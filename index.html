@@ -1,16 +1,49 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta content='text/html; charset=utf-8' http-equiv='Content-Type' />
     <title>POT</title>
-	<link rel="stylesheet" href="stylesheets/bootstrap.min.css" />
-	<link rel="stylesheet" href="stylesheets/style.css" />
+    <link rel="stylesheet" href="stylesheets/bootstrap.min.css" />
+    <link rel="stylesheet" href="stylesheets/style.css" />
 </head>
+
 <body>
+    <div class="row">
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 col-md-offset-4"
+            style="border: 1px solid aliceblue; height: 726px;">
+            <div class="row" style="height: 140px;">
+            </div>
+            <div class="row" style="height: 60px;">
+                <form role="form">
+                    <div class="form-group">
+                        <label for="name">查询</label>
+                        <input type="number" name="Code" id="inputCode" class="form-control" value="" min="{100000" }
+                            max="500000" step="1" required="required" title="证券代码"
+                            onkeypress="return (/[\d]/.test(String.fromCharCode(event.keyCode)))" onkeyup="draw();">
+                        <span id="notexist"
+                            style="position: relative; left: 320px; top: -20px; letter-spacing: 0.1em; visibility: hidden;">证券信息不存在</span>
+                    </div>
+                </form>
+            </div>
+            <div id="chartContainer" class="row" style="height: 400px;">
+                <div id="chart" style="height: 400px; margin-top: 20px;"></div>
+            </div>
+        </div>
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="border: 1px solid aliceblue; height: 726px;">
+            <div class="row" style="height: 400px;">
+                <div id="chart2" style="height: 400px; margin-top: 20px;"></div>
+            </div>
+        </div>
+    </div>
+
     <script type="text/javascript" src="javascripts/d3.js"></script>
     <script type="text/javascript" src="javascripts/jquery.min.js"></script>
-    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="javascripts/echarts.min.js"></script>
+    <script type="text/javascript" src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js">
+    </script>
     <script type="text/javascript" src="javascripts/firm.js"></script>
     <script type="text/javascript" src="javascripts/myjs.js"></script>
 </body>
+
 </html>
