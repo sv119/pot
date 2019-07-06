@@ -1,13 +1,130 @@
-body,
-html {
-	width: 100%;
-	height: 100%;
+body, html {
 	overflow: hidden;
 	margin: 0;
 	padding: 0;
-	background: rgb(11, 18, 32);
+	background: rgb(17, 29, 59);
 	color: white;
 	font-family: "微软雅黑";
+}
+
+.left{
+	width: 347px;
+	height: 855px;
+	/* border: solid;
+	border-radius: 13px 13px 13px 13px;
+	border-width: 2px; 
+	margin-left: 7px; */
+	margin-top: 3px;
+}
+
+.center{
+	width: 690px;
+	height: 855px;
+	/* border: solid;
+	border-radius: 13px 13px 13px 13px;
+	border-width: 2px;
+	margin-left: 5px; */
+	margin-top: 3px;
+}
+
+.right{
+	width: 467px;
+	height: 855px;
+	/* border: solid;
+	border-radius: 13px 13px 13px 13px;
+	border-width: 2px;
+	margin-left: 20px; */
+	margin-top: 3px;
+}
+
+.select{
+	width: 340px;
+	height: 205px;
+	border: solid;
+	border-radius: 13px 13px 13px 13px;
+	border-width: 2px;
+	margin-top: 3px;
+	margin-left: 10px;
+}
+
+.treeselect{
+	width: 340px;
+	height: 355px;
+	border: solid;
+	border-radius: 13px 13px 13px 13px;
+	border-width: 2px;
+	margin-left: 10px;
+	margin-top: 5px;
+}
+
+.map1{
+	width: 340px;
+	height: 280px;
+	border: solid;
+	border-radius: 13px 13px 13px 13px;
+	border-width: 2px;
+	margin-top: 5px;
+	margin-left: 10px;
+}
+
+.alldata{
+	width: 680px;
+	height: 420px;
+	border: solid;
+	border-radius: 13px 13px 13px 13px;
+	border-width: 2px;
+	margin-top: 5px;
+	margin-left: 20px;
+}
+
+.mds{
+	width: 680px;
+	height: 420px;
+	border: solid;
+	border-radius: 13px 13px 13px 13px;
+	border-width: 2px;
+	margin-top: 8px;
+	margin-left: 20px;
+}
+
+.img1{
+	width: 460px;
+	height: 206px;
+	border: solid;
+	border-radius: 13px 13px 13px 13px;
+	border-width: 2px;
+	margin-top: 6px;
+	margin-left: 25px;
+}
+
+.img2{
+	width: 460px;
+	height: 206px;
+	border: solid;
+	border-radius: 13px 13px 13px 13px;
+	border-width: 2px;
+	margin-top: 6px;
+	margin-left: 25px;
+}
+
+.img3{
+	width: 460px;
+	height: 206px;
+	border: solid;
+	border-radius: 13px 13px 13px 13px;
+	border-width: 2px;
+	margin-top: 6px;
+	margin-left: 25px;
+}
+
+.img4{
+	width: 460px;
+	height: 206px;
+	border: solid;
+	border-radius: 13px 13px 13px 13px;
+	border-width: 2px;
+	margin-top: 6px;
+	margin-left: 25px;
 }
 
 input::-webkit-outer-spin-button,
@@ -23,4 +140,8 @@ input[type="number"] {
 	margin-left: auto;
 	margin-right: auto;
 	width: 100px;
+}
+
+.form-control{
+	margin-top: 0px;
 }
