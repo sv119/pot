@@ -14,8 +14,8 @@
                     <form role="form">
                             <div class="form-group">
                                 <label for="name" style="margin-top: 2px;">&nbsp;&nbsp;&nbsp;&nbsp;查询</label>
-                                <input type="number" name="Code" id="inputCode" class="form-control" value="" min="{100000" }
-                                    max="500000" step="1" required="required" placeholder="证券代码" style="margin-left: 50px;"
+                                <input type="number" name="Code" id="inputCode" class="form-control" value=""
+                                    required="required" placeholder="证券代码" style="margin-left: 50px;"
                                     onkeypress="return (/[\d]/.test(String.fromCharCode(event.keyCode)))" onkeyup="draw();">
                                 <span id="notexist"
                                     style="position: relative; left: 190px; top: -28px; letter-spacing: 0.1em; visibility: hidden;">
@@ -23,13 +23,13 @@
                             </div>
                     </form>
             </div>
-            <div class="treeselect"></div>
+            <div class="treeselect" id="tree"></div>
             <div class="map1"></div>
         </div>
 
         <div class="center" style="float:left;">
             <div class="alldata" style="float:left;">
-                <div id="chart" style="height: 400px; margin-top: 20px;"></div>
+                <div id="sunburst" style="height: 400px; margin-top: 20px;"></div>
             </div>
             <div class="mds" style="float: left;">
                 <div id="chart2" style="height: 400px; margin-top: 20px;"></div>
@@ -38,7 +38,7 @@
 
         <div class="right" style="float:left;">
             <div class="img1" style="float:left;"></div>
-            <div class="img2" style="float:left;"></div>
+            <div id="chart" class="img2" style="float:left;"></div>
             <div class="img3" style="float:left;"></div>
             <div class="img4" style="float:left;"></div>
         </div>

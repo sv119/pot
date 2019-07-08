@@ -2,7 +2,7 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 14:33:05 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-05 18:18:57
+ * @Last Modified time: 2019-07-08 13:28:47
  */
 
 (function () {
@@ -12,16 +12,16 @@
             this.Code = info.SECURITY_CODE; // 证券代码
             this.Name = info.SECURITY_NAME; // 证券简称
             this.Type = dict[info.SECURITY_CODE]; // 管理分类
-            this.CurrentAssets = info.BAME00840M; // 流动资产
-            this.FixedAssets = info.BAME01320M; // 固定资产
-            this.OtherAssets = info.BAME01330M; // 其他资产
-            this.TotalAssets = info.BAME01340M; // 资产总计
-            this.CurrentLiability = info.BAME01980M; // 流动负债
-            this.FixedLiability = info.BAME02190M; // 固定负债
-            this.OtherLiability = info.BAME02200M; // 其他负债
-            this.TotalLiability = info.BAME02210M; // 负债总计
-            this.TotalEquity = info.BAME02470M; // 所有者权益总计
-            this.TotalLiability_Equity = info.BAME02480M; // 负债和所有者权益总计
+            this.CurrentAssets = info.BAME00840M > 0 ? info.BAME00840M : 0; // 流动资产
+            this.FixedAssets = info.BAME01320M > 0 ? info.BAME01320M : 0; // 固定资产
+            this.OtherAssets = info.BAME01330M > 0 ? info.BAME01330M : 0; // 其他资产
+            this.TotalAssets = info.BAME01340M > 0 ? info.BAME01340M : 0; // 资产总计
+            this.CurrentLiability = info.BAME01980M > 0 ? info.BAME01980M : 0; // 流动负债
+            this.FixedLiability = info.BAME02190M > 0 ? info.BAME02190M : 0; // 固定负债
+            this.OtherLiability = info.BAME02200M > 0 ? info.BAME02200M : 0; // 其他负债
+            this.TotalLiability = info.BAME02210M > 0 ? info.BAME02210M : 0; // 负债总计
+            this.TotalEquity = info.BAME02470M > 0 ? info.BAME02470M : 0; // 所有者权益总计
+            this.TotalLiability_Equity = info.BAME02480M > 0 ? info.BAME02480M : 0; // 负债和所有者权益总计
         }
         return Balance;
     })();
@@ -63,6 +63,7 @@
 
 // 分类表
 var dict = {};
+var Class = [];
 
 function LoadClassInfo(info) {
     for (let i = 0; i < info.length; i++) {
@@ -74,5 +75,60 @@ function LoadClassInfo(info) {
             CLASS_3: info[i].CLASS_3,
             TYPE_3: info[i].TYPE_3
         };
+        let i_1 = 0,
+            i_2 = 0,
+            i_3 = 0;
+        for (i_1 = 0; i_1 <= Class.length; i_1++) {
+            if (i_1 == Class.length) {
+                Class.push({
+                    name: info[i].TYPE_1,
+                    children: []
+                });
+                break;
+            }
+            if (Class[i_1].name == info[i].TYPE_1)
+                break;
+        }
+        for (i_2 = 0; i_2 <= Class[i_1].children.length; i_2++) {
+            if (i_2 == Class[i_1].children.length) {
+                Class[i_1].children.push({
+                    name: info[i].TYPE_2,
+                    children: []
+                });
+                break;
+            }
+            if (Class[i_1].children[i_2].name == info[i].TYPE_2)
+                break;
+        }
+        for (i_3 = 0; i_3 <= Class[i_1].children[i_2].children.length; i_3++) {
+            if (i_3 == Class[i_1].children[i_2].children.length) {
+                Class[i_1].children[i_2].children.push({
+                    name: info[i].TYPE_3,
+                    children: []
+                });
+                break;
+            }
+            if (Class[i_1].children[i_2].children[i_3].name == info[i].TYPE_3)
+                break;
+        }
+        for (i_4 = 0; i_4 <= Class[i_1].children[i_2].children[i_3].children.length; i_4++) {
+            if (i_4 == Class[i_1].children[i_2].children[i_3].children.length) {
+                Class[i_1].children[i_2].children[i_3].children.push({
+                    name: info[i].NAME + "(" + info[i].CODE + ")"
+                });
+                break;
+            }
+            if (Class[i_1].children[i_2].children[i_3].children[i_4].name == info[i].TYPE_3)
+                break;
+        }
+    }
+}
+
+// 翻译字段名
+var nameof = {};
+
+function LoadDictionary(info) {
+    for (let i = 0; i < info.length; i++) {
+        nameof[info[i].Var] = info[i].Name;
     }
 }

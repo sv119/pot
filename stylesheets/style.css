@@ -41,7 +41,6 @@ body, html {
 	width: 340px;
 	height: 205px;
 	border: solid;
-	border-radius: 13px 13px 13px 13px;
 	border-width: 2px;
 	margin-top: 3px;
 	margin-left: 10px;
@@ -51,17 +50,16 @@ body, html {
 	width: 340px;
 	height: 355px;
 	border: solid;
-	border-radius: 13px 13px 13px 13px;
 	border-width: 2px;
 	margin-left: 10px;
 	margin-top: 5px;
+	overflow-y: scroll;
 }
 
 .map1{
 	width: 340px;
 	height: 280px;
 	border: solid;
-	border-radius: 13px 13px 13px 13px;
 	border-width: 2px;
 	margin-top: 5px;
 	margin-left: 10px;
@@ -71,7 +69,6 @@ body, html {
 	width: 680px;
 	height: 420px;
 	border: solid;
-	border-radius: 13px 13px 13px 13px;
 	border-width: 2px;
 	margin-top: 5px;
 	margin-left: 20px;
@@ -81,7 +78,6 @@ body, html {
 	width: 680px;
 	height: 420px;
 	border: solid;
-	border-radius: 13px 13px 13px 13px;
 	border-width: 2px;
 	margin-top: 8px;
 	margin-left: 20px;
@@ -91,7 +87,6 @@ body, html {
 	width: 460px;
 	height: 206px;
 	border: solid;
-	border-radius: 13px 13px 13px 13px;
 	border-width: 2px;
 	margin-top: 6px;
 	margin-left: 25px;
@@ -101,7 +96,6 @@ body, html {
 	width: 460px;
 	height: 206px;
 	border: solid;
-	border-radius: 13px 13px 13px 13px;
 	border-width: 2px;
 	margin-top: 6px;
 	margin-left: 25px;
@@ -111,7 +105,6 @@ body, html {
 	width: 460px;
 	height: 206px;
 	border: solid;
-	border-radius: 13px 13px 13px 13px;
 	border-width: 2px;
 	margin-top: 6px;
 	margin-left: 25px;
@@ -121,7 +114,6 @@ body, html {
 	width: 460px;
 	height: 206px;
 	border: solid;
-	border-radius: 13px 13px 13px 13px;
 	border-width: 2px;
 	margin-top: 6px;
 	margin-left: 25px;
