@@ -2,7 +2,7 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 10:56:05 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-08 19:41:50
+ * @Last Modified time: 2019-07-09 00:42:43
  */
 
 var colorset = {
@@ -28,6 +28,11 @@ var SRC = {
 
 var yearset = [];
 
+var incase = {
+  year: null,
+  ctx: "Merge"
+};
+
 (function load() {
   var csv = d3.dsv(",", "text/csv;charset=gb2312");
   csv(SRC.Rule, function (data) {
@@ -41,6 +46,22 @@ var yearset = [];
           for (var y = 0; y <= yearset.length; y++) {
             if (y == yearset.length) {
               yearset.push(year);
+              d3.select("#year")
+                .append("li")
+                .append("a")
+                .attr("href", "javascript: void(0);")
+                .text(year)
+                .on("click", function () {
+                  if (d3.select(this).text() == incase.year)
+                    return;
+                  incase.year = d3.select(this).text();
+                  d3.select("#nowYear").html(incase.year + '<span class="caret"></span>');
+                  draw();
+                });
+              if (y == 0) {
+                d3.select("#nowYear").html(year + '<span class="caret"></span>');
+                incase.year = year;
+              }
               break;
             }
             if (year == yearset[y])
@@ -136,6 +157,13 @@ var yearset = [];
 
 function init() {
   // console.log(dataset);
+  d3.selectAll(".ctxselector").on("click", function () {
+    if (d3.select(this).text() == incase.ctx)
+      return;
+    incase.ctx = d3.select(this).text() == "合并年数据" ? "Merge" : "Parent";
+    d3.select("#nowCtx").html(d3.select(this).text() + '<span class="caret"></span>');
+    draw();
+  });
   $("input[name=Code]").val("");
   document.getElementById("inputCode").focus();
   paint_sunburst([]);
@@ -183,16 +211,21 @@ function draw() {
     }
   }
   paint_detail(objset, prtset);
-  paint_analyze(objset);
-  paint_pic2(objset);
+  if (incase.ctx == "Merge") {
+    paint_analyze(objset);
+    paint_pic2(objset);
+  } else {
+    paint_analyze(prtset);
+    paint_pic2(prtset);
+  }
 
   if (objset.length == 0 && prtset.length == 0) {
     paint_sunburst([]);
     return;
   }
 
-  var year = "2017";
-  var type = "Merge";
+  var year = incase.year;
+  var type = incase.ctx;
   for (let i = 0; i < Sheets.BalanceSheet.length; i++) {
     if ((Sheets.BalanceSheet[i].DATA_YEAR).toString().substring(0, 4) != year)
       continue;
@@ -242,7 +275,7 @@ function paint_detail(dataObj, prtset) {
         },
       },
       title: {
-        text: '没有数据',
+        text: '资产负债明细',
         left: 'center',
         top: 10,
         textStyle: {
@@ -384,8 +417,7 @@ function paint_detail(dataObj, prtset) {
         },
       },
       title: {
-        text: dataObj[0].Name,
-        subtext: dataObj[0].Type.TYPE_1 + "/" + dataObj[0].Type.TYPE_2 + "/" + dataObj[0].Type.TYPE_3,
+        text: "资产负债明细",
         left: 'center',
         top: 10,
         textStyle: {
@@ -550,8 +582,7 @@ function paint_detail(dataObj, prtset) {
         },
       },
       title: {
-        text: dataObj[0].Name,
-        subtext: dataObj[0].Type.TYPE_1 + "/" + dataObj[0].Type.TYPE_2 + "/" + dataObj[0].Type.TYPE_3,
+        text: "资产负债明细",
         left: 'center',
         top: 10,
         textStyle: {
@@ -630,12 +661,82 @@ function paint_detail(dataObj, prtset) {
 paint_detail([], []);
 
 function paint_sunburst(d) {
+  if (d == void 0)
+    d = [];
   var colors = colorset.sunset;
   var bgColor = colorset.background;
 
   var myChart = echarts.init(document.getElementById('sunburst'));
+  if (d.length == 0) {
+    var data = [{
+      name: '',
+      value: 1,
+      itemStyle: {
+        normal: {
+          color: colors[0]
+        }
+      }
+    }];
 
-  let data = [{
+    option = {
+      backgroundColor: bgColor,
+      color: colors,
+      title: {
+        text: "没有数据",
+        left: 'center',
+        top: 10,
+        textStyle: {
+          color: '#e6e6e6',
+          opacity: 1
+        }
+      },
+      highlightPolicy: 'descendant',
+      emphasis: {
+        itemStyle: {
+          opacity: 1
+        }
+      },
+      highlight: {
+        itemStyle: {
+          opacity: 0.9
+        }
+      },
+      series: [{
+        type: 'sunburst',
+        center: ['50%', '52%'],
+        data: data,
+        label: {
+          rotate: 'radial',
+          color: '#222',
+          minAngle: 5
+        },
+        itemStyle: {
+          borderColor: bgColor,
+          borderWidth: 2,
+          opacity: 0.65
+        },
+        levels: [{}, {
+          r0: 20,
+          r: 75,
+          label: {
+            rotate: 0
+          },
+          downplay: {
+            label: {
+              opacity: 0.5
+            }
+          }
+        }]
+      }]
+    };
+
+    if (option && typeof option === "object") {
+      myChart.setOption(option, true);
+    }
+    return;
+  }
+
+  var data = [{
     name: '资产总计',
     itemStyle: {
       normal: {
@@ -822,10 +923,19 @@ function paint_sunburst(d) {
   };
   data[2]['children'][0]['children'].push(child);
 
-
   option = {
     backgroundColor: bgColor,
     color: colors,
+    title: {
+      text: d.SECURITY_NAME,
+      subtext: dict[d.SECURITY_CODE].TYPE_1 + "/" + dict[d.SECURITY_CODE].TYPE_2 + "/" + dict[d.SECURITY_CODE].TYPE_3,
+      left: 'center',
+      top: 10,
+      textStyle: {
+        color: '#e6e6e6',
+        opacity: 1
+      }
+    },
     highlightPolicy: 'descendant',
     emphasis: {
       itemStyle: {
@@ -1000,7 +1110,9 @@ function buildTree() {
             .classed("branch_at_" + i_1 + "_" + i_2 + "_" + i_3, true)
             .style("line-height", "1em")
             .style("display", "none")
-            .style("color", "#FFD180")
+            .style("color", function () {
+              return "#FFD180";
+            })
             .html("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + Class[i_1].children[i_2].children[i_3].children[i_4].name)
             .on("click", function () {
               $("input[name=Code]").val(
@@ -1036,7 +1148,7 @@ function paint_analyze(d) {
         }
       },
       title: {
-        text: '没有数据',
+        text: '偿债能力分析',
         left: 'center',
         top: 10,
         textStyle: {
@@ -1146,8 +1258,7 @@ function paint_analyze(d) {
       // },
     },
     title: {
-      text: d[0].Name,
-      subtext: d[0].Type.TYPE_1 + "/" + d[0].Type.TYPE_2 + "/" + d[0].Type.TYPE_3,
+      text: "偿债能力分析",
       left: 'center',
       top: 10,
       textStyle: {
@@ -1225,7 +1336,7 @@ function paint_pic2(d) {
         }
       },
       title: {
-        text: '没有数据',
+        text: '运营能力分析',
         left: 'center',
         top: 10,
         textStyle: {
@@ -1309,7 +1420,7 @@ function paint_pic2(d) {
   averRepo /= d.length;
   averAssets /= d.length;
 
-  
+
   for (let i = 0; i < d.length; i++) {
     year.push(d[i].year);
     data[0].push(parseInt(d[i].CashFlow.FromOperation / averCheck * 1000) / 1000);
@@ -1365,8 +1476,7 @@ function paint_pic2(d) {
       // },
     },
     title: {
-      text: d[0].Name,
-      subtext: d[0].Type.TYPE_1 + "/" + d[0].Type.TYPE_2 + "/" + d[0].Type.TYPE_3,
+      text: "运营能力分析",
       left: 'center',
       top: 10,
       textStyle: {

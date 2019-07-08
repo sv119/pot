@@ -1,27 +1,51 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta content='text/html; charset=utf-8' http-equiv='Content-Type' />
     <title>POT</title>
-	<link rel="stylesheet" href="stylesheets/bootstrap.min.css" />
-	<link rel="stylesheet" href="stylesheets/style.css" />
+    <link rel="stylesheet" href="stylesheets/bootstrap.min.css" />
+    <link rel="stylesheet" href="stylesheets/style.css" />
 </head>
+
 <body>
     <div id="all" style="width:1536px;height:865px;">
 
-        <div class="left" style="float:left;" >
-            <div class="select">
-                    <form role="form">
-                            <div class="form-group">
-                                <label for="name" style="margin-top: 2px;">&nbsp;&nbsp;&nbsp;&nbsp;查询</label>
-                                <input type="number" name="Code" id="inputCode" class="form-control" value=""
-                                    required="required" placeholder="证券代码" style="margin-left: 50px;"
-                                    onkeypress="return (/[\d]/.test(String.fromCharCode(event.keyCode)))" onkeyup="draw();">
-                                <span id="notexist"
-                                    style="position: relative; left: 190px; top: -28px; letter-spacing: 0.1em; visibility: hidden;">
-                                    证券信息不存在</span>
-                            </div>
-                    </form>
+        <div class="left" style="float:left;">
+            <div class="select" style="padding: 10px;">
+                <form role="form">
+                    <div class="form-group" style="padding: 10px 20px 0px 20px; margin-bottom: 0px;">
+                        <label for="name" style="margin-top: 2px;">输入证券代码查询</label>
+                        <input type="number" name="Code" id="inputCode" class="form-control" value=""
+                            required="required" placeholder="证券代码" style="margin-left: 50px; height: 2em;"
+                            onkeypress="return (/[\d]/.test(String.fromCharCode(event.keyCode)))" onkeyup="draw();">
+                        <span id="notexist"
+                            style="position: relative; left: 190px; top: -28px; letter-spacing: 0.1em; visibility: hidden;">
+                            证券信息不存在</span>
+                    </div>
+                    <div class="form-group" style="padding: 0px 20px; margin-bottom: 0px;">
+                        <label for="time" style="margin-top: 2px; float: left;">数据年选择</label>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" id="nowYear" class="btn btn-default dropdown-toggle" data-toggle="dropdown">1970
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" id="year" role="menu">
+                        </ul>
+                    </div>
+                    <div class="form-group" style="padding: 10px 20px; margin-bottom: 0px;">
+                        <label for="time" style="margin-top: 2px; float: left;">数据源选择</label>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" id="nowCtx" class="btn btn-default dropdown-toggle" data-toggle="dropdown">合并年数据
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" id="ctx" role="menu">
+                            <li><a class="ctxselector" href="javascript: void(0);">合并年数据</a></li>
+                            <li><a class="ctxselector" href="javascript: void(0);">母公司年数据</a></li>
+                        </ul>
+                    </div>
+                </form>
             </div>
             <div class="treeselect" id="tree"></div>
             <div class="map1"></div>
@@ -43,8 +67,8 @@
             <div class="img4" style="float:left;"></div>
         </div>
     </div>
-    
-    
+
+
     <script type="text/javascript" src="javascripts/d3.js"></script>
     <script type="text/javascript" src="javascripts/jquery.min.js"></script>
     <script type="text/javascript" src="javascripts/echarts.min.js"></script>
@@ -53,4 +77,5 @@
     <script type="text/javascript" src="javascripts/firm.js"></script>
     <script type="text/javascript" src="javascripts/myjs.js"></script>
 </body>
+
 </html>
