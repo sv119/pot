@@ -2,8 +2,13 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 10:56:05 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-08 13:47:45
+ * @Last Modified time: 2019-07-08 19:41:50
  */
+
+var colorset = {
+  sunset: ['#FF7853', '#EA5151', '#CC3F57', '#9A2555', '#FFAE57'],
+  background: '#2E2733'
+};
 
 var dataset = {};
 
@@ -178,6 +183,8 @@ function draw() {
     }
   }
   paint_detail(objset, prtset);
+  paint_analyze(objset);
+  paint_pic2(objset);
 
   if (objset.length == 0 && prtset.length == 0) {
     paint_sunburst([]);
@@ -205,13 +212,18 @@ function paint_detail(dataObj, prtset) {
   if (prtset == void 0)
     prtset = [];
   if (dataObj.length == 0 && prtset.length == 0) {
-    var myChart = echarts.init(document.getElementById('chart'), 'dark');
+    var myChart = echarts.init(document.getElementById('chart'));
     var app = {};
     app.title = "没有数据";
 
     let year = [" - "];
 
     var option = {
+      backgroundColor: colorset.background,
+      textStyle: {
+        color: '#eee'
+      },
+      color: colorset.sunset,
       tooltip: {
         trigger: 'axis',
         axisPointer: { // 坐标轴指示器，坐标轴触发有效
@@ -232,7 +244,10 @@ function paint_detail(dataObj, prtset) {
       title: {
         text: '没有数据',
         left: 'center',
-        top: 10
+        top: 10,
+        textStyle: {
+          color: '#e6e6e6'
+        }
       },
       grid: {
         left: '3%',
@@ -248,7 +263,7 @@ function paint_detail(dataObj, prtset) {
         type: 'value',
         axisLabel: {
           formatter: function (value, index) {
-            return parseInt(value) >= 10000000 ? parseInt(value / 10000000) / 10 + "亿元" : parseInt(value / 10000) + "万元";
+            return parseInt(value) >= 10000000 ? parseInt(value / 1000000) / 100 + "亿元" : parseInt(value / 10000) + "万元";
           }
         }
       }],
@@ -294,7 +309,7 @@ function paint_detail(dataObj, prtset) {
     return;
   }
 
-  var myChart = echarts.init(document.getElementById('chart'), 'dark');
+  var myChart = echarts.init(document.getElementById('chart'));
 
   let data = [];
   for (let i = 0; i < 14; i++) {
@@ -346,6 +361,11 @@ function paint_detail(dataObj, prtset) {
     }
 
     option = {
+      backgroundColor: colorset.background,
+      textStyle: {
+        color: '#eee'
+      },
+      color: colorset.sunset,
       tooltip: {
         trigger: 'axis',
         axisPointer: { // 坐标轴指示器，坐标轴触发有效
@@ -367,7 +387,10 @@ function paint_detail(dataObj, prtset) {
         text: dataObj[0].Name,
         subtext: dataObj[0].Type.TYPE_1 + "/" + dataObj[0].Type.TYPE_2 + "/" + dataObj[0].Type.TYPE_3,
         left: 'center',
-        top: 10
+        top: 10,
+        textStyle: {
+          color: '#e6e6e6'
+        }
       },
       // legend: {
       //   data: ['资产总计（母公司）', '流动资产（母公司）', '固定资产（母公司）', '负债总计（母公司）', '流动负债（母公司）', '固定负债（母公司）',
@@ -390,7 +413,7 @@ function paint_detail(dataObj, prtset) {
         type: 'value',
         axisLabel: {
           formatter: function (value, index) {
-            return parseInt(value) >= 10000000 ? parseInt(value / 10000000) / 10 + "亿元" : parseInt(value / 10000) + "万元";
+            return parseInt(value) >= 10000000 ? parseInt(value / 1000000) / 100 + "亿元" : parseInt(value / 10000) + "万元";
           }
         }
       }],
@@ -504,6 +527,11 @@ function paint_detail(dataObj, prtset) {
     }
 
     option = {
+      backgroundColor: colorset.background,
+      textStyle: {
+        color: '#eee'
+      },
+      color: colorset.sunset,
       tooltip: {
         trigger: 'axis',
         axisPointer: { // 坐标轴指示器，坐标轴触发有效
@@ -525,7 +553,10 @@ function paint_detail(dataObj, prtset) {
         text: dataObj[0].Name,
         subtext: dataObj[0].Type.TYPE_1 + "/" + dataObj[0].Type.TYPE_2 + "/" + dataObj[0].Type.TYPE_3,
         left: 'center',
-        top: 10
+        top: 10,
+        textStyle: {
+          color: '#e6e6e6'
+        }
       },
       // legend: {
       //   data: ['资产总计', '流动资产', '固定资产', '负债总计', '流动负债', '固定负债'],
@@ -546,7 +577,7 @@ function paint_detail(dataObj, prtset) {
         type: 'value',
         axisLabel: {
           formatter: function (value, index) {
-            return parseInt(value) >= 100000000 ? parseInt(value / 10000000) / 10 + "亿元" : parseInt(value / 10000) + "万元";
+            return parseInt(value) >= 100000000 ? parseInt(value / 1000000) / 100 + "亿元" : parseInt(value / 10000) + "万元";
           }
         }
       }],
@@ -596,29 +627,39 @@ function paint_detail(dataObj, prtset) {
   }
 }
 
-paint_detail([]);
+paint_detail([], []);
 
 function paint_sunburst(d) {
-  var colors = ['#FFAE57', '#FF7853', '#EA5151', '#CC3F57', '#9A2555'];
-  var bgColor = '#2E2733';
+  var colors = colorset.sunset;
+  var bgColor = colorset.background;
 
-  var myChart = echarts.init(document.getElementById('sunburst'), 'dark');
+  var myChart = echarts.init(document.getElementById('sunburst'));
 
   let data = [{
     name: '资产总计',
     itemStyle: {
-      color: colors[0]
+      normal: {
+        color: colors[0]
+      }
     },
     children: [{
       name: '流动资产',
-      itemStyle: {
+      label: {
         color: colors[0]
+      },
+      itemStyle: {
+        color: 'transparent',
+        borderColor: colors[0]
       },
       children: []
     }, {
       name: '非流动资产',
-      itemStyle: {
+      label: {
         color: colors[0]
+      },
+      itemStyle: {
+        color: 'transparent',
+        borderColor: colors[0]
       },
       children: []
     }]
@@ -629,26 +670,38 @@ function paint_sunburst(d) {
     },
     children: [{
       name: '流动负债',
-      itemStyle: {
+      label: {
         color: colors[1]
+      },
+      itemStyle: {
+        color: 'transparent',
+        borderColor: colors[1]
       },
       children: []
     }, {
       name: '非流动负债',
-      itemStyle: {
+      label: {
         color: colors[1]
+      },
+      itemStyle: {
+        color: 'transparent',
+        borderColor: colors[1]
       },
       children: []
     }]
   }, {
-    name: '所有者权益总计',
+    name: '所有者权益',
     itemStyle: {
       color: colors[2]
     },
     children: [{
       name: '所有者权益总计',
-      itemStyle: {
+      label: {
         color: colors[2]
+      },
+      itemStyle: {
+        color: 'transparent',
+        borderColor: colors[2]
       },
       children: []
     }]
@@ -664,9 +717,6 @@ function paint_sunburst(d) {
     if (val >= all / 6) {
       var child = {
         name: nameof[para + spaner + "0M"],
-        itemStyle: {
-          color: colors[0]
-        },
         value: val
       };
       data[0]['children'][0]['children'].push(child);
@@ -676,9 +726,6 @@ function paint_sunburst(d) {
   }
   var child = {
     name: "其他",
-    itemStyle: {
-      color: colors[0]
-    },
     value: others
   };
   data[0]['children'][0]['children'].push(child);
@@ -693,9 +740,6 @@ function paint_sunburst(d) {
     if (val >= all / 6) {
       var child = {
         name: nameof[para + spaner + "0M"],
-        itemStyle: {
-          color: colors[0]
-        },
         value: val
       };
       data[0]['children'][1]['children'].push(child);
@@ -705,9 +749,6 @@ function paint_sunburst(d) {
   }
   child = {
     name: "其他",
-    itemStyle: {
-      color: colors[0]
-    },
     value: others
   };
   data[0]['children'][1]['children'].push(child);
@@ -722,9 +763,6 @@ function paint_sunburst(d) {
     if (val >= all / 6) {
       var child = {
         name: nameof[para + spaner + "0M"],
-        itemStyle: {
-          color: colors[1]
-        },
         value: val
       };
       data[1]['children'][0]['children'].push(child);
@@ -734,9 +772,6 @@ function paint_sunburst(d) {
   }
   child = {
     name: "其他",
-    itemStyle: {
-      color: colors[1]
-    },
     value: others
   };
   data[1]['children'][0]['children'].push(child);
@@ -751,9 +786,6 @@ function paint_sunburst(d) {
     if (val >= all / 6) {
       var child = {
         name: nameof[para + spaner + "0M"],
-        itemStyle: {
-          color: colors[1]
-        },
         value: val
       };
       data[1]['children'][1]['children'].push(child);
@@ -763,9 +795,6 @@ function paint_sunburst(d) {
   }
   child = {
     name: "其他",
-    itemStyle: {
-      color: colors[1]
-    },
     value: others
   };
   data[1]['children'][1]['children'].push(child);
@@ -780,9 +809,6 @@ function paint_sunburst(d) {
     if (val >= all / 6) {
       var child = {
         name: nameof[para + spaner + "0M"],
-        itemStyle: {
-          color: colors[2]
-        },
         value: val
       };
       data[2]['children'][0]['children'].push(child);
@@ -792,25 +818,28 @@ function paint_sunburst(d) {
   }
   child = {
     name: "其他",
-    itemStyle: {
-      color: colors[2]
-    },
     value: others
   };
   data[2]['children'][0]['children'].push(child);
 
+
   option = {
-    // title: {
-    //   text: d.SECURITY_NAME,
-    //   // subtext: d.Type.TYPE_1 + "/" + d.Type.TYPE_2 + "/" + d.Type.TYPE_3,
-    //   left: 'center',
-    //   top: 10
-    // },
     backgroundColor: bgColor,
     color: colors,
+    highlightPolicy: 'descendant',
+    emphasis: {
+      itemStyle: {
+        opacity: 1
+      }
+    },
+    highlight: {
+      itemStyle: {
+        opacity: 0.9
+      }
+    },
     series: [{
       type: 'sunburst',
-      center: ['50%', '48%'],
+      center: ['50%', '52%'],
       data: data,
       sort: function (a, b) {
         if (a.depth === 1) {
@@ -821,36 +850,44 @@ function paint_sunburst(d) {
       },
       label: {
         rotate: 'radial',
-        color: '#eee'
+        color: '#222',
+        minAngle: 5
       },
       itemStyle: {
         borderColor: bgColor,
-        borderWidth: 2
+        borderWidth: 2,
+        opacity: 0.65
       },
       levels: [{}, {
-        r0: 0,
-        r: 40,
+        r0: 20,
+        r: 75,
         label: {
           rotate: 0
+        },
+        downplay: {
+          label: {
+            opacity: 0.5
+          }
         }
       }, {
-        r0: 40,
-        r: 105
-      }, {
-        r0: 115,
-        r: 140,
+        r0: 85,
+        r: 120,
         itemStyle: {
           shadowBlur: 2,
-          shadowColor: colors[2],
-          color: 'transparent'
+          shadowColor: 'transparent'
         },
         label: {
           rotate: 'tangential',
           fontSize: 10,
+        },
+        downplay: {
+          label: {
+            opacity: 0.5
+          }
         }
       }, {
-        r0: 140,
-        r: 145,
+        r0: 120,
+        r: 125,
         itemStyle: {
           shadowBlur: 80,
           shadowColor: colors[0]
@@ -859,6 +896,7 @@ function paint_sunburst(d) {
           position: 'outside',
           textShadowBlur: 5,
           textShadowColor: '#333',
+          color: '#eee'
         },
         downplay: {
           label: {
@@ -875,14 +913,21 @@ function paint_sunburst(d) {
 }
 
 function buildTree() {
-  var all = d3.select("#tree").append("div").attr("id", "treeContainer").style("margin", "10px").style("letter-spacing", "0.2em");
+  var all = d3.select("#tree")
+    .append("div")
+    .attr("id", "treeContainer")
+    .style("margin", "10px")
+    .style("letter-spacing", "0.2em");
   for (let i_1 = 0; i_1 < Class.length; i_1++) {
     if (Class[i_1].name == "")
       continue;
     var c_1 = all.append("p")
+      .append("a")
+      .attr("href", "javascript: void(0);")
       .attr("id", "root_" + i_1)
-      .style("line-height", "1.4em")
-      .html("#" + Class[i_1].name)
+      .style("line-height", "1.8em")
+      .style("color", colorset.sunset[0])
+      .html(Class[i_1].name)
       .on("click", function () {
         var child = "branch_at_" + this.id.substring(5, this.id.length);
         d3.selectAll(".level2")
@@ -899,12 +944,15 @@ function buildTree() {
       });
     for (let i_2 = 0; i_2 < Class[i_1].children.length; i_2++) {
       var c_2 = all.append("p")
+        .append("a")
+        .attr("href", "javascript: void(0);")
         .classed("level2", true)
         .classed("branch_at_" + i_1, true)
         .attr("id", "root_" + i_1 + "_" + i_2)
-        .style("line-height", "1.2em")
+        .style("line-height", "1.4em")
         .style("display", "none")
-        .html("->" + Class[i_1].children[i_2].name)
+        .style("color", colorset.sunset[1])
+        .html("&nbsp;&nbsp;" + Class[i_1].children[i_2].name)
         .on("click", function () {
           var child = "branch_at_" + this.id.substring(5, this.id.length);
           d3.selectAll(".branch_" + this.id.substring(5, this.id.length))
@@ -921,13 +969,16 @@ function buildTree() {
         });
       for (let i_3 = 0; i_3 < Class[i_1].children[i_2].children.length; i_3++) {
         var c_3 = all.append("p")
+          .append("a")
+          .attr("href", "javascript: void(0);")
           .classed("level3", true)
           .classed("branch_" + i_1, true)
           .classed("branch_at_" + i_1 + "_" + i_2, true)
           .attr("id", "root_" + i_1 + "_" + i_2 + "_" + i_3)
-          .style("line-height", "1em")
+          .style("line-height", "1.2em")
           .style("display", "none")
-          .html("--[]" + Class[i_1].children[i_2].children[i_3].name)
+          .style("color", colorset.sunset[2])
+          .html("&nbsp;&nbsp;&nbsp;&nbsp;" + Class[i_1].children[i_2].children[i_3].name)
           .on("click", function () {
             var child = "branch_at_" + this.id.substring(5, this.id.length);
             d3.selectAll(".level4")
@@ -941,20 +992,423 @@ function buildTree() {
           });
         for (let i_4 = 0; i_4 < Class[i_1].children[i_2].children[i_3].children.length; i_4++) {
           var c_4 = all.append("p")
+            .append("a")
+            .attr("href", "javascript: void(0);")
             .classed("level4", true)
             .classed("branch_" + i_1, true)
             .classed("branch_" + i_1 + "_" + i_2, true)
             .classed("branch_at_" + i_1 + "_" + i_2 + "_" + i_3, true)
-            .style("line-height", "0.8em")
+            .style("line-height", "1em")
             .style("display", "none")
-            .html("&nbsp;&nbsp;&nbsp;? " + Class[i_1].children[i_2].children[i_3].children[i_4].name)
+            .style("color", "#FFD180")
+            .html("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + Class[i_1].children[i_2].children[i_3].children[i_4].name)
             .on("click", function () {
               $("input[name=Code]").val(
                 d3.select(this).html().substring(d3.select(this).html().indexOf('(') + 1, d3.select(this).html().indexOf(')')));
-                draw();
+              draw();
             });
         }
       }
     }
   }
 }
+
+function paint_analyze(d) {
+  if (d == void 0)
+    d = [];
+  if (d.length == 0) {
+    var myChart = echarts.init(document.getElementById('analyze'));
+    var app = {};
+    app.title = "没有数据";
+
+    let year = [" - "];
+
+    var option = {
+      backgroundColor: colorset.background,
+      textStyle: {
+        color: '#eee'
+      },
+      color: colorset.sunset,
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { // 坐标轴指示器，坐标轴触发有效
+          type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+        }
+      },
+      title: {
+        text: '没有数据',
+        left: 'center',
+        top: 10,
+        textStyle: {
+          color: '#e6e6e6'
+        }
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+      },
+      xAxis: [{
+        type: 'category',
+        data: year
+      }],
+      yAxis: [{
+        type: 'value'
+      }],
+      series: [{
+        name: '流动比率',
+        type: 'bar',
+        data: []
+      }, {
+        name: '速动比率',
+        type: 'bar',
+        data: []
+      }, {
+        name: '现金比例',
+        type: 'bar',
+        data: []
+      }, {
+        name: '资产负债率',
+        type: 'bar',
+        data: []
+      }]
+    };
+
+    if (option && typeof option === "object") {
+      myChart.setOption(option, true);
+    }
+
+    return;
+  }
+
+  var myChart = echarts.init(document.getElementById('analyze'));
+
+  let data = [];
+  for (let i = 0; i < 4; i++) {
+    data.push([]);
+  }
+
+  let year = [];
+
+  var option = null;
+
+  for (let i = 0; i < d.length; i++) {
+    year.push(d[i].year);
+    data[0].push(parseInt(d[i].CurrentAssets / d[i].CurrentLiability * 1000) / 1000);
+    data[1].push(parseInt(d[i].ValidAssets / d[i].CurrentLiability * 1000) / 1000);
+    data[2].push(parseInt(d[i].CheckAssets / d[i].CurrentLiability * 1000) / 1000);
+    data[3].push(parseInt(d[i].TotalLiability / d[i].TotalAssets * 1000) / 1000);
+  }
+
+  for (var i = 0; i < year.length; i++) {
+    var max = parseInt(year[0]);
+    var index = 0;
+    for (var j = 0; j < year.length - i; j++) {
+      if (parseInt(year[j]) > max) {
+        max = parseInt(year[j]);
+        index = j;
+      }
+    }
+    if (index != year.length - i - 1) {
+      var obj = year[index];
+      year[index] = year[year.length - 1];
+      year[year.length - 1] = obj;
+      for (var j = 0; j < 4; j++) {
+        obj = data[j][index];
+        data[j][index] = data[j][data[j].length - 1];
+        data[j][data[j].length - 1] = obj;
+      }
+    }
+  }
+
+  option = {
+    backgroundColor: colorset.background,
+    textStyle: {
+      color: '#eee'
+    },
+    color: colorset.sunset,
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { // 坐标轴指示器，坐标轴触发有效
+        type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+      },
+      // formatter: function (params, ticket, callback) {
+      //   let res = params[0].name + "年";
+      //   for (let i = 0, l = params.length; i < l; i++) {
+      //     if (parseInt(params[i].value) > 10000000) {
+      //       res += '<br/>' + params[i].marker + params[i].seriesName + ' : ' + parseInt(params[i].value / 1000000) / 100 + ' 亿元';
+      //     } else {
+      //       res += '<br/>' + params[i].marker + params[i].seriesName + ' : ' + parseInt(params[i].value / 100) / 100 + ' 万元';
+      //     }
+      //   }
+      //   return res;
+      // },
+    },
+    title: {
+      text: d[0].Name,
+      subtext: d[0].Type.TYPE_1 + "/" + d[0].Type.TYPE_2 + "/" + d[0].Type.TYPE_3,
+      left: 'center',
+      top: 10,
+      textStyle: {
+        color: '#e6e6e6'
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: [{
+      type: 'category',
+      data: year
+    }],
+    yAxis: [{
+      type: 'value',
+      // axisLabel: {
+      //   formatter: function (value, index) {
+      //     return parseInt(value) >= 10000000 ? parseInt(value / 1000000) / 100 + "亿元" : parseInt(value / 10000) + "万元";
+      //   }
+      // }
+    }],
+    series: [{
+      name: '流动比率',
+      type: 'bar',
+      stack: '1',
+      data: data[0]
+    }, {
+      name: '速动比率',
+      type: 'bar',
+      stack: '2',
+      data: data[1]
+    }, {
+      name: '现金比例',
+      type: 'bar',
+      stack: '3',
+      data: data[2]
+    }, {
+      name: '资产负债率',
+      type: 'bar',
+      stack: '4',
+      data: data[3]
+    }]
+  };
+
+  if (option && typeof option === "object") {
+    myChart.setOption(option, true);
+  }
+}
+
+paint_analyze([]);
+
+function paint_pic2(d) {
+  if (d == void 0)
+    d = [];
+  if (d.length == 0) {
+    var myChart = echarts.init(document.getElementById('analyze_2'));
+    var app = {};
+    app.title = "没有数据";
+
+    let year = [" - "];
+
+    var option = {
+      backgroundColor: colorset.background,
+      textStyle: {
+        color: '#eee'
+      },
+      color: colorset.sunset,
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { // 坐标轴指示器，坐标轴触发有效
+          type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+        }
+      },
+      title: {
+        text: '没有数据',
+        left: 'center',
+        top: 10,
+        textStyle: {
+          color: '#e6e6e6'
+        }
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+      },
+      xAxis: [{
+        type: 'category',
+        data: year
+      }],
+      yAxis: [{
+        type: 'value'
+      }],
+      series: [{
+        name: '应收账款周转率',
+        type: 'bar',
+        data: []
+      }, {
+        name: '存货周转率',
+        type: 'bar',
+        data: []
+      }, {
+        name: '总资产周转率',
+        type: 'bar',
+        data: []
+      }]
+    };
+
+    if (option && typeof option === "object") {
+      myChart.setOption(option, true);
+    }
+
+    return;
+  }
+
+  var y = "2017";
+  var type = "Merge";
+  for (var i = 0; i < dataset[y][type].Income.length; i++) {
+    if (dataset[y][type].Income[i].Code == d[0].Code) {
+      for (var m = 0; m < d.length; m++) {
+        d[m].Income = dataset[y][type].Income[i];
+      }
+      break;
+    }
+  }
+  for (var i = 0; i < dataset[y][type].CashFlow.length; i++) {
+    if (dataset[y][type].CashFlow[i].Code == d[0].Code) {
+      for (var m = 0; m < d.length; m++) {
+        d[m].CashFlow = dataset[y][type].CashFlow[i];
+      }
+      break;
+    }
+  }
+
+  var myChart = echarts.init(document.getElementById('analyze_2'));
+
+  let data = [];
+  for (let i = 0; i < 3; i++) {
+    data.push([]);
+  }
+
+  let year = [];
+
+  var option = null;
+
+  var averCheck = 0;
+  var averRepo = 0;
+  var averAssets = 0;
+  for (let i = 0; i < d.length; i++) {
+    averCheck += parseInt(d[i].ToCheckIn);
+    averRepo += parseInt(d[i].Repo);
+    averAssets += parseInt(d[i].TotalAssets);
+  }
+  averCheck /= d.length;
+  averRepo /= d.length;
+  averAssets /= d.length;
+
+  
+  for (let i = 0; i < d.length; i++) {
+    year.push(d[i].year);
+    data[0].push(parseInt(d[i].CashFlow.FromOperation / averCheck * 1000) / 1000);
+    data[1].push(parseInt(d[i].Income.TotalCost / averRepo * 1000) / 1000);
+    data[2].push(parseInt(d[i].CashFlow.FromOperation / averAssets * 1000) / 1000);
+    // console.log(d[i].CashFlow.FromOperation, averCheck);
+    // console.log(d[i].Income.TotalCost, averRepo);
+    // console.log(d[i].CashFlow.FromOperation, averAssets);
+  }
+
+  for (var i = 0; i < year.length; i++) {
+    var max = parseInt(year[0]);
+    var index = 0;
+    for (var j = 0; j < year.length - i; j++) {
+      if (parseInt(year[j]) > max) {
+        max = parseInt(year[j]);
+        index = j;
+      }
+    }
+    if (index != year.length - i - 1) {
+      var obj = year[index];
+      year[index] = year[year.length - 1];
+      year[year.length - 1] = obj;
+      for (var j = 0; j < 3; j++) {
+        obj = data[j][index];
+        data[j][index] = data[j][data[j].length - 1];
+        data[j][data[j].length - 1] = obj;
+      }
+    }
+  }
+
+  option = {
+    backgroundColor: colorset.background,
+    textStyle: {
+      color: '#eee'
+    },
+    color: colorset.sunset,
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { // 坐标轴指示器，坐标轴触发有效
+        type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+      },
+      // formatter: function (params, ticket, callback) {
+      //   let res = params[0].name + "年";
+      //   for (let i = 0, l = params.length; i < l; i++) {
+      //     if (parseInt(params[i].value) > 10000000) {
+      //       res += '<br/>' + params[i].marker + params[i].seriesName + ' : ' + parseInt(params[i].value / 1000000) / 100 + ' 亿元';
+      //     } else {
+      //       res += '<br/>' + params[i].marker + params[i].seriesName + ' : ' + parseInt(params[i].value / 100) / 100 + ' 万元';
+      //     }
+      //   }
+      //   return res;
+      // },
+    },
+    title: {
+      text: d[0].Name,
+      subtext: d[0].Type.TYPE_1 + "/" + d[0].Type.TYPE_2 + "/" + d[0].Type.TYPE_3,
+      left: 'center',
+      top: 10,
+      textStyle: {
+        color: '#e6e6e6'
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: [{
+      type: 'category',
+      data: year
+    }],
+    yAxis: [{
+      type: 'value',
+      // axisLabel: {
+      //   formatter: function (value, index) {
+      //     return parseInt(value) >= 10000000 ? parseInt(value / 1000000) / 100 + "亿元" : parseInt(value / 10000) + "万元";
+      //   }
+      // }
+    }],
+    series: [{
+      name: '应收账款周转率',
+      type: 'bar',
+      data: data[0]
+    }, {
+      name: '存货周转率',
+      type: 'bar',
+      data: data[1]
+    }, {
+      name: '总资产周转率',
+      type: 'bar',
+      data: data[2]
+    }]
+  };
+
+  if (option && typeof option === "object") {
+    myChart.setOption(option, true);
+  }
+}
+
+paint_pic2([]);

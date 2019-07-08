@@ -2,7 +2,7 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 14:33:05 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-08 13:28:47
+ * @Last Modified time: 2019-07-08 19:30:31
  */
 
 (function () {
@@ -13,6 +13,13 @@
             this.Name = info.SECURITY_NAME; // 证券简称
             this.Type = dict[info.SECURITY_CODE]; // 管理分类
             this.CurrentAssets = info.BAME00840M > 0 ? info.BAME00840M : 0; // 流动资产
+            this.ValidAssets = asure(info.BAME00840M) -
+                asure(info.BAME00650M) - asure(info.BAME00310M) - asure(info.BAME00320M) - asure(info.BAME00330M); // 速动资产
+            this.CheckAssets = asure(info.BAME00030M) + asure(info.BAME00570M) + asure(info.BAME00600M) + asure(info.BAME00160M) +
+                asure(info.BAME00170M) + asure(info.BAME00180M) + asure(info.BAME00190M) +
+                asure(info.BAME00200M) + asure(info.BAME00210M); // 货币资金
+            this.ToCheckIn = asure(info.BAME00250M); // 应收账款
+            this.Repo = asure(info.BAME00650M); // 存货
             this.FixedAssets = info.BAME01320M > 0 ? info.BAME01320M : 0; // 固定资产
             this.OtherAssets = info.BAME01330M > 0 ? info.BAME01330M : 0; // 其他资产
             this.TotalAssets = info.BAME01340M > 0 ? info.BAME01340M : 0; // 资产总计
@@ -22,6 +29,8 @@
             this.TotalLiability = info.BAME02210M > 0 ? info.BAME02210M : 0; // 负债总计
             this.TotalEquity = info.BAME02470M > 0 ? info.BAME02470M : 0; // 所有者权益总计
             this.TotalLiability_Equity = info.BAME02480M > 0 ? info.BAME02480M : 0; // 负债和所有者权益总计
+            this.Income = null;
+            this.CashFlow = null;
         }
         return Balance;
     })();
@@ -114,7 +123,7 @@ function LoadClassInfo(info) {
         for (i_4 = 0; i_4 <= Class[i_1].children[i_2].children[i_3].children.length; i_4++) {
             if (i_4 == Class[i_1].children[i_2].children[i_3].children.length) {
                 Class[i_1].children[i_2].children[i_3].children.push({
-                    name: info[i].NAME + "(" + info[i].CODE + ")"
+                    name: info[i].NAME + " (" + info[i].CODE + ")"
                 });
                 break;
             }
@@ -131,4 +140,8 @@ function LoadDictionary(info) {
     for (let i = 0; i < info.length; i++) {
         nameof[info[i].Var] = info[i].Name;
     }
+}
+
+function asure(n) {
+    return n > 0 ? parseInt(n) : 0;
 }
