@@ -2,7 +2,7 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 10:56:05 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-09 00:42:43
+ * @Last Modified time: 2019-07-09 20:37:09
  */
 
 var colorset = {
@@ -168,9 +168,19 @@ function init() {
   document.getElementById("inputCode").focus();
   paint_sunburst([]);
   buildTree();
+  if (incase.ctx == "Merge") {
+    drawMDS(incase.year, "m");
+  } else {
+    drawMDS(incase.year, "p");
+  }
 }
 
 function draw() {
+  if (incase.ctx == "Merge") {
+    drawMDS(incase.year, "m");
+  } else {
+    drawMDS(incase.year, "p");
+  }
   let code = $("input[name=Code]").val();
   d3.select("#notexist")
     .text("证券信息不存在")
@@ -963,14 +973,14 @@ function paint_sunburst(d) {
         color: '#222',
         minAngle: 5
       },
-      itemStyle: {
-        borderColor: bgColor,
-        borderWidth: 2,
-        opacity: 0.65
-      },
+      // itemStyle: {
+      //   borderColor: bgColor,
+      //   borderWidth: 2,
+      //   opacity: 0.65
+      // },
       levels: [{}, {
-        r0: 20,
-        r: 75,
+        r0: 30,
+        r: 65,
         label: {
           rotate: 0
         },
@@ -980,12 +990,8 @@ function paint_sunburst(d) {
           }
         }
       }, {
-        r0: 85,
-        r: 120,
-        itemStyle: {
-          shadowBlur: 2,
-          shadowColor: 'transparent'
-        },
+        r0: 65,
+        r: 105,
         label: {
           rotate: 'tangential',
           fontSize: 10,
@@ -996,7 +1002,7 @@ function paint_sunburst(d) {
           }
         }
       }, {
-        r0: 120,
+        r0: 105,
         r: 125,
         itemStyle: {
           shadowBlur: 80,
@@ -1378,8 +1384,8 @@ function paint_pic2(d) {
     return;
   }
 
-  var y = "2017";
-  var type = "Merge";
+  var y = incase.year;
+  var type = incase.ctx;
   for (var i = 0; i < dataset[y][type].Income.length; i++) {
     if (dataset[y][type].Income[i].Code == d[0].Code) {
       for (var m = 0; m < d.length; m++) {
@@ -1522,3 +1528,134 @@ function paint_pic2(d) {
 }
 
 paint_pic2([]);
+
+var mdsData = {};
+
+function drawMDS(y, ctx) {
+  var myChart = echarts.init(document.getElementById('chart2'));
+  let data = [];
+  if (mdsData[y] == void 0) {
+    mdsData[y] = {};
+  }
+  if (mdsData[y][ctx] == void 0 || mdsData[y][ctx].length != 0) {
+    mdsData[y][ctx] = {};
+    d3.json("src/mds_" + y + "_" + ctx + ".json", function (jsondata) {
+      mdsData[y][ctx] = jsondata;
+      var label = mdsData[y][ctx].label;
+      data = mdsData[y][ctx].data;
+      var type = ctx == "m" ? "Merge" : "Parent";
+      for (var i = 0; i < label.length; i++) {
+        for (var j = 0; j < dataset[y][type].Balance.length; j++) {
+          if (dataset[y][type].Balance[j].Code == label[i]) {
+            data[i].push(dataset[y][type].Balance[j].Name);
+            data[i].push(label[i]);
+            break;
+          }
+        }
+      }
+
+      var option = {
+        backgroundColor: colorset.background,
+        textStyle: {
+          color: '#eee'
+        },
+        dataZoom: [{
+            id: 'dataZoomX',
+            type: 'slider',
+            xAxisIndex: [0],
+            filterMode: 'weakFilter'
+          },
+          {
+            id: 'dataZoomY',
+            type: 'slider',
+            yAxisIndex: [0],
+            filterMode: 'weakFilter'
+          }
+        ],
+        color: colorset.sunset,
+        title: {
+          text: "特征值降维",
+          left: 'center',
+          top: 10,
+          textStyle: {
+            color: '#e6e6e6'
+          }
+        },
+        xAxis: {},
+        yAxis: {},
+        series: [{
+          symbolSize: 10,
+          symbol: "rect",
+          label: {
+            emphasis: {
+              show: true,
+              formatter: function (param) {
+                return param.data[2];
+              },
+              position: 'top'
+            }
+          },
+          data: data,
+          type: 'scatter'
+        }]
+      };
+
+      if (option && typeof option === "object") {
+        myChart.setOption(option, true);
+      }
+    });
+    return;
+  }
+  label = mdsData[y][ctx].label;
+  data = mdsData[y][ctx].data;
+
+  var option = {
+    backgroundColor: colorset.background,
+    textStyle: {
+      color: '#eee'
+    },
+    dataZoom: [{
+        id: 'dataZoomX',
+        type: 'slider',
+        xAxisIndex: [0],
+        filterMode: 'weakFilter'
+      },
+      {
+        id: 'dataZoomY',
+        type: 'slider',
+        yAxisIndex: [0],
+        filterMode: 'weakFilter'
+      }
+    ],
+    color: colorset.sunset,
+    title: {
+      text: "特征值降维",
+      left: 'center',
+      top: 10,
+      textStyle: {
+        color: '#e6e6e6'
+      }
+    },
+    xAxis: {},
+    yAxis: {},
+    series: [{
+      symbolSize: 10,
+      symbol: rect,
+      label: {
+        emphasis: {
+          show: true,
+          formatter: function (param) {
+            return param.data[2];
+          },
+          position: 'top'
+        }
+      },
+      data: data,
+      type: 'scatter'
+    }]
+  };
+
+  if (option && typeof option === "object") {
+    myChart.setOption(option, true);
+  }
+}
