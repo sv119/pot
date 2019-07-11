@@ -9,14 +9,24 @@
 </head>
 
 <body>
-    <div id="all" style="width:1536px;height:865px;">
+    <header style="letter-spacing: 0.2em;">
+        大规模监管数据可视化预研项目
+        <span class="title" style=" font-size:14px; position: absolute; right: 30px; top:-20px; "></span>
+    </header>
+    <div id="all" style="width:1536px;height:815px;float: left;">
         <div class="left" style="float:left;">
-            <div class="map1" id="box"></div>
-            <div class="treeselect" id="tree"></div>
+            <!--div-- class="map1" id="box"></div-->
+            <div class="treeselect" id="tree">
+                <div id="tree_well" class="tree well" style="background: none; border: none; padding-bottom: 0px;">
+                    <ul style="padding-left: 15px;">
+                    </ul>
+                </div>
+            </div>
             <div class="select" style="padding: 10px;">
                 <form role="form">
-                    <div class="form-group" style="padding: 0px 20px; margin-bottom: 0px;">
-                        <label for="time" style="margin-top: 2px; float: left;">数据年选择</label>
+                    <div class="form-group" style="padding: 0px 20px; margin-bottom: 0px;margin-top: 16px;">
+                        <label for="time"
+                            style="margin-top: 5px; float: left;margin-right: 5px;color:#3eaae9;">数据年选择</label>
                     </div>
                     <div class="btn-group">
                         <button type="button" id="nowYear" class="btn btn-default dropdown-toggle"
@@ -27,7 +37,8 @@
                         </ul>
                     </div>
                     <div class="form-group" style="padding: 10px 20px; margin-bottom: 0px;">
-                        <label for="time" style="margin-top: 2px; float: left;">数据源选择</label>
+                        <label for="time"
+                            style="margin-top: 14px; float: left;margin-right: 5px;color:#3eaae9;">数据源选择</label>
                     </div>
                     <div class="btn-group">
                         <button type="button" id="nowCtx" class="btn btn-default dropdown-toggle"
@@ -40,12 +51,12 @@
                         </ul>
                     </div>
                     <div class="form-group" style="padding: 10px 20px 0px 20px; margin-bottom: 0px;">
-                        <label for="name" style="margin-top: 2px;">输入证券代码查询</label>
+                        <label for="name" style="margin-top: 2px;color:#3eaae9;">输入证券代码查询</label>
                         <input type="number" name="Code" id="inputCode" class="form-control" value=""
                             required="required" placeholder="证券代码" style="margin-left: 50px; height: 2em;"
                             onkeypress="return (/[\d]/.test(String.fromCharCode(event.keyCode)))" onkeyup="draw();">
                         <span id="notexist"
-                            style="position: relative; left: 190px; top: -28px; letter-spacing: 0.1em; visibility: hidden;">
+                            style="position: relative; left: 180px; top: -25px; letter-spacing: 0.1em; visibility: hidden;">
                             证券信息不存在</span>
                     </div>
                 </form>
@@ -55,16 +66,16 @@
             <div class="alldata" style="float:left;">
                 <div id="sunburst"></div>
             </div>
-            <div class="mds" style="float: left;">
-                <div id="chart2" style="height: 400px; margin-top: 20px;"></div>
+            <div id="map" class="map" style="float: left;">
             </div>
         </div>
 
         <div class="right" style="float:left;">
             <div id="analyze" class="img1" style="float:left;"></div>
             <div id="analyze_2" class="img2" style="float:left;"></div>
-            <div id="chart" class="img3" style="float:left;"></div>
-            <div class="img4" style="float:left;"></div>
+            <div id="chart" class="img3" style="float:left;">
+                <div id="chart2" style="height: 340px; margin-top: 10px;"></div>
+            </div>
         </div>
     </div>
 
@@ -74,6 +85,7 @@
     <script type="text/javascript" src="javascripts/echarts.min.js"></script>
     <script type="text/javascript" src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js">
     </script>
+    <script type="text/javascript" src="javascripts/china.js"></script>
     <script type="text/javascript" src="javascripts/firm.js"></script>
     <script type="text/javascript" src="javascripts/myjs.js"></script>
 </body>

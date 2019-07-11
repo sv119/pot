@@ -2,7 +2,7 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 10:56:05 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-11 14:56:39
+ * @Last Modified time: 2019-07-11 18:48:41
  */
 
 var colorset = {
@@ -34,14 +34,34 @@ var incase = {
 };
 
 (function load() {
+  var NOTFOUND = {};
   var csv = d3.dsv(",", "text/csv;charset=gb2312");
   csv(SRC.Rule, function (data) {
     LoadClassInfo(data);
+    buildTree();
     csv(SRC.Dictionary, function (data) {
       LoadDictionary(data);
       csv(SRC.BalanceSheet, function (data) {
         Sheets.BalanceSheet = data;
         for (let i = 0; i < data.length; i++) {
+          try {
+            let txt = d3.select("#item-" + data[i].SECURITY_CODE).text();
+            d3.select("#item-" + data[i].SECURITY_CODE)
+              .text("")
+              .append("a")
+              .attr("href", "javascript: void(0);")
+              .text(txt)
+              .on("click", function () {
+                $("input[name=Code]").val(
+                  d3.select(this).text().substring(d3.select(this).text().indexOf('(') + 1, d3.select(this).text().indexOf(')')));
+                draw();
+              });
+          } catch (error) {
+            if (NOTFOUND[data[i].SECURITY_CODE] == void 0) {
+              console.error("警告：" + data[i].SECURITY_NAME + " (" + data[i].SECURITY_CODE + ") 查找不到有效的分类信息，数据加载失败！");
+              NOTFOUND[data[i].SECURITY_CODE] = 1;
+            }
+          }
           let year = (data[i].DATA_YEAR).toString().substring(0, 4);
           for (var y = 0; y <= yearset.length; y++) {
             if (y == yearset.length) {
@@ -168,7 +188,6 @@ function init() {
   $("input[name=Code]").val("");
   document.getElementById("inputCode").focus();
   paint_sunburst([]);
-  buildTree();
   if (incase.ctx == "Merge") {
     drawMDS(incase.year, "m");
   } else {
@@ -270,7 +289,6 @@ function paint_sunburst(d) {
     }];
 
     option = {
-      backgroundColor: bgColor,
       color: colors,
       title: {
         text: "没有数据",
@@ -515,7 +533,6 @@ function paint_sunburst(d) {
   data[2]['children'][0]['children'].push(child);
 
   option = {
-    backgroundColor: bgColor,
     color: colors,
     title: {
       text: d.SECURITY_NAME,
@@ -523,7 +540,7 @@ function paint_sunburst(d) {
       left: 'center',
       top: 10,
       textStyle: {
-        color: '#e6e6e6',
+        color: '#00f6ff',
         opacity: 1
       }
     },
@@ -610,106 +627,56 @@ function paint_sunburst(d) {
 }
 
 function buildTree() {
-  var all = d3.select("#tree")
-    .append("div")
-    .attr("id", "treeContainer")
-    .style("margin", "10px")
-    .style("letter-spacing", "0.2em");
+  var all = d3.select("#tree_well").select("ul");
+
   for (let i_1 = 0; i_1 < Class.length; i_1++) {
     if (Class[i_1].name == "")
       continue;
-    var c_1 = all.append("p")
-      .append("a")
-      .attr("href", "javascript: void(0);")
-      .attr("id", "root_" + i_1)
-      .style("line-height", "1.8em")
-      .style("color", colorset.sunset[0])
-      .html(Class[i_1].name)
-      .on("click", function () {
-        var child = "branch_at_" + this.id.substring(5, this.id.length);
-        d3.selectAll(".level2")
-          .style("display", function () {
-            if (d3.select(this).classed(child)) {
-              return d3.select(this).style("display") == "block" ? "none" : "block";
-            } else {
-              return "none";
-            }
-          });
-        d3.selectAll(".level3")
-          .style("display", "none");
-        d3.selectAll(".level4").style("display", "none");
-      });
+    var c_1 = all.append("li")
+      .html('<span><i class="icon-folder-open"></i>' + Class[i_1].name + '</span>')
+      .append("ul")
+      .style("padding-left", "25px");
     for (let i_2 = 0; i_2 < Class[i_1].children.length; i_2++) {
-      var c_2 = all.append("p")
-        .append("a")
-        .attr("href", "javascript: void(0);")
-        .classed("level2", true)
-        .classed("branch_at_" + i_1, true)
-        .attr("id", "root_" + i_1 + "_" + i_2)
-        .style("line-height", "1.4em")
+      var c_2 = c_1.append("li")
         .style("display", "none")
-        .style("color", colorset.sunset[1])
-        .html("&nbsp;&nbsp;" + Class[i_1].children[i_2].name)
-        .on("click", function () {
-          var child = "branch_at_" + this.id.substring(5, this.id.length);
-          d3.selectAll(".branch_" + this.id.substring(5, this.id.length))
-            .style("display", "none");
-          d3.selectAll(".level3")
-            .style("display", function () {
-              if (d3.select(this).classed(child)) {
-                return d3.select(this).style("display") == "block" ? "none" : "block";
-              } else {
-                return "none";
-              }
-            });
-          d3.selectAll(".level4").style("display", "none");
-        });
+        .html('<span><i class="icon-minus-sign"></i>' + Class[i_1].children[i_2].name + '</span>')
+        .append("ul")
+        .style("padding-left", "25px");
       for (let i_3 = 0; i_3 < Class[i_1].children[i_2].children.length; i_3++) {
-        var c_3 = all.append("p")
-          .append("a")
-          .attr("href", "javascript: void(0);")
-          .classed("level3", true)
-          .classed("branch_" + i_1, true)
-          .classed("branch_at_" + i_1 + "_" + i_2, true)
-          .attr("id", "root_" + i_1 + "_" + i_2 + "_" + i_3)
-          .style("line-height", "1.2em")
+        var c_3 = c_2.append("li")
           .style("display", "none")
-          .style("color", colorset.sunset[2])
-          .html("&nbsp;&nbsp;&nbsp;&nbsp;" + Class[i_1].children[i_2].children[i_3].name)
-          .on("click", function () {
-            var child = "branch_at_" + this.id.substring(5, this.id.length);
-            d3.selectAll(".level4")
-              .style("display", function () {
-                if (d3.select(this).classed(child)) {
-                  return d3.select(this).style("display") == "block" ? "none" : "block";
-                } else {
-                  return "none";
-                }
-              });
-          });
+          .html('<span><i class="icon-minus-sign"></i>' + Class[i_1].children[i_2].children[i_3].name + '</span>')
+          .append("ul")
+          .style("padding-left", "25px");
         for (let i_4 = 0; i_4 < Class[i_1].children[i_2].children[i_3].children.length; i_4++) {
-          var c_4 = all.append("p")
-            .append("a")
-            .attr("href", "javascript: void(0);")
-            .classed("level4", true)
-            .classed("branch_" + i_1, true)
-            .classed("branch_" + i_1 + "_" + i_2, true)
-            .classed("branch_at_" + i_1 + "_" + i_2 + "_" + i_3, true)
-            .style("line-height", "1em")
+          var c_4 = c_3.append("li")
             .style("display", "none")
-            .style("color", function () {
-              return "#FFD180";
+            .append("span")
+            .style("color", "#666")
+            .attr("id", function () {
+              var str = Class[i_1].children[i_2].children[i_3].children[i_4].name;
+              return "item-" + str.substring(str.indexOf('(') + 1, str.indexOf(')'));
             })
-            .html("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + Class[i_1].children[i_2].children[i_3].children[i_4].name)
-            .on("click", function () {
-              $("input[name=Code]").val(
-                d3.select(this).html().substring(d3.select(this).html().indexOf('(') + 1, d3.select(this).html().indexOf(')')));
-              draw();
-            });
+            .html('<i class="icon-leaf"></i>' + Class[i_1].children[i_2].children[i_3].children[i_4].name);
         }
       }
     }
   }
+
+  $(function () {
+    $('.tree li:has(ul)').addClass('parent_li').find(' > span');
+    $('.tree li.parent_li > span').on('click', function (e) {
+      var children = $(this).parent('li.parent_li').find(' > ul > li');
+      if (children.is(":visible")) {
+        children.hide('fast');
+        $(this).find(' > i').addClass('icon-plus-sign').removeClass('icon-minus-sign');
+      } else {
+        children.show('fast');
+        $(this).find(' > i').addClass('icon-minus-sign').removeClass('icon-plus-sign');
+      }
+      e.stopPropagation();
+    });
+  });
 }
 
 function paint_analyze(d) {
@@ -723,7 +690,6 @@ function paint_analyze(d) {
     let year = [" - "];
 
     var option = {
-      backgroundColor: colorset.background,
       textStyle: {
         color: '#eee'
       },
@@ -739,7 +705,7 @@ function paint_analyze(d) {
         left: 'center',
         top: 10,
         textStyle: {
-          color: '#e6e6e6'
+          color: '#00f6ff'
         }
       },
       grid: [{
@@ -895,7 +861,6 @@ function paint_analyze(d) {
   }
 
   option = {
-    backgroundColor: colorset.background,
     textStyle: {
       color: '#eee'
     },
@@ -911,7 +876,7 @@ function paint_analyze(d) {
       left: 'center',
       top: 10,
       textStyle: {
-        color: '#e6e6e6'
+        color: '#00f6ff'
       }
     },
     grid: [{
@@ -1018,7 +983,6 @@ function drawMDS(y, ctx) {
       }
 
       var option = {
-        backgroundColor: colorset.background,
         textStyle: {
           color: '#eee'
         },
@@ -1041,7 +1005,7 @@ function drawMDS(y, ctx) {
           left: 'center',
           top: 10,
           textStyle: {
-            color: '#e6e6e6'
+            color: '#00f6ff'
           }
         },
         xAxis: {},
@@ -1073,7 +1037,6 @@ function drawMDS(y, ctx) {
   data = mdsData[y][ctx].data;
 
   var option = {
-    backgroundColor: colorset.background,
     textStyle: {
       color: '#eee'
     },
@@ -1127,8 +1090,8 @@ function drawMDS(y, ctx) {
 {
   var param = "TotalAssets";
 
-  var width = parseInt(d3.select("#chart").style("width")) - 4;
-  var height = parseInt(d3.select("#chart").style("height")) - 4;
+  var width = parseInt(d3.select("#analyze_2").style("width")) - 4;
+  var height = parseInt(d3.select("#analyze_2").style("height")) - 4;
   var padding = {
     top: 40,
     right: 20,
@@ -1138,6 +1101,8 @@ function drawMDS(y, ctx) {
   var svg = null;
 
   var yScale = null;
+  var trans = 0;
+  var columnAt = 0;
 
   var animation = 1000;
 
@@ -1148,7 +1113,7 @@ function drawMDS(y, ctx) {
 
   var _data = [];
 
-  var rectStep = /*8 * */ parseInt(width) / _data.length;
+  var rectStep = 10 * parseInt(width) / _data.length;
   var rectWidth = rectStep * 0.6;
 
   var max;
@@ -1157,14 +1122,68 @@ function drawMDS(y, ctx) {
 }
 
 function layout() {
-  d3.select("#ranking").selectAll("rect").transition().duration(animation * 0.8).attr("fill", color.in);
-  d3.select("#column-" + $("input[name=Code]").val()).transition().duration(animation * 0.8).attr("fill", "white");
+  d3.select("#ranking").selectAll("rect").attr("fill", color.in);
+  d3.select("#column-" + $("input[name=Code]").val()).attr("fill", "white");
+
+  let highlighted = d3.select("#column-" + $("input[name=Code]").val());
+  try {
+    let center = parseInt(width) / 2 - (padding.left + padding.right) / 2;
+    let start = parseFloat(highlighted.attr("x")) + parseFloat(highlighted.attr("transform").substring(10, highlighted.attr("transform").indexOf(',')));
+    let dx = center - start - rectWidth;
+    trans += dx;
+    trans = trans > 0 ? 0 : trans;
+
+    for (let i = 0; i < _data.length; i++) {
+      if (_data[i].Code == $("input[name=Code]").val()) {
+        columnAt = i;
+        break;
+      }
+    }
+    let begin = columnAt < 10 ? 0 : columnAt - 10;
+    max = parseInt(_data[begin][param]);
+    for (let i = begin + 1; i < _data.length && i < begin + 21; i++) {
+      _data[i].index = i;
+      if (parseInt(_data[i][param]) > max) {
+        max = parseInt(_data[i][param]);
+      }
+    }
+    max = max > 0 ? max * 1.1 : max * 0.9;
+    yScale = d3.scale.linear()
+      .domain([min, max])
+      .range([0, parseInt(height) - padding.top - padding.bottom]);
+
+    d3.select("#ranking")
+      .selectAll("rect")
+      .data(_data)
+      .transition()
+      .delay(animation)
+      .duration(animation)
+      .attr("transform", "translate(" + trans + ",0)")
+      .attr("fill", function (d) {
+        return (d.Code == $("input[name=Code]").val()) ? "white" : color.in;
+      })
+      .style("opacity", 1)
+      .attr("width", rectWidth)
+      .transition()
+      .delay(2.1 * animation)
+      .duration(animation)
+      .attr("y", function (d) {
+        return parseInt(height) - padding.bottom - yScale(parseInt(d[param]));
+      })
+      .attr("height", function (d) {
+        return yScale(parseInt(d[param]));
+      })
+      .attr("x", function (d, i) {
+        return i * rectStep;
+      });
+  } catch (error) {}
+
   if (_data == dataset[incase.year][incase.ctx].Balance) {
     return;
   }
   _data = dataset[incase.year][incase.ctx].Balance;
 
-  rectStep = /*8 * */ parseInt(width) / _data.length;
+  rectStep = 10 * parseInt(width) / _data.length;
   rectWidth = rectStep * 0.6;
 
   max = parseInt(_data[0][param]);
@@ -1181,7 +1200,7 @@ function layout() {
     }
     average += parseInt(_data[i][param]);
   }
-  min = min > 0 ? min * 0.9 : min * 1.1;
+  min = min > 0 ? 0 : min * 1.1;
   max = max > 0 ? max * 1.1 : max * 0.9;
   average /= _data.length;
 
@@ -1202,7 +1221,6 @@ function layout() {
     _data[_data.length - 1 - i] = _data[index];
     _data[index] = temp;
   }
-  // console.log(_data);
 
   if (d3.select("#analyze_2").html() == "") {
     svg = d3.select("#analyze_2")
@@ -1223,7 +1241,7 @@ function layout() {
 
   rectUpdate.transition()
     .duration(animation)
-    .attr("fill", function(d){
+    .attr("fill", function (d) {
       return (d.Code == $("input[name=Code]").val()) ? "white" : color.in;
     })
     .style("opacity", 1)
@@ -1238,8 +1256,8 @@ function layout() {
       return yScale(parseInt(d[param]));
     })
     .transition()
-    .delay(2000)
-    .duration(animation)
+    .delay(2000 + 2000 * Math.random())
+    .duration(animation + animation * Math.random())
     .attr("x", function (d, i) {
       return i * rectStep;
     });
@@ -1253,12 +1271,13 @@ function layout() {
     .attr("x", function (d, i) {
       return d.index * rectStep;
     })
+    .attr("transform", "translate(" + trans + ",0)")
     .attr("y", parseInt(height) - padding.bottom - yScale(parseInt(average)))
     .attr("width", 0)
     .attr("height", yScale(average))
     .transition()
     .duration(animation)
-    .attr("fill", function(d){
+    .attr("fill", function (d) {
       return (d.Code == $("input[name=Code]").val()) ? "white" : color.in;
     })
     .attr("y", function (d) {
@@ -1280,3 +1299,645 @@ function layout() {
     .style("opacity", 0)
     .attr("width", 0);
 }
+
+(function map() {
+  var dom = document.getElementById(('map'), 'shine');
+  var myChart = echarts.init(dom);
+  var app = {};
+  option = null;
+  var mapName = 'china'
+  var data = [{
+          name: "北京",
+          value: 199
+      },
+      {
+          name: "天津",
+          value: 42
+      },
+      {
+          name: "河北",
+          value: 102
+      },
+      {
+          name: "山西",
+          value: 81
+      },
+      {
+          name: "内蒙古",
+          value: 47
+      },
+      {
+          name: "辽宁",
+          value: 67
+      },
+      {
+          name: "吉林",
+          value: 82
+      },
+      {
+          name: "黑龙江",
+          value: 123
+      },
+      {
+          name: "上海",
+          value: 24
+      },
+      {
+          name: "江苏",
+          value: 92
+      },
+      {
+          name: "浙江",
+          value: 114
+      },
+      {
+          name: "安徽",
+          value: 109
+      },
+      {
+          name: "福建",
+          value: 116
+      },
+      {
+          name: "江西",
+          value: 91
+      },
+      {
+          name: "山东",
+          value: 119
+      },
+      {
+          name: "河南",
+          value: 137
+      },
+      {
+          name: "湖北",
+          value: 116
+      },
+      {
+          name: "湖南",
+          value: 114
+      },
+      {
+          name: "重庆",
+          value: 91
+      },
+      {
+          name: "四川",
+          value: 125
+      },
+      {
+          name: "贵州",
+          value: 62
+      },
+      {
+          name: "云南",
+          value: 83
+      },
+      {
+          name: "西藏",
+          value: 9
+      },
+      {
+          name: "陕西",
+          value: 80
+      },
+      {
+          name: "甘肃",
+          value: 56
+      },
+      {
+          name: "青海",
+          value: 10
+      },
+      {
+          name: "宁夏",
+          value: 18
+      },
+      {
+          name: "新疆",
+          value: 180
+      },
+      {
+          name: "广东",
+          value: 123
+      },
+      {
+          name: "广西",
+          value: 59
+      },
+      {
+          name: "海南",
+          value: 14
+      },
+  ];
+
+  var geoCoordMap = {};
+  var toolTipData = [{
+          name: "北京",
+          value: [{
+              name: "科技人才总数",
+              value: 95
+          }, {
+              name: "理科",
+              value: 82
+          }]
+      },
+      {
+          name: "天津",
+          value: [{
+              name: "文科",
+              value: 22
+          }, {
+              name: "理科",
+              value: 20
+          }]
+      },
+      {
+          name: "河北",
+          value: [{
+              name: "文科",
+              value: 60
+          }, {
+              name: "理科",
+              value: 42
+          }]
+      },
+      {
+          name: "山西",
+          value: [{
+              name: "文科",
+              value: 40
+          }, {
+              name: "理科",
+              value: 41
+          }]
+      },
+      {
+          name: "内蒙古",
+          value: [{
+              name: "文科",
+              value: 23
+          }, {
+              name: "理科",
+              value: 24
+          }]
+      },
+      {
+          name: "辽宁",
+          value: [{
+              name: "文科",
+              value: 39
+          }, {
+              name: "理科",
+              value: 28
+          }]
+      },
+      {
+          name: "吉林",
+          value: [{
+              name: "文科",
+              value: 41
+          }, {
+              name: "理科",
+              value: 41
+          }]
+      },
+      {
+          name: "黑龙江",
+          value: [{
+              name: "文科",
+              value: 35
+          }, {
+              name: "理科",
+              value: 31
+          }]
+      },
+      {
+          name: "上海",
+          value: [{
+              name: "文科",
+              value: 12
+          }, {
+              name: "理科",
+              value: 12
+          }]
+      },
+      {
+          name: "江苏",
+          value: [{
+              name: "文科",
+              value: 47
+          }, {
+              name: "理科",
+              value: 45
+          }]
+      },
+      {
+          name: "浙江",
+          value: [{
+              name: "文科",
+              value: 57
+          }, {
+              name: "理科",
+              value: 57
+          }]
+      },
+      {
+          name: "安徽",
+          value: [{
+              name: "文科",
+              value: 57
+          }, {
+              name: "理科",
+              value: 52
+          }]
+      },
+      {
+          name: "福建",
+          value: [{
+              name: "文科",
+              value: 59
+          }, {
+              name: "理科",
+              value: 57
+          }]
+      },
+      {
+          name: "江西",
+          value: [{
+              name: "文科",
+              value: 49
+          }, {
+              name: "理科",
+              value: 42
+          }]
+      },
+      {
+          name: "山东",
+          value: [{
+              name: "文科",
+              value: 67
+          }, {
+              name: "理科",
+              value: 52
+          }]
+      },
+      {
+          name: "河南",
+          value: [{
+              name: "文科",
+              value: 69
+          }, {
+              name: "理科",
+              value: 68
+          }]
+      },
+      {
+          name: "湖北",
+          value: [{
+              name: "文科",
+              value: 60
+          }, {
+              name: "理科",
+              value: 56
+          }]
+      },
+      {
+          name: "湖南",
+          value: [{
+              name: "文科",
+              value: 62
+          }, {
+              name: "理科",
+              value: 52
+          }]
+      },
+      {
+          name: "重庆",
+          value: [{
+              name: "文科",
+              value: 47
+          }, {
+              name: "理科",
+              value: 44
+          }]
+      },
+      {
+          name: "四川",
+          value: [{
+              name: "文科",
+              value: 65
+          }, {
+              name: "理科",
+              value: 60
+          }]
+      },
+      {
+          name: "贵州",
+          value: [{
+              name: "文科",
+              value: 32
+          }, {
+              name: "理科",
+              value: 30
+          }]
+      },
+      {
+          name: "云南",
+          value: [{
+              name: "文科",
+              value: 42
+          }, {
+              name: "理科",
+              value: 41
+          }]
+      },
+      {
+          name: "西藏",
+          value: [{
+              name: "文科",
+              value: 5
+          }, {
+              name: "理科",
+              value: 4
+          }]
+      },
+      {
+          name: "陕西",
+          value: [{
+              name: "文科",
+              value: 38
+          }, {
+              name: "理科",
+              value: 42
+          }]
+      },
+      {
+          name: "甘肃",
+          value: [{
+              name: "文科",
+              value: 28
+          }, {
+              name: "理科",
+              value: 28
+          }]
+      },
+      {
+          name: "青海",
+          value: [{
+              name: "文科",
+              value: 5
+          }, {
+              name: "理科",
+              value: 5
+          }]
+      },
+      {
+          name: "宁夏",
+          value: [{
+              name: "文科",
+              value: 10
+          }, {
+              name: "理科",
+              value: 8
+          }]
+      },
+      {
+          name: "新疆",
+          value: [{
+              name: "文科",
+              value: 36
+          }, {
+              name: "理科",
+              value: 31
+          }]
+      },
+      {
+          name: "广东",
+          value: [{
+              name: "文科",
+              value: 63
+          }, {
+              name: "理科",
+              value: 60
+          }]
+      },
+      {
+          name: "广西",
+          value: [{
+              name: "文科",
+              value: 29
+          }, {
+              name: "理科",
+              value: 30
+          }]
+      },
+      {
+          name: "海南",
+          value: [{
+              name: "文科",
+              value: 8
+          }, {
+              name: "理科",
+              value: 6
+          }]
+      },
+  ];
+
+  /*获取地图数据*/
+  myChart.showLoading();
+  var mapFeatures = echarts.getMap(mapName).geoJson.features;
+  myChart.hideLoading();
+  mapFeatures.forEach(function (v) {
+      // 地区名称
+      var name = v.properties.name;
+      // 地区经纬度
+      geoCoordMap[name] = v.properties.cp;
+
+  });
+
+  // console.log(data)
+  // console.log(toolTipData)
+  var max = 480,
+      min = 9; // todo 
+  var maxSize4Pin = 100,
+      minSize4Pin = 20;
+
+  var convertData = function (data) {
+      var res = [];
+      for (var i = 0; i < data.length; i++) {
+          var geoCoord = geoCoordMap[data[i].name];
+          if (geoCoord) {
+              res.push({
+                  name: data[i].name,
+                  value: geoCoord.concat(data[i].value),
+              });
+          }
+      }
+      return res;
+  };
+  option = {
+      tooltip: {
+          padding: 0,
+          enterable: true,
+          transitionDuration: 1,
+          textStyle: {
+              color: '#000',
+              decoration: 'none',
+          },
+          formatter: function (params) {
+              var tipHtml = '';
+              tipHtml =
+                  '<div style="width:150px;height:90px;background:rgba(22,80,158,0.8);border:1px solid rgba(7,166,255,0.7)">' +
+                  '<div style="width:150px;height:40px;line-height:40px;border-bottom:2px solid rgba(7,166,255,0.7);padding:0 20px">' +
+                  '<i style="display:inline-block;width:8px;height:8px;background:#16d6ff;border-radius:40px;">' +
+                  '</i>' +
+                  '<span style="margin-left:10px;color:#fff;font-size:16px;">' + params.name +
+                  '</span>' +
+                  '</div>' +
+                  '<div style="padding:10px">' +
+                  '<p style="color:#fff;font-size:12px;">' +
+                  '<i style="display:inline-block;width:10px;height:10px;background:#16d6ff;border-radius:40px;margin:0 8px">' +
+                  '</i>' +
+                  '单位总数：' + '<span style="color:#11ee7d;margin:0 6px;">' + toolTipData.length +
+                  '</span>' + '个' + '</p>'
+              '</div>' + '</div>';
+
+              return tipHtml;
+          }
+
+      },
+
+      visualMap: {
+          show: true,
+          min: 0,
+          max: 200,
+          left: '10%',
+          top: 'bottom',
+          calculable: true,
+          seriesIndex: [1],
+          inRange: {
+              color: ['#04387b', '#467bc0'] // 蓝绿
+          }
+      },
+      geo: {
+          show: true,
+          map: mapName,
+          label: {
+              normal: {
+                  show: false
+              },
+              emphasis: {
+                  show: false,
+              }
+          },
+          roam: false,
+          itemStyle: {
+              normal: {
+                  areaColor: '#023677',
+                  borderColor: '#1180c7',
+              },
+              emphasis: {
+                  areaColor: '#4499d0',
+              }
+          }
+      },
+      series: [{
+              name: '散点',
+              type: 'scatter',
+              coordinateSystem: 'geo',
+              data: convertData(data),
+              symbolSize: function (val) {
+                  return val[2] / 10;
+              },
+              label: {
+                  normal: {
+                      formatter: '{b}',
+                      position: 'right',
+                      show: true
+                  },
+                  emphasis: {
+                      show: true
+                  }
+              },
+              itemStyle: {
+                  normal: {
+                      color: '#fff'
+                  }
+              }
+          },
+          {
+              type: 'map',
+              map: mapName,
+              geoIndex: 0,
+              aspectScale: 0.75, //长宽比
+              showLegendSymbol: false, // 存在legend时显示
+              label: {
+                  normal: {
+                      show: true
+                  },
+                  emphasis: {
+                      show: false,
+                      textStyle: {
+                          color: '#fff'
+                      }
+                  }
+              },
+              roam: true,
+              itemStyle: {
+                  normal: {
+                      areaColor: '#031525',
+                      borderColor: '#3B5077',
+                  },
+                  emphasis: {
+                      areaColor: '#2B91B7'
+                  }
+              },
+              animation: false,
+              data: data
+          },
+          {
+              name: '点',
+              type: 'scatter',
+              coordinateSystem: 'geo',
+              zlevel: 6,
+          },
+          {
+              name: 'Top 5',
+              type: 'effectScatter',
+              coordinateSystem: 'geo',
+              data: convertData(data.sort(function (a, b) {
+                  return b.value - a.value;
+              }).slice(0, 10)),
+              symbolSize: function (val) {
+                  return val[2] / 10;
+              },
+              showEffectOn: 'render',
+              rippleEffect: {
+                  brushType: 'stroke'
+              },
+              hoverAnimation: true,
+              label: {
+                  normal: {
+                      formatter: '{b}',
+                      position: 'left',
+                      show: false
+                  }
+              },
+              itemStyle: {
+                  normal: {
+                      color: 'yellow',
+                      shadowBlur: 10,
+                      shadowColor: 'yellow'
+                  }
+              },
+              zlevel: 1
+          },
+
+      ]
+  };
+  if (option && typeof option === "object") {
+      myChart.setOption(option, true);
+  }
+})()
