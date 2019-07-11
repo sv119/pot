@@ -72,7 +72,24 @@
 
         <div class="right" style="float:left;">
             <div id="analyze" class="img1" style="float:left;"></div>
-            <div id="analyze_2" class="img2" style="float:left;"></div>
+            <div style="float:left;">
+                <label for="name" style="position: relative; left: 32px; top: 64px;">排序字段</label>
+                <div style="position: relative; left: 32px; top: 60px;">
+                    <label class="radio-inline">
+                        <input type="radio" name="optionsRadiosinline" id="optionsRadios1" value="TotalAssets" onclick="onSelect()">资产总计
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="optionsRadiosinline" id="optionsRadios2" value="TotalLiability" onclick="onSelect()">负债总计
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="optionsRadiosinline" id="optionsRadios3" value="TotalEquity" onclick="onSelect()">所有者权益总计
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="optionsRadiosinline" id="optionsRadios4" value="TotalLiability_Equity" onclick="onSelect()">负债和所有者权益总计
+                    </label>
+                </div>
+                <div id="analyze_2" class="img2"></div>
+            </div>
             <div id="chart" class="img3" style="float:left;">
                 <div id="chart2" style="height: 340px; margin-top: 10px;"></div>
             </div>

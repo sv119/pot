@@ -2,7 +2,7 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 10:56:05 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-11 18:48:41
+ * @Last Modified time: 2019-07-11 21:55:14
  */
 
 var colorset = {
@@ -185,6 +185,7 @@ function init() {
     d3.select("#nowCtx").html(d3.select(this).text() + '<span class="caret"></span>');
     draw();
   });
+  $("input[name='optionsRadiosinline'][value='TotalAssets']").prop("checked",true);
   $("input[name=Code]").val("");
   document.getElementById("inputCode").focus();
   paint_sunburst([]);
@@ -196,7 +197,7 @@ function init() {
 }
 
 function draw() {
-  layout();
+  layout(false);
   if (incase.ctx == "Merge") {
     drawMDS(incase.year, "m");
   } else {
@@ -423,10 +424,12 @@ function paint_sunburst(d) {
   var para = "BAME00";
   for (var num = 3; num <= 83; num++) {
     var spaner = num < 10 ? "0" + num : num;
+    if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
+      continue;
     var val = parseInt(d[para + spaner + "0M"]);
     if (val >= all / 6) {
       var child = {
-        name: nameof[para + spaner + "0M"],
+        name: enter(nameof[para + spaner + "0M"], 5),
         value: val
       };
       data[0]['children'][0]['children'].push(child);
@@ -446,10 +449,12 @@ function paint_sunburst(d) {
   para = "BAME0";
   for (var num = 86; num <= 131; num++) {
     var spaner = num < 100 ? "0" + num : num;
+    if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
+      continue;
     var val = parseInt(d[para + spaner + "0M"]);
     if (val >= all / 6) {
       var child = {
-        name: nameof[para + spaner + "0M"],
+        name: enter(nameof[para + spaner + "0M"], 5),
         value: val
       };
       data[0]['children'][1]['children'].push(child);
@@ -472,7 +477,7 @@ function paint_sunburst(d) {
     var val = parseInt(d[para + spaner + "0M"]);
     if (val >= all / 6) {
       var child = {
-        name: nameof[para + spaner + "0M"],
+        name: enter(nameof[para + spaner + "0M"], 5),
         value: val
       };
       data[1]['children'][0]['children'].push(child);
@@ -492,10 +497,12 @@ function paint_sunburst(d) {
   para = "BAME0";
   for (var num = 200; num <= 218; num++) {
     var spaner = num.toString();
+    if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
+      continue;
     var val = parseInt(d[para + spaner + "0M"]);
     if (val >= all / 6) {
       var child = {
-        name: nameof[para + spaner + "0M"],
+        name: enter(nameof[para + spaner + "0M"], 5),
         value: val
       };
       data[1]['children'][1]['children'].push(child);
@@ -515,10 +522,12 @@ function paint_sunburst(d) {
   para = "BAME0";
   for (var num = 223; num <= 246; num++) {
     var spaner = num.toString();
+    if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
+      continue;
     var val = parseInt(d[para + spaner + "0M"]);
     if (val >= all / 6) {
       var child = {
-        name: nameof[para + spaner + "0M"],
+        name: enter(nameof[para + spaner + "0M"], 5),
         value: val
       };
       data[2]['children'][0]['children'].push(child);
@@ -1088,14 +1097,14 @@ function drawMDS(y, ctx) {
 
 // 柱状图配置项
 {
-  var param = "TotalAssets";
+  var param = ($("input[name='optionsRadiosinline']:checked").val());
 
   var width = parseInt(d3.select("#analyze_2").style("width")) - 4;
   var height = parseInt(d3.select("#analyze_2").style("height")) - 4;
   var padding = {
-    top: 40,
+    top: 46,
     right: 20,
-    bottom: 20,
+    bottom: 10,
     left: 20
   };
   var svg = null;
@@ -1119,9 +1128,15 @@ function drawMDS(y, ctx) {
   var max;
   var min;
   var average;
+
+  var tooltip = d3.select("body")
+    .append("div")
+    .classed("dragtip", true)
+    .style("opacity", 0.0)
+    .style("position", "absolute");
 }
 
-function layout() {
+function layout(ensure) {
   d3.select("#ranking").selectAll("rect").attr("fill", color.in);
   d3.select("#column-" + $("input[name=Code]").val()).attr("fill", "white");
 
@@ -1140,45 +1155,82 @@ function layout() {
       }
     }
     let begin = columnAt < 10 ? 0 : columnAt - 10;
-    max = parseInt(_data[begin][param]);
+    let _max = parseInt(_data[begin][param]);
     for (let i = begin + 1; i < _data.length && i < begin + 21; i++) {
       _data[i].index = i;
-      if (parseInt(_data[i][param]) > max) {
-        max = parseInt(_data[i][param]);
+      if (parseInt(_data[i][param]) > _max) {
+        _max = parseInt(_data[i][param]);
       }
     }
-    max = max > 0 ? max * 1.1 : max * 0.9;
+    _max = _max > 0 ? _max * 1.1 : _max * 0.9;
     yScale = d3.scale.linear()
-      .domain([min, max])
+      .domain([min, _max])
       .range([0, parseInt(height) - padding.top - padding.bottom]);
 
-    d3.select("#ranking")
-      .selectAll("rect")
-      .data(_data)
-      .transition()
-      .delay(animation)
-      .duration(animation)
-      .attr("transform", "translate(" + trans + ",0)")
-      .attr("fill", function (d) {
-        return (d.Code == $("input[name=Code]").val()) ? "white" : color.in;
-      })
-      .style("opacity", 1)
-      .attr("width", rectWidth)
-      .transition()
-      .delay(2.1 * animation)
-      .duration(animation)
-      .attr("y", function (d) {
-        return parseInt(height) - padding.bottom - yScale(parseInt(d[param]));
-      })
-      .attr("height", function (d) {
-        return yScale(parseInt(d[param]));
-      })
-      .attr("x", function (d, i) {
-        return i * rectStep;
-      });
+    if (_max < max) {
+      d3.select("#ranking")
+        .selectAll("rect")
+        .data(_data)
+        .transition()
+        .delay(animation)
+        .duration(animation)
+        .attr("transform", "translate(" + trans + ",0)")
+        .attr("fill", function (d) {
+          return (d.Code == $("input[name=Code]").val()) ? "white" : color.in;
+        })
+        .style("opacity", 1)
+        .attr("width", rectWidth);
+
+      d3.select("#ranking")
+        .selectAll("rect")
+        .data(_data)
+        .transition()
+        .delay(2.1 * animation)
+        .duration(animation)
+        .attr("y", function (d) {
+          return parseInt(height) - padding.bottom - yScale(parseInt(d[param]));
+        })
+        .attr("height", function (d) {
+          return yScale(parseInt(d[param]));
+        })
+        .attr("x", function (d, i) {
+          return i * rectStep;
+        });
+    } else {
+      d3.select("#ranking")
+        .selectAll("rect")
+        .data(_data)
+        .transition()
+        .delay(animation)
+        .duration(animation)
+        .attr("y", function (d) {
+          return parseInt(height) - padding.bottom - yScale(parseInt(d[param]));
+        })
+        .attr("height", function (d) {
+          return yScale(parseInt(d[param]));
+        })
+        .attr("x", function (d, i) {
+          return i * rectStep;
+        });
+
+      d3.select("#ranking")
+        .selectAll("rect")
+        .data(_data)
+        .transition()
+        .delay(2.1 * animation)
+        .duration(animation)
+        .attr("transform", "translate(" + trans + ",0)")
+        .attr("fill", function (d) {
+          return (d.Code == $("input[name=Code]").val()) ? "white" : color.in;
+        })
+        .style("opacity", 1)
+        .attr("width", rectWidth);
+    }
+
+    max = _max;
   } catch (error) {}
 
-  if (_data == dataset[incase.year][incase.ctx].Balance) {
+  if (_data == dataset[incase.year][incase.ctx].Balance && !ensure) {
     return;
   }
   _data = dataset[incase.year][incase.ctx].Balance;
@@ -1275,6 +1327,24 @@ function layout() {
     .attr("y", parseInt(height) - padding.bottom - yScale(parseInt(average)))
     .attr("width", 0)
     .attr("height", yScale(average))
+    .on("mouseover", function (d, i) {
+      tooltip.html(rank(i) + "<br />" + d.Name + " (" + d.Code + ")<br />" + param + ": " + format(d[param]))
+        .style("left", (d3.event.pageX + 20) + "px")
+        .style("top", (d3.event.pageY + 20) + "px")
+        .style("opacity", 1.0);
+    })
+    .on("mousemove", function (d) {
+      tooltip.style("left", (d3.event.pageX + 20) + "px")
+        .style("top", (d3.event.pageY + 20) + "px");
+    })
+    .on("mouseout", function (d) {
+      tooltip.style("opacity", 0.0);
+    })
+    .on("click", function () {
+      $("input[name=Code]").val(
+        this.id.substring(this.id.indexOf('-') + 1, this.id.length));
+      draw();
+    })
     .transition()
     .duration(animation)
     .attr("fill", function (d) {
@@ -1307,442 +1377,442 @@ function layout() {
   option = null;
   var mapName = 'china'
   var data = [{
-          name: "北京",
-          value: 199
-      },
-      {
-          name: "天津",
-          value: 42
-      },
-      {
-          name: "河北",
-          value: 102
-      },
-      {
-          name: "山西",
-          value: 81
-      },
-      {
-          name: "内蒙古",
-          value: 47
-      },
-      {
-          name: "辽宁",
-          value: 67
-      },
-      {
-          name: "吉林",
-          value: 82
-      },
-      {
-          name: "黑龙江",
-          value: 123
-      },
-      {
-          name: "上海",
-          value: 24
-      },
-      {
-          name: "江苏",
-          value: 92
-      },
-      {
-          name: "浙江",
-          value: 114
-      },
-      {
-          name: "安徽",
-          value: 109
-      },
-      {
-          name: "福建",
-          value: 116
-      },
-      {
-          name: "江西",
-          value: 91
-      },
-      {
-          name: "山东",
-          value: 119
-      },
-      {
-          name: "河南",
-          value: 137
-      },
-      {
-          name: "湖北",
-          value: 116
-      },
-      {
-          name: "湖南",
-          value: 114
-      },
-      {
-          name: "重庆",
-          value: 91
-      },
-      {
-          name: "四川",
-          value: 125
-      },
-      {
-          name: "贵州",
-          value: 62
-      },
-      {
-          name: "云南",
-          value: 83
-      },
-      {
-          name: "西藏",
-          value: 9
-      },
-      {
-          name: "陕西",
-          value: 80
-      },
-      {
-          name: "甘肃",
-          value: 56
-      },
-      {
-          name: "青海",
-          value: 10
-      },
-      {
-          name: "宁夏",
-          value: 18
-      },
-      {
-          name: "新疆",
-          value: 180
-      },
-      {
-          name: "广东",
-          value: 123
-      },
-      {
-          name: "广西",
-          value: 59
-      },
-      {
-          name: "海南",
-          value: 14
-      },
+      name: "北京",
+      value: 199
+    },
+    {
+      name: "天津",
+      value: 42
+    },
+    {
+      name: "河北",
+      value: 102
+    },
+    {
+      name: "山西",
+      value: 81
+    },
+    {
+      name: "内蒙古",
+      value: 47
+    },
+    {
+      name: "辽宁",
+      value: 67
+    },
+    {
+      name: "吉林",
+      value: 82
+    },
+    {
+      name: "黑龙江",
+      value: 123
+    },
+    {
+      name: "上海",
+      value: 24
+    },
+    {
+      name: "江苏",
+      value: 92
+    },
+    {
+      name: "浙江",
+      value: 114
+    },
+    {
+      name: "安徽",
+      value: 109
+    },
+    {
+      name: "福建",
+      value: 116
+    },
+    {
+      name: "江西",
+      value: 91
+    },
+    {
+      name: "山东",
+      value: 119
+    },
+    {
+      name: "河南",
+      value: 137
+    },
+    {
+      name: "湖北",
+      value: 116
+    },
+    {
+      name: "湖南",
+      value: 114
+    },
+    {
+      name: "重庆",
+      value: 91
+    },
+    {
+      name: "四川",
+      value: 125
+    },
+    {
+      name: "贵州",
+      value: 62
+    },
+    {
+      name: "云南",
+      value: 83
+    },
+    {
+      name: "西藏",
+      value: 9
+    },
+    {
+      name: "陕西",
+      value: 80
+    },
+    {
+      name: "甘肃",
+      value: 56
+    },
+    {
+      name: "青海",
+      value: 10
+    },
+    {
+      name: "宁夏",
+      value: 18
+    },
+    {
+      name: "新疆",
+      value: 180
+    },
+    {
+      name: "广东",
+      value: 123
+    },
+    {
+      name: "广西",
+      value: 59
+    },
+    {
+      name: "海南",
+      value: 14
+    },
   ];
 
   var geoCoordMap = {};
   var toolTipData = [{
-          name: "北京",
-          value: [{
-              name: "科技人才总数",
-              value: 95
-          }, {
-              name: "理科",
-              value: 82
-          }]
-      },
-      {
-          name: "天津",
-          value: [{
-              name: "文科",
-              value: 22
-          }, {
-              name: "理科",
-              value: 20
-          }]
-      },
-      {
-          name: "河北",
-          value: [{
-              name: "文科",
-              value: 60
-          }, {
-              name: "理科",
-              value: 42
-          }]
-      },
-      {
-          name: "山西",
-          value: [{
-              name: "文科",
-              value: 40
-          }, {
-              name: "理科",
-              value: 41
-          }]
-      },
-      {
-          name: "内蒙古",
-          value: [{
-              name: "文科",
-              value: 23
-          }, {
-              name: "理科",
-              value: 24
-          }]
-      },
-      {
-          name: "辽宁",
-          value: [{
-              name: "文科",
-              value: 39
-          }, {
-              name: "理科",
-              value: 28
-          }]
-      },
-      {
-          name: "吉林",
-          value: [{
-              name: "文科",
-              value: 41
-          }, {
-              name: "理科",
-              value: 41
-          }]
-      },
-      {
-          name: "黑龙江",
-          value: [{
-              name: "文科",
-              value: 35
-          }, {
-              name: "理科",
-              value: 31
-          }]
-      },
-      {
-          name: "上海",
-          value: [{
-              name: "文科",
-              value: 12
-          }, {
-              name: "理科",
-              value: 12
-          }]
-      },
-      {
-          name: "江苏",
-          value: [{
-              name: "文科",
-              value: 47
-          }, {
-              name: "理科",
-              value: 45
-          }]
-      },
-      {
-          name: "浙江",
-          value: [{
-              name: "文科",
-              value: 57
-          }, {
-              name: "理科",
-              value: 57
-          }]
-      },
-      {
-          name: "安徽",
-          value: [{
-              name: "文科",
-              value: 57
-          }, {
-              name: "理科",
-              value: 52
-          }]
-      },
-      {
-          name: "福建",
-          value: [{
-              name: "文科",
-              value: 59
-          }, {
-              name: "理科",
-              value: 57
-          }]
-      },
-      {
-          name: "江西",
-          value: [{
-              name: "文科",
-              value: 49
-          }, {
-              name: "理科",
-              value: 42
-          }]
-      },
-      {
-          name: "山东",
-          value: [{
-              name: "文科",
-              value: 67
-          }, {
-              name: "理科",
-              value: 52
-          }]
-      },
-      {
-          name: "河南",
-          value: [{
-              name: "文科",
-              value: 69
-          }, {
-              name: "理科",
-              value: 68
-          }]
-      },
-      {
-          name: "湖北",
-          value: [{
-              name: "文科",
-              value: 60
-          }, {
-              name: "理科",
-              value: 56
-          }]
-      },
-      {
-          name: "湖南",
-          value: [{
-              name: "文科",
-              value: 62
-          }, {
-              name: "理科",
-              value: 52
-          }]
-      },
-      {
-          name: "重庆",
-          value: [{
-              name: "文科",
-              value: 47
-          }, {
-              name: "理科",
-              value: 44
-          }]
-      },
-      {
-          name: "四川",
-          value: [{
-              name: "文科",
-              value: 65
-          }, {
-              name: "理科",
-              value: 60
-          }]
-      },
-      {
-          name: "贵州",
-          value: [{
-              name: "文科",
-              value: 32
-          }, {
-              name: "理科",
-              value: 30
-          }]
-      },
-      {
-          name: "云南",
-          value: [{
-              name: "文科",
-              value: 42
-          }, {
-              name: "理科",
-              value: 41
-          }]
-      },
-      {
-          name: "西藏",
-          value: [{
-              name: "文科",
-              value: 5
-          }, {
-              name: "理科",
-              value: 4
-          }]
-      },
-      {
-          name: "陕西",
-          value: [{
-              name: "文科",
-              value: 38
-          }, {
-              name: "理科",
-              value: 42
-          }]
-      },
-      {
-          name: "甘肃",
-          value: [{
-              name: "文科",
-              value: 28
-          }, {
-              name: "理科",
-              value: 28
-          }]
-      },
-      {
-          name: "青海",
-          value: [{
-              name: "文科",
-              value: 5
-          }, {
-              name: "理科",
-              value: 5
-          }]
-      },
-      {
-          name: "宁夏",
-          value: [{
-              name: "文科",
-              value: 10
-          }, {
-              name: "理科",
-              value: 8
-          }]
-      },
-      {
-          name: "新疆",
-          value: [{
-              name: "文科",
-              value: 36
-          }, {
-              name: "理科",
-              value: 31
-          }]
-      },
-      {
-          name: "广东",
-          value: [{
-              name: "文科",
-              value: 63
-          }, {
-              name: "理科",
-              value: 60
-          }]
-      },
-      {
-          name: "广西",
-          value: [{
-              name: "文科",
-              value: 29
-          }, {
-              name: "理科",
-              value: 30
-          }]
-      },
-      {
-          name: "海南",
-          value: [{
-              name: "文科",
-              value: 8
-          }, {
-              name: "理科",
-              value: 6
-          }]
-      },
+      name: "北京",
+      value: [{
+        name: "科技人才总数",
+        value: 95
+      }, {
+        name: "理科",
+        value: 82
+      }]
+    },
+    {
+      name: "天津",
+      value: [{
+        name: "文科",
+        value: 22
+      }, {
+        name: "理科",
+        value: 20
+      }]
+    },
+    {
+      name: "河北",
+      value: [{
+        name: "文科",
+        value: 60
+      }, {
+        name: "理科",
+        value: 42
+      }]
+    },
+    {
+      name: "山西",
+      value: [{
+        name: "文科",
+        value: 40
+      }, {
+        name: "理科",
+        value: 41
+      }]
+    },
+    {
+      name: "内蒙古",
+      value: [{
+        name: "文科",
+        value: 23
+      }, {
+        name: "理科",
+        value: 24
+      }]
+    },
+    {
+      name: "辽宁",
+      value: [{
+        name: "文科",
+        value: 39
+      }, {
+        name: "理科",
+        value: 28
+      }]
+    },
+    {
+      name: "吉林",
+      value: [{
+        name: "文科",
+        value: 41
+      }, {
+        name: "理科",
+        value: 41
+      }]
+    },
+    {
+      name: "黑龙江",
+      value: [{
+        name: "文科",
+        value: 35
+      }, {
+        name: "理科",
+        value: 31
+      }]
+    },
+    {
+      name: "上海",
+      value: [{
+        name: "文科",
+        value: 12
+      }, {
+        name: "理科",
+        value: 12
+      }]
+    },
+    {
+      name: "江苏",
+      value: [{
+        name: "文科",
+        value: 47
+      }, {
+        name: "理科",
+        value: 45
+      }]
+    },
+    {
+      name: "浙江",
+      value: [{
+        name: "文科",
+        value: 57
+      }, {
+        name: "理科",
+        value: 57
+      }]
+    },
+    {
+      name: "安徽",
+      value: [{
+        name: "文科",
+        value: 57
+      }, {
+        name: "理科",
+        value: 52
+      }]
+    },
+    {
+      name: "福建",
+      value: [{
+        name: "文科",
+        value: 59
+      }, {
+        name: "理科",
+        value: 57
+      }]
+    },
+    {
+      name: "江西",
+      value: [{
+        name: "文科",
+        value: 49
+      }, {
+        name: "理科",
+        value: 42
+      }]
+    },
+    {
+      name: "山东",
+      value: [{
+        name: "文科",
+        value: 67
+      }, {
+        name: "理科",
+        value: 52
+      }]
+    },
+    {
+      name: "河南",
+      value: [{
+        name: "文科",
+        value: 69
+      }, {
+        name: "理科",
+        value: 68
+      }]
+    },
+    {
+      name: "湖北",
+      value: [{
+        name: "文科",
+        value: 60
+      }, {
+        name: "理科",
+        value: 56
+      }]
+    },
+    {
+      name: "湖南",
+      value: [{
+        name: "文科",
+        value: 62
+      }, {
+        name: "理科",
+        value: 52
+      }]
+    },
+    {
+      name: "重庆",
+      value: [{
+        name: "文科",
+        value: 47
+      }, {
+        name: "理科",
+        value: 44
+      }]
+    },
+    {
+      name: "四川",
+      value: [{
+        name: "文科",
+        value: 65
+      }, {
+        name: "理科",
+        value: 60
+      }]
+    },
+    {
+      name: "贵州",
+      value: [{
+        name: "文科",
+        value: 32
+      }, {
+        name: "理科",
+        value: 30
+      }]
+    },
+    {
+      name: "云南",
+      value: [{
+        name: "文科",
+        value: 42
+      }, {
+        name: "理科",
+        value: 41
+      }]
+    },
+    {
+      name: "西藏",
+      value: [{
+        name: "文科",
+        value: 5
+      }, {
+        name: "理科",
+        value: 4
+      }]
+    },
+    {
+      name: "陕西",
+      value: [{
+        name: "文科",
+        value: 38
+      }, {
+        name: "理科",
+        value: 42
+      }]
+    },
+    {
+      name: "甘肃",
+      value: [{
+        name: "文科",
+        value: 28
+      }, {
+        name: "理科",
+        value: 28
+      }]
+    },
+    {
+      name: "青海",
+      value: [{
+        name: "文科",
+        value: 5
+      }, {
+        name: "理科",
+        value: 5
+      }]
+    },
+    {
+      name: "宁夏",
+      value: [{
+        name: "文科",
+        value: 10
+      }, {
+        name: "理科",
+        value: 8
+      }]
+    },
+    {
+      name: "新疆",
+      value: [{
+        name: "文科",
+        value: 36
+      }, {
+        name: "理科",
+        value: 31
+      }]
+    },
+    {
+      name: "广东",
+      value: [{
+        name: "文科",
+        value: 63
+      }, {
+        name: "理科",
+        value: 60
+      }]
+    },
+    {
+      name: "广西",
+      value: [{
+        name: "文科",
+        value: 29
+      }, {
+        name: "理科",
+        value: 30
+      }]
+    },
+    {
+      name: "海南",
+      value: [{
+        name: "文科",
+        value: 8
+      }, {
+        name: "理科",
+        value: 6
+      }]
+    },
   ];
 
   /*获取地图数据*/
@@ -1750,194 +1820,268 @@ function layout() {
   var mapFeatures = echarts.getMap(mapName).geoJson.features;
   myChart.hideLoading();
   mapFeatures.forEach(function (v) {
-      // 地区名称
-      var name = v.properties.name;
-      // 地区经纬度
-      geoCoordMap[name] = v.properties.cp;
+    // 地区名称
+    var name = v.properties.name;
+    // 地区经纬度
+    geoCoordMap[name] = v.properties.cp;
 
   });
 
   // console.log(data)
   // console.log(toolTipData)
   var max = 480,
-      min = 9; // todo 
+    min = 9; // todo 
   var maxSize4Pin = 100,
-      minSize4Pin = 20;
+    minSize4Pin = 20;
 
   var convertData = function (data) {
-      var res = [];
-      for (var i = 0; i < data.length; i++) {
-          var geoCoord = geoCoordMap[data[i].name];
-          if (geoCoord) {
-              res.push({
-                  name: data[i].name,
-                  value: geoCoord.concat(data[i].value),
-              });
-          }
+    var res = [];
+    for (var i = 0; i < data.length; i++) {
+      var geoCoord = geoCoordMap[data[i].name];
+      if (geoCoord) {
+        res.push({
+          name: data[i].name,
+          value: geoCoord.concat(data[i].value),
+        });
       }
-      return res;
+    }
+    return res;
   };
   option = {
-      tooltip: {
-          padding: 0,
-          enterable: true,
-          transitionDuration: 1,
-          textStyle: {
-              color: '#000',
-              decoration: 'none',
+    tooltip: {
+      padding: 0,
+      enterable: true,
+      transitionDuration: 1,
+      textStyle: {
+        color: '#000',
+        decoration: 'none',
+      },
+      formatter: function (params) {
+        var tipHtml = '';
+        tipHtml =
+          '<div style="width:150px;height:90px;background:rgba(22,80,158,0.8);border:1px solid rgba(7,166,255,0.7)">' +
+          '<div style="width:150px;height:40px;line-height:40px;border-bottom:2px solid rgba(7,166,255,0.7);padding:0 20px">' +
+          '<i style="display:inline-block;width:8px;height:8px;background:#16d6ff;border-radius:40px;">' +
+          '</i>' +
+          '<span style="margin-left:10px;color:#fff;font-size:16px;">' + params.name +
+          '</span>' +
+          '</div>' +
+          '<div style="padding:10px">' +
+          '<p style="color:#fff;font-size:12px;">' +
+          '<i style="display:inline-block;width:10px;height:10px;background:#16d6ff;border-radius:40px;margin:0 8px">' +
+          '</i>' +
+          '单位总数：' + '<span style="color:#11ee7d;margin:0 6px;">' + toolTipData.length +
+          '</span>' + '个' + '</p>'
+        '</div>' + '</div>';
+
+        return tipHtml;
+      }
+
+    },
+
+    visualMap: {
+      show: true,
+      min: 0,
+      max: 200,
+      left: '10%',
+      top: 'bottom',
+      calculable: true,
+      seriesIndex: [1],
+      inRange: {
+        color: ['#04387b', '#467bc0'] // 蓝绿
+      }
+    },
+    geo: {
+      show: true,
+      map: mapName,
+      label: {
+        normal: {
+          show: false
+        },
+        emphasis: {
+          show: false,
+        }
+      },
+      roam: false,
+      itemStyle: {
+        normal: {
+          areaColor: '#023677',
+          borderColor: '#1180c7',
+        },
+        emphasis: {
+          areaColor: '#4499d0',
+        }
+      }
+    },
+    series: [{
+        name: '散点',
+        type: 'scatter',
+        coordinateSystem: 'geo',
+        data: convertData(data),
+        symbolSize: function (val) {
+          return val[2] / 10;
+        },
+        label: {
+          normal: {
+            formatter: '{b}',
+            position: 'right',
+            show: true
           },
-          formatter: function (params) {
-              var tipHtml = '';
-              tipHtml =
-                  '<div style="width:150px;height:90px;background:rgba(22,80,158,0.8);border:1px solid rgba(7,166,255,0.7)">' +
-                  '<div style="width:150px;height:40px;line-height:40px;border-bottom:2px solid rgba(7,166,255,0.7);padding:0 20px">' +
-                  '<i style="display:inline-block;width:8px;height:8px;background:#16d6ff;border-radius:40px;">' +
-                  '</i>' +
-                  '<span style="margin-left:10px;color:#fff;font-size:16px;">' + params.name +
-                  '</span>' +
-                  '</div>' +
-                  '<div style="padding:10px">' +
-                  '<p style="color:#fff;font-size:12px;">' +
-                  '<i style="display:inline-block;width:10px;height:10px;background:#16d6ff;border-radius:40px;margin:0 8px">' +
-                  '</i>' +
-                  '单位总数：' + '<span style="color:#11ee7d;margin:0 6px;">' + toolTipData.length +
-                  '</span>' + '个' + '</p>'
-              '</div>' + '</div>';
-
-              return tipHtml;
+          emphasis: {
+            show: true
           }
-
+        },
+        itemStyle: {
+          normal: {
+            color: '#fff'
+          }
+        }
+      },
+      {
+        type: 'map',
+        map: mapName,
+        geoIndex: 0,
+        aspectScale: 0.75, //长宽比
+        showLegendSymbol: false, // 存在legend时显示
+        label: {
+          normal: {
+            show: true
+          },
+          emphasis: {
+            show: false,
+            textStyle: {
+              color: '#fff'
+            }
+          }
+        },
+        roam: true,
+        itemStyle: {
+          normal: {
+            areaColor: '#031525',
+            borderColor: '#3B5077',
+          },
+          emphasis: {
+            areaColor: '#2B91B7'
+          }
+        },
+        animation: false,
+        data: data
+      },
+      {
+        name: '点',
+        type: 'scatter',
+        coordinateSystem: 'geo',
+        zlevel: 6,
+      },
+      {
+        name: 'Top 5',
+        type: 'effectScatter',
+        coordinateSystem: 'geo',
+        data: convertData(data.sort(function (a, b) {
+          return b.value - a.value;
+        }).slice(0, 10)),
+        symbolSize: function (val) {
+          return val[2] / 10;
+        },
+        showEffectOn: 'render',
+        rippleEffect: {
+          brushType: 'stroke'
+        },
+        hoverAnimation: true,
+        label: {
+          normal: {
+            formatter: '{b}',
+            position: 'left',
+            show: false
+          }
+        },
+        itemStyle: {
+          normal: {
+            color: 'yellow',
+            shadowBlur: 10,
+            shadowColor: 'yellow'
+          }
+        },
+        zlevel: 1
       },
 
-      visualMap: {
-          show: true,
-          min: 0,
-          max: 200,
-          left: '10%',
-          top: 'bottom',
-          calculable: true,
-          seriesIndex: [1],
-          inRange: {
-              color: ['#04387b', '#467bc0'] // 蓝绿
-          }
-      },
-      geo: {
-          show: true,
-          map: mapName,
-          label: {
-              normal: {
-                  show: false
-              },
-              emphasis: {
-                  show: false,
-              }
-          },
-          roam: false,
-          itemStyle: {
-              normal: {
-                  areaColor: '#023677',
-                  borderColor: '#1180c7',
-              },
-              emphasis: {
-                  areaColor: '#4499d0',
-              }
-          }
-      },
-      series: [{
-              name: '散点',
-              type: 'scatter',
-              coordinateSystem: 'geo',
-              data: convertData(data),
-              symbolSize: function (val) {
-                  return val[2] / 10;
-              },
-              label: {
-                  normal: {
-                      formatter: '{b}',
-                      position: 'right',
-                      show: true
-                  },
-                  emphasis: {
-                      show: true
-                  }
-              },
-              itemStyle: {
-                  normal: {
-                      color: '#fff'
-                  }
-              }
-          },
-          {
-              type: 'map',
-              map: mapName,
-              geoIndex: 0,
-              aspectScale: 0.75, //长宽比
-              showLegendSymbol: false, // 存在legend时显示
-              label: {
-                  normal: {
-                      show: true
-                  },
-                  emphasis: {
-                      show: false,
-                      textStyle: {
-                          color: '#fff'
-                      }
-                  }
-              },
-              roam: true,
-              itemStyle: {
-                  normal: {
-                      areaColor: '#031525',
-                      borderColor: '#3B5077',
-                  },
-                  emphasis: {
-                      areaColor: '#2B91B7'
-                  }
-              },
-              animation: false,
-              data: data
-          },
-          {
-              name: '点',
-              type: 'scatter',
-              coordinateSystem: 'geo',
-              zlevel: 6,
-          },
-          {
-              name: 'Top 5',
-              type: 'effectScatter',
-              coordinateSystem: 'geo',
-              data: convertData(data.sort(function (a, b) {
-                  return b.value - a.value;
-              }).slice(0, 10)),
-              symbolSize: function (val) {
-                  return val[2] / 10;
-              },
-              showEffectOn: 'render',
-              rippleEffect: {
-                  brushType: 'stroke'
-              },
-              hoverAnimation: true,
-              label: {
-                  normal: {
-                      formatter: '{b}',
-                      position: 'left',
-                      show: false
-                  }
-              },
-              itemStyle: {
-                  normal: {
-                      color: 'yellow',
-                      shadowBlur: 10,
-                      shadowColor: 'yellow'
-                  }
-              },
-              zlevel: 1
-          },
-
-      ]
+    ]
   };
   if (option && typeof option === "object") {
-      myChart.setOption(option, true);
+    myChart.setOption(option, true);
   }
 })()
+
+function rank(num) {
+  num = parseInt(num) + 1;
+  if (num == 1) {
+    return "<span style='color: red;'><b>1st</b></span>";
+  }
+  if (num == 2) {
+    return "<span style='color: gold;'><b>2nd</b></span>";
+  }
+  if (num == 3) {
+    return "<span style='color: orange;'><b>3rd</b></span>";
+  }
+  if (num < 11) {
+    return "<span><b>" + num + "th</b></span>";
+  }
+  if (num % 100 >= 11 && num % 100 <= 13) {
+    return "<span>" + num + "th</span>";
+  }
+  if (num % 10 == 1) {
+    return "<span>" + num + "st</span>";
+  }
+  if (num % 10 == 2) {
+    return "<span>" + num + "nd</span>";
+  }
+  if (num % 10 == 3) {
+    return "<span>" + num + "rd</span>";
+  }
+  return "<span>" + num + "th</span>";
+}
+
+function format(num) {
+  var number = [];
+  var str = "￥";
+  if (num < 0) {
+    str += "-";
+    num *= -1;
+  } else if (!(num >= 0)) {
+    return "没有数据";
+  }
+  var digit = parseFloat(num) - parseInt(num);
+  num = parseInt(num);
+  while (num > 0) {
+    var part = num % 1000;
+    num = parseInt(num / 1000);
+    number.push(part);
+  }
+  for (var i = number.length - 1; i >= 0; i--) {
+    str += number[i];
+    if (i != 0) {
+      str += ',';
+    }
+  }
+  if (digit > 0) {
+    str += digit.toString().substring(1, 4);
+  }
+  return str;
+}
+
+function onSelect() {
+  param = ($("input[name='optionsRadiosinline']:checked").val());
+  layout(true);
+}
+
+function enter(str, limit) {
+  char = str.split('');
+  str = "";
+  for (var i = 0; i < char.length; i++) {
+    str += char[i];
+    if (i > 0 && i < char.length - 2 && (i + 1) % limit == 0) {
+      str += '\n';
+    }
+  }
+  return str;
+}

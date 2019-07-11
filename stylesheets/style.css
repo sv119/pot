@@ -135,6 +135,18 @@ header {
 	background: url(../images/bg_report.png) no-repeat;
 }
 
+.dragtip {
+	width: 160px;
+	height: auto;
+	font-family: Operator Mono;
+	font-size: 14px;
+	color: white;
+	text-align: center;
+	background-color: #22222288;
+	border-radius: 4px;
+}
+
+
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {

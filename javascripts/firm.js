@@ -2,7 +2,7 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 14:33:05 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-10 21:20:32
+ * @Last Modified time: 2019-07-11 19:46:23
  */
 
 (function () {
@@ -182,7 +182,6 @@ function Quick_Sort(A, param, low, high) {
 
 function QSort(A, param) {
     while (onSort > 0) {
-        break;
         setTimeout("QSort(A, param)", 1000);
     }
     if (A.length > 1 && onSort == 0) {
