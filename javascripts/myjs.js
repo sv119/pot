@@ -2,7 +2,7 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 10:56:05 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-10 21:31:57
+ * @Last Modified time: 2019-07-11 14:56:39
  */
 
 var colorset = {
@@ -225,10 +225,8 @@ function draw() {
   // paint_detail(objset, prtset);
   if (incase.ctx == "Merge") {
     paint_analyze(objset);
-    paint_pic2(objset);
   } else {
     paint_analyze(prtset);
-    paint_pic2(prtset);
   }
 
   if (objset.length == 0 && prtset.length == 0) {
@@ -737,215 +735,70 @@ function paint_analyze(d) {
         }
       },
       title: {
-        text: '偿债能力分析',
+        text: '运营能力分析 / 偿债能力分析',
         left: 'center',
         top: 10,
         textStyle: {
           color: '#e6e6e6'
         }
       },
-      grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        containLabel: true
-      },
+      grid: [{
+        left: 50,
+        right: 20,
+        height: '35%'
+      }, {
+        left: 50,
+        right: 20,
+        top: '65%',
+        height: '30%'
+      }],
       xAxis: [{
         type: 'category',
-        data: year
+        data: year,
+        axisLabel: {
+          show: false
+        }
+      }, {
+        gridIndex: 1,
+        type: 'category',
+        data: year,
+        position: 'top',
+        axisLabel: {
+          show: false
+        }
       }],
       yAxis: [{
         type: 'value'
+      }, {
+        gridIndex: 1,
+        type: 'value',
+        inverse: true
       }],
       series: [{
         name: '流动比率',
+        xAxisIndex: 1,
+        yAxisIndex: 1,
         type: 'bar',
         data: []
       }, {
         name: '速动比率',
+        xAxisIndex: 1,
+        yAxisIndex: 1,
         type: 'bar',
         data: []
       }, {
         name: '现金比例',
+        xAxisIndex: 1,
+        yAxisIndex: 1,
         type: 'bar',
         data: []
       }, {
         name: '资产负债率',
+        xAxisIndex: 1,
+        yAxisIndex: 1,
         type: 'bar',
         data: []
-      }]
-    };
-
-    if (option && typeof option === "object") {
-      myChart.setOption(option, true);
-    }
-
-    return;
-  }
-
-  var myChart = echarts.init(document.getElementById('analyze'));
-
-  let data = [];
-  for (let i = 0; i < 4; i++) {
-    data.push([]);
-  }
-
-  let year = [];
-
-  var option = null;
-
-  for (let i = 0; i < d.length; i++) {
-    year.push(d[i].year);
-    data[0].push(parseInt(d[i].CurrentAssets / d[i].CurrentLiability * 1000) / 1000);
-    data[1].push(parseInt(d[i].ValidAssets / d[i].CurrentLiability * 1000) / 1000);
-    data[2].push(parseInt(d[i].CheckAssets / d[i].CurrentLiability * 1000) / 1000);
-    data[3].push(parseInt(d[i].TotalLiability / d[i].TotalAssets * 1000) / 1000);
-  }
-
-  for (var i = 0; i < year.length; i++) {
-    var max = parseInt(year[0]);
-    var index = 0;
-    for (var j = 0; j < year.length - i; j++) {
-      if (parseInt(year[j]) > max) {
-        max = parseInt(year[j]);
-        index = j;
-      }
-    }
-    if (index != year.length - i - 1) {
-      var obj = year[index];
-      year[index] = year[year.length - 1];
-      year[year.length - 1] = obj;
-      for (var j = 0; j < 4; j++) {
-        obj = data[j][index];
-        data[j][index] = data[j][data[j].length - 1];
-        data[j][data[j].length - 1] = obj;
-      }
-    }
-  }
-
-  option = {
-    backgroundColor: colorset.background,
-    textStyle: {
-      color: '#eee'
-    },
-    color: colorset.sunset,
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: { // 坐标轴指示器，坐标轴触发有效
-        type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
-      },
-      // formatter: function (params, ticket, callback) {
-      //   let res = params[0].name + "年";
-      //   for (let i = 0, l = params.length; i < l; i++) {
-      //     if (parseInt(params[i].value) > 10000000) {
-      //       res += '<br/>' + params[i].marker + params[i].seriesName + ' : ' + parseInt(params[i].value / 1000000) / 100 + ' 亿元';
-      //     } else {
-      //       res += '<br/>' + params[i].marker + params[i].seriesName + ' : ' + parseInt(params[i].value / 100) / 100 + ' 万元';
-      //     }
-      //   }
-      //   return res;
-      // },
-    },
-    title: {
-      text: "偿债能力分析",
-      left: 'center',
-      top: 10,
-      textStyle: {
-        color: '#e6e6e6'
-      }
-    },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      containLabel: true
-    },
-    xAxis: [{
-      type: 'category',
-      data: year
-    }],
-    yAxis: [{
-      type: 'value',
-      // axisLabel: {
-      //   formatter: function (value, index) {
-      //     return parseInt(value) >= 10000000 ? parseInt(value / 1000000) / 100 + "亿元" : parseInt(value / 10000) + "万元";
-      //   }
-      // }
-    }],
-    series: [{
-      name: '流动比率',
-      type: 'bar',
-      stack: '1',
-      data: data[0]
-    }, {
-      name: '速动比率',
-      type: 'bar',
-      stack: '2',
-      data: data[1]
-    }, {
-      name: '现金比例',
-      type: 'bar',
-      stack: '3',
-      data: data[2]
-    }, {
-      name: '资产负债率',
-      type: 'bar',
-      stack: '4',
-      data: data[3]
-    }]
-  };
-
-  if (option && typeof option === "object") {
-    myChart.setOption(option, true);
-  }
-}
-
-paint_analyze([]);
-
-function paint_pic2(d) {
-  if (d == void 0)
-    d = [];
-  if (d.length == 0) {
-    var myChart = echarts.init(document.getElementById('analyze_2'));
-    var app = {};
-    app.title = "没有数据";
-
-    let year = [" - "];
-
-    var option = {
-      backgroundColor: colorset.background,
-      textStyle: {
-        color: '#eee'
-      },
-      color: colorset.sunset,
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: { // 坐标轴指示器，坐标轴触发有效
-          type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
-        }
-      },
-      title: {
-        text: '运营能力分析',
-        left: 'center',
-        top: 10,
-        textStyle: {
-          color: '#e6e6e6'
-        }
-      },
-      grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        containLabel: true
-      },
-      xAxis: [{
-        type: 'category',
-        data: year
-      }],
-      yAxis: [{
-        type: 'value'
-      }],
-      series: [{
+      }, {
         name: '应收账款周转率',
         type: 'bar',
         data: []
@@ -986,10 +839,10 @@ function paint_pic2(d) {
     }
   }
 
-  var myChart = echarts.init(document.getElementById('analyze_2'));
+  var myChart = echarts.init(document.getElementById('analyze'));
 
   let data = [];
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 7; i++) {
     data.push([]);
   }
 
@@ -1009,15 +862,15 @@ function paint_pic2(d) {
   averRepo /= d.length;
   averAssets /= d.length;
 
-
   for (let i = 0; i < d.length; i++) {
     year.push(d[i].year);
-    data[0].push(parseInt(d[i].CashFlow.FromOperation / averCheck * 1000) / 1000);
-    data[1].push(parseInt(d[i].Income.TotalCost / averRepo * 1000) / 1000);
-    data[2].push(parseInt(d[i].CashFlow.FromOperation / averAssets * 1000) / 1000);
-    // console.log(d[i].CashFlow.FromOperation, averCheck);
-    // console.log(d[i].Income.TotalCost, averRepo);
-    // console.log(d[i].CashFlow.FromOperation, averAssets);
+    data[0].push(parseInt(d[i].CurrentAssets / d[i].CurrentLiability * 1000) / 1000);
+    data[1].push(parseInt(d[i].ValidAssets / d[i].CurrentLiability * 1000) / 1000);
+    data[2].push(parseInt(d[i].CheckAssets / d[i].CurrentLiability * 1000) / 1000);
+    data[3].push(parseInt(d[i].TotalLiability / d[i].TotalAssets * 1000) / 1000);
+    data[4].push(parseInt(d[i].CashFlow.FromOperation / averCheck * 1000) / 1000);
+    data[5].push(parseInt(d[i].Income.TotalCost / averRepo * 1000) / 1000);
+    data[6].push(parseInt(d[i].CashFlow.FromOperation / averAssets * 1000) / 1000);
   }
 
   for (var i = 0; i < year.length; i++) {
@@ -1033,7 +886,7 @@ function paint_pic2(d) {
       var obj = year[index];
       year[index] = year[year.length - 1];
       year[year.length - 1] = obj;
-      for (var j = 0; j < 3; j++) {
+      for (var j = 0; j < 7; j++) {
         obj = data[j][index];
         data[j][index] = data[j][data[j].length - 1];
         data[j][data[j].length - 1] = obj;
@@ -1051,57 +904,84 @@ function paint_pic2(d) {
       trigger: 'axis',
       axisPointer: { // 坐标轴指示器，坐标轴触发有效
         type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
-      },
-      // formatter: function (params, ticket, callback) {
-      //   let res = params[0].name + "年";
-      //   for (let i = 0, l = params.length; i < l; i++) {
-      //     if (parseInt(params[i].value) > 10000000) {
-      //       res += '<br/>' + params[i].marker + params[i].seriesName + ' : ' + parseInt(params[i].value / 1000000) / 100 + ' 亿元';
-      //     } else {
-      //       res += '<br/>' + params[i].marker + params[i].seriesName + ' : ' + parseInt(params[i].value / 100) / 100 + ' 万元';
-      //     }
-      //   }
-      //   return res;
-      // },
+      }
     },
     title: {
-      text: "运营能力分析",
+      text: "运营能力分析 / 偿债能力分析",
       left: 'center',
       top: 10,
       textStyle: {
         color: '#e6e6e6'
       }
     },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      containLabel: true
-    },
+    grid: [{
+      left: 50,
+      right: 20,
+      height: '35%'
+    }, {
+      left: 50,
+      right: 20,
+      top: '65%',
+      height: '30%'
+    }],
     xAxis: [{
       type: 'category',
-      data: year
+      data: year,
+      axisLabel: {
+        show: false
+      }
+    }, {
+      gridIndex: 1,
+      type: 'category',
+      data: year,
+      position: 'top',
+      axisLabel: {
+        show: false
+      }
     }],
     yAxis: [{
+      type: 'value'
+    }, {
+      gridIndex: 1,
       type: 'value',
-      // axisLabel: {
-      //   formatter: function (value, index) {
-      //     return parseInt(value) >= 10000000 ? parseInt(value / 1000000) / 100 + "亿元" : parseInt(value / 10000) + "万元";
-      //   }
-      // }
+      inverse: true
     }],
     series: [{
+      name: '流动比率',
+      type: 'bar',
+      xAxisIndex: 1,
+      yAxisIndex: 1,
+      data: data[0]
+    }, {
+      name: '速动比率',
+      type: 'bar',
+      xAxisIndex: 1,
+      yAxisIndex: 1,
+      data: data[1]
+    }, {
+      name: '现金比例',
+      type: 'bar',
+      xAxisIndex: 1,
+      yAxisIndex: 1,
+      data: data[2]
+    }, {
+      name: '资产负债率',
+      xAxisIndex: 1,
+      yAxisIndex: 1,
+      type: 'bar',
+      data: data[3]
+    }, {
       name: '应收账款周转率',
       type: 'bar',
-      data: data[0]
+      data: data[4]
     }, {
       name: '存货周转率',
       type: 'bar',
-      data: data[1]
+      data: data[5]
     }, {
       name: '总资产周转率',
       type: 'bar',
-      data: data[2]
+      data: data[6]
     }]
   };
 
@@ -1110,7 +990,7 @@ function paint_pic2(d) {
   }
 }
 
-paint_pic2([]);
+paint_analyze([]);
 
 var mdsData = {};
 
@@ -1277,16 +1157,14 @@ function drawMDS(y, ctx) {
 }
 
 function layout() {
-  d3.select("#ranking").selectAll("rect").transition().duration(1000).attr("fill", color.in);
-  d3.select("#column-" + $("input[name=Code]").val()).transition().duration(1000).attr("fill", "white");
+  d3.select("#ranking").selectAll("rect").transition().duration(animation * 0.8).attr("fill", color.in);
+  d3.select("#column-" + $("input[name=Code]").val()).transition().duration(animation * 0.8).attr("fill", "white");
   if (_data == dataset[incase.year][incase.ctx].Balance) {
     return;
   }
   _data = dataset[incase.year][incase.ctx].Balance;
 
-  //定义矩形所占的宽度（包括空白）,即从前一个矩形开始位置到后一个矩形开始位置的距离
   rectStep = /*8 * */ parseInt(width) / _data.length;
-  //定义矩形的宽度（不包括空白）
   rectWidth = rectStep * 0.6;
 
   max = parseInt(_data[0][param]);
@@ -1307,19 +1185,10 @@ function layout() {
   max = max > 0 ? max * 1.1 : max * 0.9;
   average /= _data.length;
 
-  //y轴比例尺
   yScale = d3.scale.linear()
     .domain([min, max])
     .range([0, parseInt(height) - padding.top - padding.bottom]);
 
-  // QSort(_data, param);
-  // if (onSort == 0) {
-  //   if (_data.length > 1 && onSort == 0) {
-  //     onSort++;
-  //     Quick_Sort(_data, param, 0, _data.length - 1);
-  //   }
-  //   onSort--;
-  // }
   for (let i = 0; i < _data.length; i++) {
     let min = _data[0][param];
     let index = 0;
@@ -1335,8 +1204,8 @@ function layout() {
   }
   // console.log(_data);
 
-  if (d3.select("#chart").html() == "") {
-    svg = d3.select("#chart")
+  if (d3.select("#analyze_2").html() == "") {
+    svg = d3.select("#analyze_2")
       .append("svg")
       .attr("id", "ranking")
       .attr("width", width - padding.left - padding.right)
@@ -1354,7 +1223,9 @@ function layout() {
 
   rectUpdate.transition()
     .duration(animation)
-    .attr("fill", color.in)
+    .attr("fill", function(d){
+      return (d.Code == $("input[name=Code]").val()) ? "white" : color.in;
+    })
     .style("opacity", 1)
     .attr("x", function (d, i) {
       return d.index * rectStep;
@@ -1387,7 +1258,9 @@ function layout() {
     .attr("height", yScale(average))
     .transition()
     .duration(animation)
-    .attr("fill", color.in)
+    .attr("fill", function(d){
+      return (d.Code == $("input[name=Code]").val()) ? "white" : color.in;
+    })
     .attr("y", function (d) {
       return parseInt(height) - padding.bottom - yScale(parseInt(d[param]));
     })
@@ -1406,16 +1279,4 @@ function layout() {
     .duration(animation)
     .style("opacity", 0)
     .attr("width", 0);
-}
-
-function update() {
-  svg.selectAll("rect")
-    .data(_data)
-    .transition()
-    .duration(animation)
-    .attr("fill", color.in)
-    .style("opacity", 1)
-    .attr("x", function (d, i) {
-      return i * rectStep;
-    });
 }
