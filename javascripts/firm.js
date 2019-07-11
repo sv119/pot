@@ -2,7 +2,7 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 14:33:05 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-09 10:25:01
+ * @Last Modified time: 2019-07-10 21:20:32
  */
 
 (function () {
@@ -144,4 +144,57 @@ function LoadDictionary(info) {
 
 function asure(n) {
     return n > 0 ? parseInt(n) : 0;
+}
+
+// 快排
+var onSort = 0;
+/**
+ *
+ *
+ * @param {*} A         数组
+ * @param {*} param     需要排序的字段名
+ * @param {*} low       索引下限
+ * @param {*} high      索引上限
+ */
+function Quick_Sort(A, param, low, high) {
+    var flag = low;
+    var temp = parseFloat(A[low][param]);
+    var i = low,
+        j = high;
+    while (i < j) {
+        while (i < j && parseFloat(A[j][param]) <= temp){
+            j--;
+        }
+        if (i < j) {
+            A[i++] = A[j];
+        }
+        while (i < j && parseFloat(A[i][param]) > temp) {
+            i++;
+        }
+        if (i < j) {
+            A[j--] = A[i];
+        }
+    }
+    A[i] = A[flag];
+    if (low < i - 1) Quick_Sort(A, param, low, i - 1);
+    if (j + 1 < high) Quick_Sort(A, param, j + 1, high);
+}
+
+function QSort(A, param) {
+    while (onSort > 0) {
+        break;
+        setTimeout("QSort(A, param)", 1000);
+    }
+    if (A.length > 1 && onSort == 0) {
+        onSort++;
+        Quick_Sort(A, param, 0, A.length - 1);
+    }
+    for (let i = 1; i < A.length; i++) {
+        if (parseFloat(A[i][param]) > parseFloat(A[i-1][param])) {
+            onSort--;
+            QSort(A, param);
+            break;
+        }
+    }
+    onSort--;
 }

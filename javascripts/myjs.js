@@ -2,7 +2,7 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 10:56:05 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-09 20:37:09
+ * @Last Modified time: 2019-07-10 21:31:57
  */
 
 var colorset = {
@@ -157,6 +157,7 @@ var incase = {
 
 function init() {
   // console.log(dataset);
+  layout();
   d3.selectAll(".ctxselector").on("click", function () {
     if (d3.select(this).text() == incase.ctx)
       return;
@@ -176,6 +177,7 @@ function init() {
 }
 
 function draw() {
+  layout();
   if (incase.ctx == "Merge") {
     drawMDS(incase.year, "m");
   } else {
@@ -220,7 +222,7 @@ function draw() {
       }
     }
   }
-  paint_detail(objset, prtset);
+  // paint_detail(objset, prtset);
   if (incase.ctx == "Merge") {
     paint_analyze(objset);
     paint_pic2(objset);
@@ -250,425 +252,6 @@ function draw() {
     }
   }
 }
-
-function paint_detail(dataObj, prtset) {
-  if (prtset == void 0)
-    prtset = [];
-  if (dataObj.length == 0 && prtset.length == 0) {
-    var myChart = echarts.init(document.getElementById('chart'));
-    var app = {};
-    app.title = "没有数据";
-
-    let year = [" - "];
-
-    var option = {
-      backgroundColor: colorset.background,
-      textStyle: {
-        color: '#eee'
-      },
-      color: colorset.sunset,
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: { // 坐标轴指示器，坐标轴触发有效
-          type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
-        },
-        formatter: function (params, ticket, callback) {
-          let res = params[0].name + "年";
-          for (let i = 0, l = params.length; i < l; i++) {
-            if (parseInt(params[i].value) > 1000000) {
-              res += '<br/>' + params[i].marker + params[i].seriesName + ' : ' + parseInt(params[i].value / 1000000) / 100 + ' 亿元';
-            } else {
-              res += '<br/>' + params[i].marker + params[i].seriesName + ' : ' + parseInt(params[i].value / 100) / 100 + ' 万元';
-            }
-          }
-          return res;
-        },
-      },
-      title: {
-        text: '资产负债明细',
-        left: 'center',
-        top: 10,
-        textStyle: {
-          color: '#e6e6e6'
-        }
-      },
-      grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        containLabel: true
-      },
-      xAxis: [{
-        type: 'category',
-        data: year
-      }],
-      yAxis: [{
-        type: 'value',
-        axisLabel: {
-          formatter: function (value, index) {
-            return parseInt(value) >= 10000000 ? parseInt(value / 1000000) / 100 + "亿元" : parseInt(value / 10000) + "万元";
-          }
-        }
-      }],
-      series: [{
-        name: '资产总计',
-        type: 'bar',
-        stack: '资产总计',
-        barWidth: 8,
-        data: []
-      }, {
-        name: '流动资产',
-        type: 'bar',
-        stack: '资产',
-        data: []
-      }, {
-        name: '固定资产',
-        type: 'bar',
-        stack: '资产',
-        data: []
-      }, {
-        name: '负债总计',
-        type: 'bar',
-        stack: '负债总计',
-        barWidth: 8,
-        data: []
-      }, {
-        name: '流动负债',
-        type: 'bar',
-        stack: '负债',
-        data: []
-      }, {
-        name: '固定负债',
-        type: 'bar',
-        stack: '负债',
-        data: []
-      }]
-    };
-
-    if (option && typeof option === "object") {
-      myChart.setOption(option, true);
-    }
-
-    return;
-  }
-
-  var myChart = echarts.init(document.getElementById('chart'));
-
-  let data = [];
-  for (let i = 0; i < 14; i++) {
-    data.push([]);
-  }
-
-  let year = [];
-
-  var option = null;
-
-  if (prtset.length != 0) {
-    for (let i = 0; i < dataObj.length; i++) {
-      year.push(dataObj[i].year);
-      data[0].push(parseInt(dataObj[i].TotalAssets));
-      data[1].push(parseInt(dataObj[i].CurrentAssets));
-      data[2].push(parseInt(dataObj[i].FixedAssets));
-      data[3].push(parseInt(dataObj[i].TotalLiability));
-      data[4].push(parseInt(dataObj[i].CurrentLiability));
-      data[5].push(parseInt(dataObj[i].FixedLiability));
-      data[6].push(parseInt(prtset[i].TotalAssets));
-      data[7].push(parseInt(prtset[i].CurrentAssets));
-      data[8].push(parseInt(prtset[i].FixedAssets));
-      data[9].push(parseInt(prtset[i].TotalLiability));
-      data[10].push(parseInt(prtset[i].CurrentLiability));
-      data[11].push(parseInt(prtset[i].FixedLiability));
-      data[12].push(parseInt(dataObj[i].TotalEquity));
-      data[13].push(parseInt(prtset[i].TotalEquity));
-    }
-
-    for (var i = 0; i < year.length; i++) {
-      var max = parseInt(year[0]);
-      var index = 0;
-      for (var j = 0; j < year.length - i; j++) {
-        if (parseInt(year[j]) > max) {
-          max = parseInt(year[j]);
-          index = j;
-        }
-      }
-      if (index != year.length - i - 1) {
-        var obj = year[index];
-        year[index] = year[year.length - 1];
-        year[year.length - 1] = obj;
-        for (var j = 0; j < 12; j++) {
-          obj = data[j][index];
-          data[j][index] = data[j][data[j].length - 1];
-          data[j][data[j].length - 1] = obj;
-        }
-      }
-    }
-
-    option = {
-      backgroundColor: colorset.background,
-      textStyle: {
-        color: '#eee'
-      },
-      color: colorset.sunset,
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: { // 坐标轴指示器，坐标轴触发有效
-          type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
-        },
-        formatter: function (params, ticket, callback) {
-          let res = params[0].name + "年";
-          for (let i = 0, l = params.length; i < l; i++) {
-            if (parseInt(params[i].value) > 10000000) {
-              res += '<br/>' + params[i].marker + params[i].seriesName + ' : ' + parseInt(params[i].value / 1000000) / 100 + ' 亿元';
-            } else {
-              res += '<br/>' + params[i].marker + params[i].seriesName + ' : ' + parseInt(params[i].value / 100) / 100 + ' 万元';
-            }
-          }
-          return res;
-        },
-      },
-      title: {
-        text: "资产负债明细",
-        left: 'center',
-        top: 10,
-        textStyle: {
-          color: '#e6e6e6'
-        }
-      },
-      // legend: {
-      //   data: ['资产总计（母公司）', '流动资产（母公司）', '固定资产（母公司）', '负债总计（母公司）', '流动负债（母公司）', '固定负债（母公司）',
-      //     '资产总计（合并）', '流动资产（合并）', '固定资产（合并）', '负债总计（合并）', '流动负债（合并）', '固定负债（合并）'
-      //   ],
-      //   orient: "vertical",
-      //   left: "right"
-      // },
-      grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        containLabel: true
-      },
-      xAxis: [{
-        type: 'category',
-        data: year
-      }],
-      yAxis: [{
-        type: 'value',
-        axisLabel: {
-          formatter: function (value, index) {
-            return parseInt(value) >= 10000000 ? parseInt(value / 1000000) / 100 + "亿元" : parseInt(value / 10000) + "万元";
-          }
-        }
-      }],
-      series: [{
-        name: '资产总计（母公司）',
-        type: 'bar',
-        stack: '资产总计（母公司）',
-        barWidth: 6,
-        data: data[6]
-      }, {
-        name: '流动资产（母公司）',
-        type: 'bar',
-        stack: '资产（母公司）',
-        data: data[7]
-      }, {
-        name: '固定资产（母公司）',
-        type: 'bar',
-        stack: '资产（母公司）',
-        data: data[8]
-      }, {
-        name: '资产总计（合并）',
-        type: 'bar',
-        stack: '资产总计（合并）',
-        barWidth: 6,
-        data: data[0]
-      }, {
-        name: '流动资产（合并）',
-        type: 'bar',
-        stack: '资产（合并）',
-        data: data[1]
-      }, {
-        name: '固定资产（合并）',
-        type: 'bar',
-        stack: '资产（合并）',
-        data: data[2]
-      }, {
-        name: '负债总计（母公司）',
-        type: 'bar',
-        stack: '负债总计（母公司）',
-        barWidth: 6,
-        data: data[9]
-      }, {
-        name: '流动负债（母公司）',
-        type: 'bar',
-        stack: '负债（母公司）',
-        data: data[10]
-      }, {
-        name: '固定负债（母公司）',
-        type: 'bar',
-        stack: '负债（母公司）',
-        data: data[11]
-      }, {
-        name: '负债总计（合并）',
-        type: 'bar',
-        stack: '负债总计（合并）',
-        barWidth: 6,
-        data: data[3]
-      }, {
-        name: '流动负债（合并）',
-        type: 'bar',
-        stack: '负债（合并）',
-        data: data[4]
-      }, {
-        name: '固定负债（合并）',
-        type: 'bar',
-        stack: '负债（合并）',
-        data: data[5]
-      }, {
-        name: '所有者权益总计（合并）',
-        type: 'bar',
-        stack: '所有者权益总计（合并）',
-        data: data[12]
-      }, {
-        name: '所有者权益总计（母公司）',
-        type: 'bar',
-        stack: '所有者权益总计（母公司）',
-        data: data[13]
-      }]
-    };
-  } else {
-    for (let i = 0; i < dataObj.length; i++) {
-      year.push(dataObj[i].year);
-      data[0].push(parseInt(dataObj[i].TotalAssets));
-      data[1].push(parseInt(dataObj[i].CurrentAssets));
-      data[2].push(parseInt(dataObj[i].FixedAssets));
-      data[3].push(parseInt(dataObj[i].TotalLiability));
-      data[4].push(parseInt(dataObj[i].CurrentLiability));
-      data[5].push(parseInt(dataObj[i].FixedLiability));
-      data[6].push(parseInt(dataObj[i].TotalEquity));
-    }
-
-    for (var i = 0; i < year.length; i++) {
-      var max = parseInt(year[0]);
-      var index = 0;
-      for (var j = 0; j < year.length - i; j++) {
-        if (parseInt(year[j]) > max) {
-          max = parseInt(year[j]);
-          index = j;
-        }
-      }
-      if (index != year.length - i - 1) {
-        var obj = year[index];
-        year[index] = year[year.length - 1];
-        year[year.length - 1] = obj;
-        for (var j = 0; j < 6; j++) {
-          obj = data[j][index];
-          data[j][index] = data[j][data[j].length - 1];
-          data[j][data[j].length - 1] = obj;
-        }
-      }
-    }
-
-    option = {
-      backgroundColor: colorset.background,
-      textStyle: {
-        color: '#eee'
-      },
-      color: colorset.sunset,
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: { // 坐标轴指示器，坐标轴触发有效
-          type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
-        },
-        formatter: function (params, ticket, callback) {
-          let res = params[0].name + "年";
-          for (let i = 0, l = params.length; i < l; i++) {
-            if (parseInt(params[i].value) > 10000000) {
-              res += '<br/>' + params[i].marker + params[i].seriesName + ' : ' + parseInt(params[i].value / 1000000) / 100 + ' 亿元';
-            } else {
-              res += '<br/>' + params[i].marker + params[i].seriesName + ' : ' + parseInt(params[i].value / 100) / 100 + ' 万元';
-            }
-          }
-          return res;
-        },
-      },
-      title: {
-        text: "资产负债明细",
-        left: 'center',
-        top: 10,
-        textStyle: {
-          color: '#e6e6e6'
-        }
-      },
-      // legend: {
-      //   data: ['资产总计', '流动资产', '固定资产', '负债总计', '流动负债', '固定负债'],
-      //   orient: "vertical",
-      //   left: "right"
-      // },
-      grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        containLabel: true
-      },
-      xAxis: [{
-        type: 'category',
-        data: year
-      }],
-      yAxis: [{
-        type: 'value',
-        axisLabel: {
-          formatter: function (value, index) {
-            return parseInt(value) >= 100000000 ? parseInt(value / 1000000) / 100 + "亿元" : parseInt(value / 10000) + "万元";
-          }
-        }
-      }],
-      series: [{
-        name: '资产总计',
-        type: 'bar',
-        stack: '资产总计',
-        barWidth: 8,
-        data: data[0]
-      }, {
-        name: '流动资产',
-        type: 'bar',
-        stack: '资产',
-        data: data[1]
-      }, {
-        name: '固定资产',
-        type: 'bar',
-        stack: '资产',
-        data: data[2]
-      }, {
-        name: '负债总计',
-        type: 'bar',
-        stack: '负债总计',
-        barWidth: 8,
-        data: data[3]
-      }, {
-        name: '流动负债',
-        type: 'bar',
-        stack: '负债',
-        data: data[4]
-      }, {
-        name: '固定负债',
-        type: 'bar',
-        stack: '负债',
-        data: data[5]
-      }, {
-        name: '所有者权益总计',
-        type: 'bar',
-        stack: '所有者权益总计',
-        data: data[12]
-      }]
-    };
-  }
-
-  if (option && typeof option === "object") {
-    myChart.setOption(option, true);
-  }
-}
-
-paint_detail([], []);
 
 function paint_sunburst(d) {
   if (d == void 0)
@@ -1658,4 +1241,181 @@ function drawMDS(y, ctx) {
   if (option && typeof option === "object") {
     myChart.setOption(option, true);
   }
+}
+
+// 柱状图配置项
+{
+  var param = "TotalAssets";
+
+  var width = parseInt(d3.select("#chart").style("width")) - 4;
+  var height = parseInt(d3.select("#chart").style("height")) - 4;
+  var padding = {
+    top: 40,
+    right: 20,
+    bottom: 20,
+    left: 20
+  };
+  var svg = null;
+
+  var yScale = null;
+
+  var animation = 1000;
+
+  var color = {
+    init: colorset.sunset[3],
+    in: colorset.sunset[0]
+  };
+
+  var _data = [];
+
+  var rectStep = /*8 * */ parseInt(width) / _data.length;
+  var rectWidth = rectStep * 0.6;
+
+  var max;
+  var min;
+  var average;
+}
+
+function layout() {
+  d3.select("#ranking").selectAll("rect").transition().duration(1000).attr("fill", color.in);
+  d3.select("#column-" + $("input[name=Code]").val()).transition().duration(1000).attr("fill", "white");
+  if (_data == dataset[incase.year][incase.ctx].Balance) {
+    return;
+  }
+  _data = dataset[incase.year][incase.ctx].Balance;
+
+  //定义矩形所占的宽度（包括空白）,即从前一个矩形开始位置到后一个矩形开始位置的距离
+  rectStep = /*8 * */ parseInt(width) / _data.length;
+  //定义矩形的宽度（不包括空白）
+  rectWidth = rectStep * 0.6;
+
+  max = parseInt(_data[0][param]);
+  min = parseInt(_data[0][param]);
+  average = parseInt(_data[0][param]);
+
+  for (let i = 1; i < _data.length; i++) {
+    _data[i].index = i;
+    if (parseInt(_data[i][param]) > max) {
+      max = parseInt(_data[i][param]);
+    }
+    if (parseInt(_data[i][param]) < min) {
+      min = parseInt(_data[i][param]);
+    }
+    average += parseInt(_data[i][param]);
+  }
+  min = min > 0 ? min * 0.9 : min * 1.1;
+  max = max > 0 ? max * 1.1 : max * 0.9;
+  average /= _data.length;
+
+  //y轴比例尺
+  yScale = d3.scale.linear()
+    .domain([min, max])
+    .range([0, parseInt(height) - padding.top - padding.bottom]);
+
+  // QSort(_data, param);
+  // if (onSort == 0) {
+  //   if (_data.length > 1 && onSort == 0) {
+  //     onSort++;
+  //     Quick_Sort(_data, param, 0, _data.length - 1);
+  //   }
+  //   onSort--;
+  // }
+  for (let i = 0; i < _data.length; i++) {
+    let min = _data[0][param];
+    let index = 0;
+    for (let j = 0; j < _data.length - i; j++) {
+      if (parseFloat(_data[j][param]) < min) {
+        min = parseFloat(_data[j][param]);
+        index = j;
+      }
+    }
+    let temp = _data[_data.length - 1 - i];
+    _data[_data.length - 1 - i] = _data[index];
+    _data[index] = temp;
+  }
+  // console.log(_data);
+
+  if (d3.select("#chart").html() == "") {
+    svg = d3.select("#chart")
+      .append("svg")
+      .attr("id", "ranking")
+      .attr("width", width - padding.left - padding.right)
+      .style("margin-left", padding.left + "px")
+      .attr("height", height)
+      .attr("version", "1.1")
+      .attr("xmlns", "http://www.w3.org/2000/svg");
+  } else {
+    svg = d3.select("#ranking");
+  }
+
+  let rectUpdate = svg.selectAll("rect").data(_data);
+  let rectEnter = rectUpdate.enter();
+  let rectExit = rectUpdate.exit();
+
+  rectUpdate.transition()
+    .duration(animation)
+    .attr("fill", color.in)
+    .style("opacity", 1)
+    .attr("x", function (d, i) {
+      return d.index * rectStep;
+    })
+    .attr("y", function (d) {
+      return parseInt(height) - padding.bottom - yScale(parseInt(d[param]));
+    })
+    .attr("width", rectWidth)
+    .attr("height", function (d) {
+      return yScale(parseInt(d[param]));
+    })
+    .transition()
+    .delay(2000)
+    .duration(animation)
+    .attr("x", function (d, i) {
+      return i * rectStep;
+    });
+
+  rectEnter.append("rect")
+    .attr("id", function (d) {
+      return "column-" + d.Code;
+    })
+    .attr("fill", color.init)
+    .style("opacity", 1)
+    .attr("x", function (d, i) {
+      return d.index * rectStep;
+    })
+    .attr("y", parseInt(height) - padding.bottom - yScale(parseInt(average)))
+    .attr("width", 0)
+    .attr("height", yScale(average))
+    .transition()
+    .duration(animation)
+    .attr("fill", color.in)
+    .attr("y", function (d) {
+      return parseInt(height) - padding.bottom - yScale(parseInt(d[param]));
+    })
+    .attr("width", rectWidth)
+    .attr("height", function (d) {
+      return yScale(parseInt(d[param]));
+    })
+    .transition()
+    .delay(2000)
+    .duration(animation)
+    .attr("x", function (d, i) {
+      return i * rectStep;
+    });
+
+  rectExit.transition()
+    .duration(animation)
+    .style("opacity", 0)
+    .attr("width", 0);
+}
+
+function update() {
+  svg.selectAll("rect")
+    .data(_data)
+    .transition()
+    .duration(animation)
+    .attr("fill", color.in)
+    .style("opacity", 1)
+    .attr("x", function (d, i) {
+      return i * rectStep;
+    });
 }
