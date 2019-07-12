@@ -2,7 +2,7 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 10:56:05 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-11 21:55:14
+ * @Last Modified time: 2019-07-12 15:17:46
  */
 
 var colorset = {
@@ -58,7 +58,7 @@ var incase = {
               });
           } catch (error) {
             if (NOTFOUND[data[i].SECURITY_CODE] == void 0) {
-              console.error("警告：" + data[i].SECURITY_NAME + " (" + data[i].SECURITY_CODE + ") 查找不到有效的分类信息，数据加载失败！");
+              console.warn("警告：" + data[i].SECURITY_NAME + " (" + data[i].SECURITY_CODE + ") 查找不到有效的分类信息，数据加载失败！");
               NOTFOUND[data[i].SECURITY_CODE] = 1;
             }
           }
@@ -185,7 +185,7 @@ function init() {
     d3.select("#nowCtx").html(d3.select(this).text() + '<span class="caret"></span>');
     draw();
   });
-  $("input[name='optionsRadiosinline'][value='TotalAssets']").prop("checked",true);
+  $("input[name='optionsRadiosinline'][value='TotalAssets']").prop("checked", true);
   $("input[name=Code]").val("");
   document.getElementById("inputCode").focus();
   paint_sunburst([]);
@@ -242,36 +242,37 @@ function draw() {
       }
     }
   }
-  // paint_detail(objset, prtset);
   if (incase.ctx == "Merge") {
     paint_analyze(objset);
   } else {
     paint_analyze(prtset);
   }
 
-  if (objset.length == 0 && prtset.length == 0) {
-    paint_sunburst([]);
-    return;
-  }
+  // if (objset.length == 0 && prtset.length == 0) {
+  //   paint_sunburst([]);
+  //   return;
+  // }
 
-  var year = incase.year;
-  var type = incase.ctx;
-  for (let i = 0; i < Sheets.BalanceSheet.length; i++) {
-    if ((Sheets.BalanceSheet[i].DATA_YEAR).toString().substring(0, 4) != year)
-      continue;
-    if (type == "Parent" &&
-      (Sheets.BalanceSheet[i].CONTEXTREF == "合并年初至报告期末" || Sheets.BalanceSheet[i].CONTEXTREF == "合并上年年初至报告期末") ||
-      type == "Merge" &&
-      (Sheets.BalanceSheet[i].CONTEXTREF == "母公司年初至报告期末" || Sheets.BalanceSheet[i].CONTEXTREF == "母公司上年年初至报告期末"))
-      continue;
-    if (Sheets.BalanceSheet[i].SECURITY_CODE == code) {
-      paint_sunburst(Sheets.BalanceSheet[i]);
-      break;
-    }
-  }
+  // var year = incase.year;
+  // var type = incase.ctx;
+  // for (let i = 0; i < Sheets.BalanceSheet.length; i++) {
+  //   if ((Sheets.BalanceSheet[i].DATA_YEAR).toString().substring(0, 4) != year)
+  //     continue;
+  //   if (type == "Parent" &&
+  //     (Sheets.BalanceSheet[i].CONTEXTREF == "合并年初至报告期末" || Sheets.BalanceSheet[i].CONTEXTREF == "合并上年年初至报告期末") ||
+  //     type == "Merge" &&
+  //     (Sheets.BalanceSheet[i].CONTEXTREF == "母公司年初至报告期末" || Sheets.BalanceSheet[i].CONTEXTREF == "母公司上年年初至报告期末"))
+  //     continue;
+  //   if (Sheets.BalanceSheet[i].SECURITY_CODE == code) {
+  //     paint_sunburst(Sheets.BalanceSheet[i]);
+  //     break;
+  //   }
+  // }
 }
 
 function paint_sunburst(d) {
+  ddd();
+  return;
   if (d == void 0)
     d = [];
   var colors = colorset.sunset;
@@ -1141,6 +1142,7 @@ function layout(ensure) {
   d3.select("#column-" + $("input[name=Code]").val()).attr("fill", "white");
 
   let highlighted = d3.select("#column-" + $("input[name=Code]").val());
+
   try {
     let center = parseInt(width) / 2 - (padding.left + padding.right) / 2;
     let start = parseFloat(highlighted.attr("x")) + parseFloat(highlighted.attr("transform").substring(10, highlighted.attr("transform").indexOf(',')));
@@ -1233,6 +1235,7 @@ function layout(ensure) {
   if (_data == dataset[incase.year][incase.ctx].Balance && !ensure) {
     return;
   }
+
   _data = dataset[incase.year][incase.ctx].Balance;
 
   rectStep = 10 * parseInt(width) / _data.length;
@@ -1368,6 +1371,10 @@ function layout(ensure) {
     .duration(animation)
     .style("opacity", 0)
     .attr("width", 0);
+
+  if (ensure) {
+    layout(false);
+  }
 }
 
 (function map() {
@@ -2071,6 +2078,7 @@ function format(num) {
 
 function onSelect() {
   param = ($("input[name='optionsRadiosinline']:checked").val());
+  d3.select("#analyze_2").selectAll("rect").remove();
   layout(true);
 }
 
@@ -2084,4 +2092,12 @@ function enter(str, limit) {
     }
   }
   return str;
+}
+
+function ddd() {
+  var portrait = new Portrait.Chart('sunburst');
+  var option = {
+    margin: [40,30,20,10]
+  };
+  portrait.setOption(option);
 }
