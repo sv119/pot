@@ -2,7 +2,7 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 10:56:05 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-12 15:17:46
+ * @Last Modified time: 2019-07-12 21:58:13
  */
 
 var colorset = {
@@ -248,30 +248,30 @@ function draw() {
     paint_analyze(prtset);
   }
 
-  // if (objset.length == 0 && prtset.length == 0) {
-  //   paint_sunburst([]);
-  //   return;
-  // }
+  if (objset.length == 0 && prtset.length == 0) {
+    paint_sunburst([]);
+    return;
+  }
 
-  // var year = incase.year;
-  // var type = incase.ctx;
-  // for (let i = 0; i < Sheets.BalanceSheet.length; i++) {
-  //   if ((Sheets.BalanceSheet[i].DATA_YEAR).toString().substring(0, 4) != year)
-  //     continue;
-  //   if (type == "Parent" &&
-  //     (Sheets.BalanceSheet[i].CONTEXTREF == "合并年初至报告期末" || Sheets.BalanceSheet[i].CONTEXTREF == "合并上年年初至报告期末") ||
-  //     type == "Merge" &&
-  //     (Sheets.BalanceSheet[i].CONTEXTREF == "母公司年初至报告期末" || Sheets.BalanceSheet[i].CONTEXTREF == "母公司上年年初至报告期末"))
-  //     continue;
-  //   if (Sheets.BalanceSheet[i].SECURITY_CODE == code) {
-  //     paint_sunburst(Sheets.BalanceSheet[i]);
-  //     break;
-  //   }
-  // }
+  var year = incase.year;
+  var type = incase.ctx;
+  for (let i = 0; i < Sheets.BalanceSheet.length; i++) {
+    if ((Sheets.BalanceSheet[i].DATA_YEAR).toString().substring(0, 4) != year)
+      continue;
+    if (type == "Parent" &&
+      (Sheets.BalanceSheet[i].CONTEXTREF == "合并年初至报告期末" || Sheets.BalanceSheet[i].CONTEXTREF == "合并上年年初至报告期末") ||
+      type == "Merge" &&
+      (Sheets.BalanceSheet[i].CONTEXTREF == "母公司年初至报告期末" || Sheets.BalanceSheet[i].CONTEXTREF == "母公司上年年初至报告期末"))
+      continue;
+    if (Sheets.BalanceSheet[i].SECURITY_CODE == code) {
+      paint_sunburst(Sheets.BalanceSheet[i]);
+      break;
+    }
+  }
 }
 
 function paint_sunburst(d) {
-  ddd();
+  ddd(d);
   return;
   if (d == void 0)
     d = [];
@@ -2094,10 +2094,198 @@ function enter(str, limit) {
   return str;
 }
 
-function ddd() {
-  var portrait = new Portrait.Chart('sunburst');
-  var option = {
-    margin: [40,30,20,10]
+var portrait = new Portrait.Chart('sunburst');
+
+function ddd(d) {
+  if (d == void 0)
+    d = [];
+  if (d.length == 0) {
+    var data = [{
+      label: '没有数据',
+      value: '',
+      children: []
+    }];
+    var option = {
+      margin: 20,
+      // border: "1px solid white",
+      // animation: 1000,
+      data: data
+    };
+
+    if (option && typeof option === "object") {
+      portrait.setOption(option);
+    }
+    return;
+  }
+
+  var data = [{
+    label: '资产总计',
+    value: '?',
+    children: [{
+      label: '流动资产',
+      value: '?',
+      children: []
+    }, {
+      label: '非流动资产',
+      value: '?',
+      children: []
+    }]
+  }, {
+    label: '负债总计',
+    value: '?',
+    children: [{
+      label: '流动负债',
+      value: '?',
+      children: []
+    }, {
+      label: '非流动负债',
+      value: '?',
+      children: []
+    }]
+  }, {
+    label: '所有者权益',
+    value: '?',
+    children: [{
+      label: '所有者权益总计',
+      value: '?',
+      children: []
+    }]
+  }];
+
+  // 流动资产
+  var all = parseInt(d["BAME00030M"]);
+  var others = 0;
+  var para = "BAME00";
+  for (var num = 3; num <= 83; num++) {
+    var spaner = num < 10 ? "0" + num : num;
+    if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
+      continue;
+    var val = parseInt(d[para + spaner + "0M"]);
+    if (val >= all / 6) {
+      var child = {
+        label: enter(nameof[para + spaner + "0M"], 5),
+        value: val
+      };
+      data[0]['children'][0]['children'].push(child);
+    } else if (val > 0) {
+      others += val;
+    }
+  }
+  var child = {
+    label: "其他",
+    value: others
   };
-  portrait.setOption(option);
+  data[0]['children'][0]['children'].push(child);
+
+  // 非流动资产
+  all = parseInt(d["BAME01320M"]);
+  others = 0;
+  para = "BAME0";
+  for (var num = 86; num <= 131; num++) {
+    var spaner = num < 100 ? "0" + num : num;
+    if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
+      continue;
+    var val = parseInt(d[para + spaner + "0M"]);
+    if (val >= all / 6) {
+      var child = {
+        label: enter(nameof[para + spaner + "0M"], 5),
+        value: val
+      };
+      data[0]['children'][1]['children'].push(child);
+    } else if (val > 0) {
+      others += val;
+    }
+  }
+  child = {
+    label: "其他",
+    value: others
+  };
+  data[0]['children'][1]['children'].push(child);
+
+  // 流动负债
+  all = parseInt(d["BAME01980M"]);
+  others = 0;
+  para = "BAME0";
+  for (var num = 137; num <= 197; num++) {
+    var spaner = num.toString();
+    var val = parseInt(d[para + spaner + "0M"]);
+    if (val >= all / 6) {
+      var child = {
+        label: enter(nameof[para + spaner + "0M"], 5),
+        value: val
+      };
+      data[1]['children'][0]['children'].push(child);
+    } else if (val > 0) {
+      others += val;
+    }
+  }
+  child = {
+    label: "其他",
+    value: others
+  };
+  data[1]['children'][0]['children'].push(child);
+
+  // 非流动负债
+  all = parseInt(d["BAME02190M"]);
+  others = 0;
+  para = "BAME0";
+  for (var num = 200; num <= 218; num++) {
+    var spaner = num.toString();
+    if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
+      continue;
+    var val = parseInt(d[para + spaner + "0M"]);
+    if (val >= all / 6) {
+      var child = {
+        label: enter(nameof[para + spaner + "0M"], 5),
+        value: val
+      };
+      data[1]['children'][1]['children'].push(child);
+    } else if (val > 0) {
+      others += val;
+    }
+  }
+  child = {
+    label: "其他",
+    value: others
+  };
+  data[1]['children'][1]['children'].push(child);
+
+  // 所有者权益总计
+  all = parseInt(d["BAME02470M"]);
+  others = 0;
+  para = "BAME0";
+  for (var num = 223; num <= 246; num++) {
+    var spaner = num.toString();
+    if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
+      continue;
+    var val = parseInt(d[para + spaner + "0M"]);
+    if (val >= all / 6) {
+      var child = {
+        label: enter(nameof[para + spaner + "0M"], 5),
+        value: val
+      };
+      data[2]['children'][0]['children'].push(child);
+    } else if (val > 0) {
+      others += val;
+    }
+  }
+  child = {
+    label: "其他",
+    value: others
+  };
+  data[2]['children'][0]['children'].push(child);
+
+  var option = {
+    margin: 20,
+    // border: "1px solid white",
+    // animation: 1000,
+    data: [{
+      label: "企业画像",
+      value: '',
+      children: data
+    }]
+  };
+  if (option && typeof option === "object") {
+    portrait.setOption(option);
+  }
 }
