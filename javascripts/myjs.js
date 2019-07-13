@@ -2,7 +2,7 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 10:56:05 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-12 21:58:13
+ * @Last Modified time: 2019-07-13 14:00:09
  */
 
 var colorset = {
@@ -47,7 +47,7 @@ var incase = {
           try {
             let txt = d3.select("#item-" + data[i].SECURITY_CODE).text();
             d3.select("#item-" + data[i].SECURITY_CODE)
-              .text("")
+              .html('<img src="../images/icon05.png" style="width:16px;height:16px;float:left">')
               .append("a")
               .attr("href", "javascript: void(0);")
               .text(txt)
@@ -188,7 +188,7 @@ function init() {
   $("input[name='optionsRadiosinline'][value='TotalAssets']").prop("checked", true);
   $("input[name=Code]").val("");
   document.getElementById("inputCode").focus();
-  paint_sunburst([]);
+  paint_portrait([]);
   if (incase.ctx == "Merge") {
     drawMDS(incase.year, "m");
   } else {
@@ -242,14 +242,9 @@ function draw() {
       }
     }
   }
-  if (incase.ctx == "Merge") {
-    paint_analyze(objset);
-  } else {
-    paint_analyze(prtset);
-  }
 
   if (objset.length == 0 && prtset.length == 0) {
-    paint_sunburst([]);
+    paint_portrait([]);
     return;
   }
 
@@ -264,157 +259,66 @@ function draw() {
       (Sheets.BalanceSheet[i].CONTEXTREF == "母公司年初至报告期末" || Sheets.BalanceSheet[i].CONTEXTREF == "母公司上年年初至报告期末"))
       continue;
     if (Sheets.BalanceSheet[i].SECURITY_CODE == code) {
-      paint_sunburst(Sheets.BalanceSheet[i]);
+      paint_portrait(Sheets.BalanceSheet[i]);
       break;
     }
   }
 }
 
-function paint_sunburst(d) {
-  ddd(d);
-  return;
+var portrait = new Portrait.Chart('sunburst');
+
+function paint_portrait(d) {
   if (d == void 0)
     d = [];
-  var colors = colorset.sunset;
-  var bgColor = colorset.background;
-
-  var myChart = echarts.init(document.getElementById('sunburst'));
   if (d.length == 0) {
     var data = [{
-      name: '',
-      value: 1,
-      itemStyle: {
-        normal: {
-          color: colors[0]
-        }
-      }
+      label: '没有数据',
+      value: '',
+      children: []
     }];
-
-    option = {
-      color: colors,
-      title: {
-        text: "没有数据",
-        left: 'center',
-        top: 10,
-        textStyle: {
-          color: '#e6e6e6',
-          opacity: 1
-        }
-      },
-      highlightPolicy: 'descendant',
-      emphasis: {
-        itemStyle: {
-          opacity: 1
-        }
-      },
-      highlight: {
-        itemStyle: {
-          opacity: 0.9
-        }
-      },
-      series: [{
-        type: 'sunburst',
-        center: ['50%', '52%'],
-        data: data,
-        label: {
-          rotate: 'radial',
-          color: '#222',
-          minAngle: 5
-        },
-        itemStyle: {
-          borderColor: bgColor,
-          borderWidth: 2,
-          opacity: 0.65
-        },
-        levels: [{}, {
-          r0: 20,
-          r: 75,
-          label: {
-            rotate: 0
-          },
-          downplay: {
-            label: {
-              opacity: 0.5
-            }
-          }
-        }]
-      }]
+    var option = {
+      margin: 20,
+      // border: "1px solid white",
+      // animation: 1000,
+      data: data
     };
 
     if (option && typeof option === "object") {
-      myChart.setOption(option, true);
+      portrait.setOption(option);
     }
     return;
   }
 
   var data = [{
-    name: '资产总计',
-    itemStyle: {
-      normal: {
-        color: colors[0]
-      }
-    },
+    label: '资产总计',
+    value: '?',
     children: [{
-      name: '流动资产',
-      label: {
-        color: colors[0]
-      },
-      itemStyle: {
-        color: 'transparent',
-        borderColor: colors[0]
-      },
+      label: '流动资产',
+      value: '?',
       children: []
     }, {
-      name: '非流动资产',
-      label: {
-        color: colors[0]
-      },
-      itemStyle: {
-        color: 'transparent',
-        borderColor: colors[0]
-      },
+      label: '非流动资产',
+      value: '?',
       children: []
     }]
   }, {
-    name: '负债总计',
-    itemStyle: {
-      color: colors[1]
-    },
+    label: '负债总计',
+    value: '?',
     children: [{
-      name: '流动负债',
-      label: {
-        color: colors[1]
-      },
-      itemStyle: {
-        color: 'transparent',
-        borderColor: colors[1]
-      },
+      label: '流动负债',
+      value: '?',
       children: []
     }, {
-      name: '非流动负债',
-      label: {
-        color: colors[1]
-      },
-      itemStyle: {
-        color: 'transparent',
-        borderColor: colors[1]
-      },
+      label: '非流动负债',
+      value: '?',
       children: []
     }]
   }, {
-    name: '所有者权益',
-    itemStyle: {
-      color: colors[2]
-    },
+    label: '所有者权益',
+    value: '?',
     children: [{
-      name: '所有者权益总计',
-      label: {
-        color: colors[2]
-      },
-      itemStyle: {
-        color: 'transparent',
-        borderColor: colors[2]
-      },
+      label: '所有者权益总计',
+      value: '?',
       children: []
     }]
   }];
@@ -430,7 +334,7 @@ function paint_sunburst(d) {
     var val = parseInt(d[para + spaner + "0M"]);
     if (val >= all / 6) {
       var child = {
-        name: enter(nameof[para + spaner + "0M"], 5),
+        label: enter(nameof[para + spaner + "0M"], 5),
         value: val
       };
       data[0]['children'][0]['children'].push(child);
@@ -439,7 +343,7 @@ function paint_sunburst(d) {
     }
   }
   var child = {
-    name: "其他",
+    label: "其他",
     value: others
   };
   data[0]['children'][0]['children'].push(child);
@@ -455,7 +359,7 @@ function paint_sunburst(d) {
     var val = parseInt(d[para + spaner + "0M"]);
     if (val >= all / 6) {
       var child = {
-        name: enter(nameof[para + spaner + "0M"], 5),
+        label: enter(nameof[para + spaner + "0M"], 5),
         value: val
       };
       data[0]['children'][1]['children'].push(child);
@@ -464,7 +368,7 @@ function paint_sunburst(d) {
     }
   }
   child = {
-    name: "其他",
+    label: "其他",
     value: others
   };
   data[0]['children'][1]['children'].push(child);
@@ -478,7 +382,7 @@ function paint_sunburst(d) {
     var val = parseInt(d[para + spaner + "0M"]);
     if (val >= all / 6) {
       var child = {
-        name: enter(nameof[para + spaner + "0M"], 5),
+        label: enter(nameof[para + spaner + "0M"], 5),
         value: val
       };
       data[1]['children'][0]['children'].push(child);
@@ -487,7 +391,7 @@ function paint_sunburst(d) {
     }
   }
   child = {
-    name: "其他",
+    label: "其他",
     value: others
   };
   data[1]['children'][0]['children'].push(child);
@@ -503,7 +407,7 @@ function paint_sunburst(d) {
     var val = parseInt(d[para + spaner + "0M"]);
     if (val >= all / 6) {
       var child = {
-        name: enter(nameof[para + spaner + "0M"], 5),
+        label: enter(nameof[para + spaner + "0M"], 5),
         value: val
       };
       data[1]['children'][1]['children'].push(child);
@@ -512,7 +416,7 @@ function paint_sunburst(d) {
     }
   }
   child = {
-    name: "其他",
+    label: "其他",
     value: others
   };
   data[1]['children'][1]['children'].push(child);
@@ -528,7 +432,7 @@ function paint_sunburst(d) {
     var val = parseInt(d[para + spaner + "0M"]);
     if (val >= all / 6) {
       var child = {
-        name: enter(nameof[para + spaner + "0M"], 5),
+        label: enter(nameof[para + spaner + "0M"], 5),
         value: val
       };
       data[2]['children'][0]['children'].push(child);
@@ -537,102 +441,23 @@ function paint_sunburst(d) {
     }
   }
   child = {
-    name: "其他",
+    label: "其他",
     value: others
   };
   data[2]['children'][0]['children'].push(child);
 
-  option = {
-    color: colors,
-    title: {
-      text: d.SECURITY_NAME,
-      subtext: dict[d.SECURITY_CODE].TYPE_1 + "/" + dict[d.SECURITY_CODE].TYPE_2 + "/" + dict[d.SECURITY_CODE].TYPE_3,
-      left: 'center',
-      top: 10,
-      textStyle: {
-        color: '#00f6ff',
-        opacity: 1
-      }
-    },
-    highlightPolicy: 'descendant',
-    emphasis: {
-      itemStyle: {
-        opacity: 1
-      }
-    },
-    highlight: {
-      itemStyle: {
-        opacity: 0.9
-      }
-    },
-    series: [{
-      type: 'sunburst',
-      center: ['50%', '52%'],
-      data: data,
-      sort: function (a, b) {
-        if (a.depth === 1) {
-          return b.getValue() - a.getValue();
-        } else {
-          return a.dataIndex - b.dataIndex;
-        }
-      },
-      label: {
-        rotate: 'radial',
-        color: '#222',
-        minAngle: 5
-      },
-      // itemStyle: {
-      //   borderColor: bgColor,
-      //   borderWidth: 2,
-      //   opacity: 0.65
-      // },
-      levels: [{}, {
-        r0: 30,
-        r: 65,
-        label: {
-          rotate: 0
-        },
-        downplay: {
-          label: {
-            opacity: 0.5
-          }
-        }
-      }, {
-        r0: 65,
-        r: 105,
-        label: {
-          rotate: 'tangential',
-          fontSize: 10,
-        },
-        downplay: {
-          label: {
-            opacity: 0.5
-          }
-        }
-      }, {
-        r0: 105,
-        r: 125,
-        itemStyle: {
-          shadowBlur: 80,
-          shadowColor: colors[0]
-        },
-        label: {
-          position: 'outside',
-          textShadowBlur: 5,
-          textShadowColor: '#333',
-          color: '#eee'
-        },
-        downplay: {
-          label: {
-            opacity: 0.5
-          }
-        }
-      }]
+  var option = {
+    margin: 20,
+    // border: "1px solid white",
+    // animation: 1000,
+    data: [{
+      label: "企业画像",
+      value: '',
+      children: data
     }]
   };
-
   if (option && typeof option === "object") {
-    myChart.setOption(option, true);
+    portrait.setOption(option);
   }
 }
 
@@ -643,19 +468,20 @@ function buildTree() {
     if (Class[i_1].name == "")
       continue;
     var c_1 = all.append("li")
-      .html('<span><i class="icon-folder-open"></i>' + Class[i_1].name + '</span>')
+      .html('<img src="../images/icon03.png" style="width:16px;height:16px;float:left"></img><span><i class="icon-folder-open"></i>' + Class[i_1].name + '</span>')
       .append("ul")
       .style("padding-left", "25px");
     for (let i_2 = 0; i_2 < Class[i_1].children.length; i_2++) {
       var c_2 = c_1.append("li")
         .style("display", "none")
-        .html('<span><i class="icon-minus-sign"></i>' + Class[i_1].children[i_2].name + '</span>')
+        .html('<img src="../images/icon01.png" style="width:16px;height:16px;float:left"></img><span><i class="icon-minus-sign"></i>' + Class[i_1].children[i_2].name + '</span>')
         .append("ul")
         .style("padding-left", "25px");
       for (let i_3 = 0; i_3 < Class[i_1].children[i_2].children.length; i_3++) {
         var c_3 = c_2.append("li")
           .style("display", "none")
-          .html('<span><i class="icon-minus-sign"></i>' + Class[i_1].children[i_2].children[i_3].name + '</span>')
+          .html('<img src="../images/icon02.png" style="width:16px;height:16px;float:left"></img><span><i class="icon-minus-sign"></i>' +
+            Class[i_1].children[i_2].children[i_3].name + '</span>')
           .append("ul")
           .style("padding-left", "25px");
         for (let i_4 = 0; i_4 < Class[i_1].children[i_2].children[i_3].children.length; i_4++) {
@@ -667,7 +493,8 @@ function buildTree() {
               var str = Class[i_1].children[i_2].children[i_3].children[i_4].name;
               return "item-" + str.substring(str.indexOf('(') + 1, str.indexOf(')'));
             })
-            .html('<i class="icon-leaf"></i>' + Class[i_1].children[i_2].children[i_3].children[i_4].name);
+            .html('<img src="../images/icon05.png" style="width:16px;height:16px;float:left"></img><i class="icon-leaf"></i>' +
+              Class[i_1].children[i_2].children[i_3].children[i_4].name);
         }
       }
     }
@@ -689,17 +516,190 @@ function buildTree() {
   });
 }
 
-function paint_analyze(d) {
-  if (d == void 0)
-    d = [];
-  if (d.length == 0) {
+{
+  /*
+  function paint_analyze(d) {
+    if (d == void 0)
+      d = [];
+    if (d.length == 0) {
+      var myChart = echarts.init(document.getElementById('analyze'));
+      var app = {};
+      app.title = "没有数据";
+
+      let year = [" - "];
+
+      var option = {
+        textStyle: {
+          color: '#eee'
+        },
+        color: colorset.sunset,
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { // 坐标轴指示器，坐标轴触发有效
+            type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+          }
+        },
+        title: {
+          text: '运营能力分析 / 偿债能力分析',
+          left: 'center',
+          top: 10,
+          textStyle: {
+            color: '#00f6ff'
+          }
+        },
+        grid: [{
+          left: 50,
+          right: 20,
+          height: '35%'
+        }, {
+          left: 50,
+          right: 20,
+          top: '65%',
+          height: '30%'
+        }],
+        xAxis: [{
+          type: 'category',
+          data: year,
+          axisLabel: {
+            show: false
+          }
+        }, {
+          gridIndex: 1,
+          type: 'category',
+          data: year,
+          position: 'top',
+          axisLabel: {
+            show: false
+          }
+        }],
+        yAxis: [{
+          type: 'value'
+        }, {
+          gridIndex: 1,
+          type: 'value',
+          inverse: true
+        }],
+        series: [{
+          name: '流动比率',
+          xAxisIndex: 1,
+          yAxisIndex: 1,
+          type: 'bar',
+          data: []
+        }, {
+          name: '速动比率',
+          xAxisIndex: 1,
+          yAxisIndex: 1,
+          type: 'bar',
+          data: []
+        }, {
+          name: '现金比例',
+          xAxisIndex: 1,
+          yAxisIndex: 1,
+          type: 'bar',
+          data: []
+        }, {
+          name: '资产负债率',
+          xAxisIndex: 1,
+          yAxisIndex: 1,
+          type: 'bar',
+          data: []
+        }, {
+          name: '应收账款周转率',
+          type: 'bar',
+          data: []
+        }, {
+          name: '存货周转率',
+          type: 'bar',
+          data: []
+        }, {
+          name: '总资产周转率',
+          type: 'bar',
+          data: []
+        }]
+      };
+
+      if (option && typeof option === "object") {
+        myChart.setOption(option, true);
+      }
+
+      return;
+    }
+
+    var y = incase.year;
+    var type = incase.ctx;
+    for (var i = 0; i < dataset[y][type].Income.length; i++) {
+      if (dataset[y][type].Income[i].Code == d[0].Code) {
+        for (var m = 0; m < d.length; m++) {
+          d[m].Income = dataset[y][type].Income[i];
+        }
+        break;
+      }
+    }
+    for (var i = 0; i < dataset[y][type].CashFlow.length; i++) {
+      if (dataset[y][type].CashFlow[i].Code == d[0].Code) {
+        for (var m = 0; m < d.length; m++) {
+          d[m].CashFlow = dataset[y][type].CashFlow[i];
+        }
+        break;
+      }
+    }
+
     var myChart = echarts.init(document.getElementById('analyze'));
-    var app = {};
-    app.title = "没有数据";
 
-    let year = [" - "];
+    let data = [];
+    for (let i = 0; i < 7; i++) {
+      data.push([]);
+    }
 
-    var option = {
+    let year = [];
+
+    var option = null;
+
+    var averCheck = 0;
+    var averRepo = 0;
+    var averAssets = 0;
+    for (let i = 0; i < d.length; i++) {
+      averCheck += parseInt(d[i].ToCheckIn);
+      averRepo += parseInt(d[i].Repo);
+      averAssets += parseInt(d[i].TotalAssets);
+    }
+    averCheck /= d.length;
+    averRepo /= d.length;
+    averAssets /= d.length;
+
+    for (let i = 0; i < d.length; i++) {
+      year.push(d[i].year);
+      data[0].push(parseInt(d[i].CurrentAssets / d[i].CurrentLiability * 1000) / 1000);
+      data[1].push(parseInt(d[i].ValidAssets / d[i].CurrentLiability * 1000) / 1000);
+      data[2].push(parseInt(d[i].CheckAssets / d[i].CurrentLiability * 1000) / 1000);
+      data[3].push(parseInt(d[i].TotalLiability / d[i].TotalAssets * 1000) / 1000);
+      data[4].push(parseInt(d[i].CashFlow.FromOperation / averCheck * 1000) / 1000);
+      data[5].push(parseInt(d[i].Income.TotalCost / averRepo * 1000) / 1000);
+      data[6].push(parseInt(d[i].CashFlow.FromOperation / averAssets * 1000) / 1000);
+    }
+
+    for (var i = 0; i < year.length; i++) {
+      var max = parseInt(year[0]);
+      var index = 0;
+      for (var j = 0; j < year.length - i; j++) {
+        if (parseInt(year[j]) > max) {
+          max = parseInt(year[j]);
+          index = j;
+        }
+      }
+      if (index != year.length - i - 1) {
+        var obj = year[index];
+        year[index] = year[year.length - 1];
+        year[year.length - 1] = obj;
+        for (var j = 0; j < 7; j++) {
+          obj = data[j][index];
+          data[j][index] = data[j][data[j].length - 1];
+          data[j][data[j].length - 1] = obj;
+        }
+      }
+    }
+
+    option = {
       textStyle: {
         color: '#eee'
       },
@@ -711,7 +711,7 @@ function paint_analyze(d) {
         }
       },
       title: {
-        text: '运营能力分析 / 偿债能力分析',
+        text: "运营能力分析 / 偿债能力分析",
         left: 'center',
         top: 10,
         textStyle: {
@@ -752,225 +752,72 @@ function paint_analyze(d) {
       }],
       series: [{
         name: '流动比率',
+        type: 'bar',
         xAxisIndex: 1,
         yAxisIndex: 1,
-        type: 'bar',
-        data: []
+        data: data[0]
       }, {
         name: '速动比率',
+        type: 'bar',
         xAxisIndex: 1,
         yAxisIndex: 1,
-        type: 'bar',
-        data: []
+        data: data[1]
       }, {
         name: '现金比例',
+        type: 'bar',
         xAxisIndex: 1,
         yAxisIndex: 1,
-        type: 'bar',
-        data: []
+        data: data[2]
       }, {
         name: '资产负债率',
         xAxisIndex: 1,
         yAxisIndex: 1,
         type: 'bar',
-        data: []
+        data: data[3]
       }, {
         name: '应收账款周转率',
         type: 'bar',
-        data: []
+        data: data[4]
       }, {
         name: '存货周转率',
         type: 'bar',
-        data: []
+        data: data[5]
       }, {
         name: '总资产周转率',
         type: 'bar',
-        data: []
+        data: data[6]
       }]
     };
 
     if (option && typeof option === "object") {
       myChart.setOption(option, true);
     }
-
-    return;
   }
-
-  var y = incase.year;
-  var type = incase.ctx;
-  for (var i = 0; i < dataset[y][type].Income.length; i++) {
-    if (dataset[y][type].Income[i].Code == d[0].Code) {
-      for (var m = 0; m < d.length; m++) {
-        d[m].Income = dataset[y][type].Income[i];
-      }
-      break;
-    }
-  }
-  for (var i = 0; i < dataset[y][type].CashFlow.length; i++) {
-    if (dataset[y][type].CashFlow[i].Code == d[0].Code) {
-      for (var m = 0; m < d.length; m++) {
-        d[m].CashFlow = dataset[y][type].CashFlow[i];
-      }
-      break;
-    }
-  }
-
-  var myChart = echarts.init(document.getElementById('analyze'));
-
-  let data = [];
-  for (let i = 0; i < 7; i++) {
-    data.push([]);
-  }
-
-  let year = [];
-
-  var option = null;
-
-  var averCheck = 0;
-  var averRepo = 0;
-  var averAssets = 0;
-  for (let i = 0; i < d.length; i++) {
-    averCheck += parseInt(d[i].ToCheckIn);
-    averRepo += parseInt(d[i].Repo);
-    averAssets += parseInt(d[i].TotalAssets);
-  }
-  averCheck /= d.length;
-  averRepo /= d.length;
-  averAssets /= d.length;
-
-  for (let i = 0; i < d.length; i++) {
-    year.push(d[i].year);
-    data[0].push(parseInt(d[i].CurrentAssets / d[i].CurrentLiability * 1000) / 1000);
-    data[1].push(parseInt(d[i].ValidAssets / d[i].CurrentLiability * 1000) / 1000);
-    data[2].push(parseInt(d[i].CheckAssets / d[i].CurrentLiability * 1000) / 1000);
-    data[3].push(parseInt(d[i].TotalLiability / d[i].TotalAssets * 1000) / 1000);
-    data[4].push(parseInt(d[i].CashFlow.FromOperation / averCheck * 1000) / 1000);
-    data[5].push(parseInt(d[i].Income.TotalCost / averRepo * 1000) / 1000);
-    data[6].push(parseInt(d[i].CashFlow.FromOperation / averAssets * 1000) / 1000);
-  }
-
-  for (var i = 0; i < year.length; i++) {
-    var max = parseInt(year[0]);
-    var index = 0;
-    for (var j = 0; j < year.length - i; j++) {
-      if (parseInt(year[j]) > max) {
-        max = parseInt(year[j]);
-        index = j;
-      }
-    }
-    if (index != year.length - i - 1) {
-      var obj = year[index];
-      year[index] = year[year.length - 1];
-      year[year.length - 1] = obj;
-      for (var j = 0; j < 7; j++) {
-        obj = data[j][index];
-        data[j][index] = data[j][data[j].length - 1];
-        data[j][data[j].length - 1] = obj;
-      }
-    }
-  }
-
-  option = {
-    textStyle: {
-      color: '#eee'
-    },
-    color: colorset.sunset,
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: { // 坐标轴指示器，坐标轴触发有效
-        type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
-      }
-    },
-    title: {
-      text: "运营能力分析 / 偿债能力分析",
-      left: 'center',
-      top: 10,
-      textStyle: {
-        color: '#00f6ff'
-      }
-    },
-    grid: [{
-      left: 50,
-      right: 20,
-      height: '35%'
-    }, {
-      left: 50,
-      right: 20,
-      top: '65%',
-      height: '30%'
-    }],
-    xAxis: [{
-      type: 'category',
-      data: year,
-      axisLabel: {
-        show: false
-      }
-    }, {
-      gridIndex: 1,
-      type: 'category',
-      data: year,
-      position: 'top',
-      axisLabel: {
-        show: false
-      }
-    }],
-    yAxis: [{
-      type: 'value'
-    }, {
-      gridIndex: 1,
-      type: 'value',
-      inverse: true
-    }],
-    series: [{
-      name: '流动比率',
-      type: 'bar',
-      xAxisIndex: 1,
-      yAxisIndex: 1,
-      data: data[0]
-    }, {
-      name: '速动比率',
-      type: 'bar',
-      xAxisIndex: 1,
-      yAxisIndex: 1,
-      data: data[1]
-    }, {
-      name: '现金比例',
-      type: 'bar',
-      xAxisIndex: 1,
-      yAxisIndex: 1,
-      data: data[2]
-    }, {
-      name: '资产负债率',
-      xAxisIndex: 1,
-      yAxisIndex: 1,
-      type: 'bar',
-      data: data[3]
-    }, {
-      name: '应收账款周转率',
-      type: 'bar',
-      data: data[4]
-    }, {
-      name: '存货周转率',
-      type: 'bar',
-      data: data[5]
-    }, {
-      name: '总资产周转率',
-      type: 'bar',
-      data: data[6]
-    }]
-  };
-
-  if (option && typeof option === "object") {
-    myChart.setOption(option, true);
-  }
+  paint_analyze([]);
+  */
 }
 
-paint_analyze([]);
+// 散点图配置项
+{
+  var mdstip = d3.select("body")
+    .append("div")
+    .attr("id", "point-view")
+    .style("position", "absolute")
+    .style("z-index", "10")
+    .style("visibility", "hidden")
+    .style("opacity", "0.7")
+    .style("border", "solid");
 
-var mdsData = {};
+  var mdsData = {};
+
+  var svg = d3.select("#mds")
+    .append("svg")
+    .attr("id", "mdssvg")
+    .attr("width", "530px")
+    .attr("height", "360px");
+}
 
 function drawMDS(y, ctx) {
-  var myChart = echarts.init(document.getElementById('chart2'));
   let data = [];
   if (mdsData[y] == void 0) {
     mdsData[y] = {};
@@ -991,109 +838,74 @@ function drawMDS(y, ctx) {
           }
         }
       }
-
-      var option = {
-        textStyle: {
-          color: '#eee'
-        },
-        dataZoom: [{
-            id: 'dataZoomX',
-            type: 'slider',
-            xAxisIndex: [0],
-            filterMode: 'weakFilter'
-          },
-          {
-            id: 'dataZoomY',
-            type: 'slider',
-            yAxisIndex: [0],
-            filterMode: 'weakFilter'
-          }
-        ],
-        color: colorset.sunset,
-        title: {
-          text: "特征值降维",
-          left: 'center',
-          top: 10,
-          textStyle: {
-            color: '#00f6ff'
-          }
-        },
-        xAxis: {},
-        yAxis: {},
-        series: [{
-          symbolSize: 10,
-          symbol: "rect",
-          label: {
-            emphasis: {
-              show: true,
-              formatter: function (param) {
-                return param.data[2];
-              },
-              position: 'top'
-            }
-          },
-          data: data,
-          type: 'scatter'
-        }]
-      };
-
-      if (option && typeof option === "object") {
-        myChart.setOption(option, true);
+      var a = [];
+      var b = [];
+      for (var i = 0; i < data.length; i++) {
+        a.push(data[i][0]);
+        b.push(data[i][1]);
       }
+      var max1 = d3.max(a);
+      var min1 = d3.min(a);
+      var max2 = d3.max(b);
+      var min2 = d3.min(b);
+
+      var svg = d3.select("#mdssvg");
+
+      var linear1 = d3.scale.linear() // 生成线性比例尺
+        .domain([min1, max1]) // 设置定义域
+        .range([0, 530]);
+      var c = [];
+      for (var i = 0; i < data.length; i++) {
+        c.push(linear1(a[i]));
+      }
+      var linear1 = d3.scale.linear() // 生成线性比例尺
+        .domain([min2, max2]) // 设置定义域
+        .range([360, 0]);
+      var d = [];
+      for (var i = 0; i < data.length; i++) {
+        d.push(linear1(b[i]));
+      }
+      var data1 = [];
+      for (var i = 0; i < data.length; i++) {
+        data1.push([c[i], d[i], data[i][2], data[i][3]]);
+      }
+
+      svg.selectAll("circle")
+        .data(data1)
+        .enter()
+        .append("circle")
+        .attr("cx", function (d) {
+          return d[0] * 0.8 + 60;
+        })
+        .attr("cy", function (d) {
+          return d[1] * 0.8 + 10;
+        })
+        .attr("r", 6)
+        .attr("opacity", "0.6")
+        .attr("fill", "#3564e6")
+        .on("mouseover", function (d) {
+          // alert((parseInt(d3.event.pageX)+10)+'px, ' + (parseInt(d3.event.pageY)-10)+'px');
+          d3.select(this).attr("fill", "white").attr("r", 9).attr("opacity", "0.8");
+          mdstip.html(d[2] + d[3]);
+          mdstip.style("visibility", "visible");
+        })
+        .on('mousemove', function () {
+          mdstip.style('top', (parseInt(d3.event.pageY) - 10) + 'px').style('left', (parseInt(d3.event.pageX) + 10) + 'px')
+        })
+        .on("mouseout", function () {
+          d3.select(this)
+            .transition()
+            .duration(300)
+            .attr("fill", "#3564e6")
+            .attr("r", 6)
+            .attr("opacity", "0.6");
+          mdstip.style("visibility", "hidden");
+        });
     });
     return;
   }
   label = mdsData[y][ctx].label;
   data = mdsData[y][ctx].data;
-
-  var option = {
-    textStyle: {
-      color: '#eee'
-    },
-    dataZoom: [{
-        id: 'dataZoomX',
-        type: 'slider',
-        xAxisIndex: [0],
-        filterMode: 'weakFilter'
-      },
-      {
-        id: 'dataZoomY',
-        type: 'slider',
-        yAxisIndex: [0],
-        filterMode: 'weakFilter'
-      }
-    ],
-    color: colorset.sunset,
-    title: {
-      text: "特征值降维",
-      left: 'center',
-      top: 10,
-      textStyle: {
-        color: '#e6e6e6'
-      }
-    },
-    xAxis: {},
-    yAxis: {},
-    series: [{
-      symbolSize: 10,
-      symbol: rect,
-      label: {
-        emphasis: {
-          show: true,
-          formatter: function (param) {
-            return param.data[2];
-          },
-          position: 'top'
-        }
-      },
-      data: data,
-      type: 'scatter'
-    }]
-  };
-
-  if (option && typeof option === "object") {
-    myChart.setOption(option, true);
-  }
 }
 
 // 柱状图配置项
@@ -2092,200 +1904,4 @@ function enter(str, limit) {
     }
   }
   return str;
-}
-
-var portrait = new Portrait.Chart('sunburst');
-
-function ddd(d) {
-  if (d == void 0)
-    d = [];
-  if (d.length == 0) {
-    var data = [{
-      label: '没有数据',
-      value: '',
-      children: []
-    }];
-    var option = {
-      margin: 20,
-      // border: "1px solid white",
-      // animation: 1000,
-      data: data
-    };
-
-    if (option && typeof option === "object") {
-      portrait.setOption(option);
-    }
-    return;
-  }
-
-  var data = [{
-    label: '资产总计',
-    value: '?',
-    children: [{
-      label: '流动资产',
-      value: '?',
-      children: []
-    }, {
-      label: '非流动资产',
-      value: '?',
-      children: []
-    }]
-  }, {
-    label: '负债总计',
-    value: '?',
-    children: [{
-      label: '流动负债',
-      value: '?',
-      children: []
-    }, {
-      label: '非流动负债',
-      value: '?',
-      children: []
-    }]
-  }, {
-    label: '所有者权益',
-    value: '?',
-    children: [{
-      label: '所有者权益总计',
-      value: '?',
-      children: []
-    }]
-  }];
-
-  // 流动资产
-  var all = parseInt(d["BAME00030M"]);
-  var others = 0;
-  var para = "BAME00";
-  for (var num = 3; num <= 83; num++) {
-    var spaner = num < 10 ? "0" + num : num;
-    if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
-      continue;
-    var val = parseInt(d[para + spaner + "0M"]);
-    if (val >= all / 6) {
-      var child = {
-        label: enter(nameof[para + spaner + "0M"], 5),
-        value: val
-      };
-      data[0]['children'][0]['children'].push(child);
-    } else if (val > 0) {
-      others += val;
-    }
-  }
-  var child = {
-    label: "其他",
-    value: others
-  };
-  data[0]['children'][0]['children'].push(child);
-
-  // 非流动资产
-  all = parseInt(d["BAME01320M"]);
-  others = 0;
-  para = "BAME0";
-  for (var num = 86; num <= 131; num++) {
-    var spaner = num < 100 ? "0" + num : num;
-    if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
-      continue;
-    var val = parseInt(d[para + spaner + "0M"]);
-    if (val >= all / 6) {
-      var child = {
-        label: enter(nameof[para + spaner + "0M"], 5),
-        value: val
-      };
-      data[0]['children'][1]['children'].push(child);
-    } else if (val > 0) {
-      others += val;
-    }
-  }
-  child = {
-    label: "其他",
-    value: others
-  };
-  data[0]['children'][1]['children'].push(child);
-
-  // 流动负债
-  all = parseInt(d["BAME01980M"]);
-  others = 0;
-  para = "BAME0";
-  for (var num = 137; num <= 197; num++) {
-    var spaner = num.toString();
-    var val = parseInt(d[para + spaner + "0M"]);
-    if (val >= all / 6) {
-      var child = {
-        label: enter(nameof[para + spaner + "0M"], 5),
-        value: val
-      };
-      data[1]['children'][0]['children'].push(child);
-    } else if (val > 0) {
-      others += val;
-    }
-  }
-  child = {
-    label: "其他",
-    value: others
-  };
-  data[1]['children'][0]['children'].push(child);
-
-  // 非流动负债
-  all = parseInt(d["BAME02190M"]);
-  others = 0;
-  para = "BAME0";
-  for (var num = 200; num <= 218; num++) {
-    var spaner = num.toString();
-    if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
-      continue;
-    var val = parseInt(d[para + spaner + "0M"]);
-    if (val >= all / 6) {
-      var child = {
-        label: enter(nameof[para + spaner + "0M"], 5),
-        value: val
-      };
-      data[1]['children'][1]['children'].push(child);
-    } else if (val > 0) {
-      others += val;
-    }
-  }
-  child = {
-    label: "其他",
-    value: others
-  };
-  data[1]['children'][1]['children'].push(child);
-
-  // 所有者权益总计
-  all = parseInt(d["BAME02470M"]);
-  others = 0;
-  para = "BAME0";
-  for (var num = 223; num <= 246; num++) {
-    var spaner = num.toString();
-    if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
-      continue;
-    var val = parseInt(d[para + spaner + "0M"]);
-    if (val >= all / 6) {
-      var child = {
-        label: enter(nameof[para + spaner + "0M"], 5),
-        value: val
-      };
-      data[2]['children'][0]['children'].push(child);
-    } else if (val > 0) {
-      others += val;
-    }
-  }
-  child = {
-    label: "其他",
-    value: others
-  };
-  data[2]['children'][0]['children'].push(child);
-
-  var option = {
-    margin: 20,
-    // border: "1px solid white",
-    // animation: 1000,
-    data: [{
-      label: "企业画像",
-      value: '',
-      children: data
-    }]
-  };
-  if (option && typeof option === "object") {
-    portrait.setOption(option);
-  }
 }

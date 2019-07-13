@@ -15,14 +15,12 @@
     </header>
     <div id="all" style="width:1536px;height:815px;float: left;">
         <div class="left" style="float:left;">
-            <!--div class="map1" id="box"></div-->
-            <div class="treeselect" id="tree">
-                <div id="tree_well" class="tree well" style="background: none; border: none; padding-bottom: 0px;">
-                    <ul style="padding-left: 15px;">
-                    </ul>
-                </div>
+            <div class="dataview">
+                <label style="margin-left:15px;">
+                    公司名:&nbsp;<input type="string" id="com" value="" style="margin-top:35px;">
+                </label>
             </div>
-            <div class="select" style="padding: 10px;">
+            <div class="select" style="padding: 10px;float: left">
                 <form role="form">
                     <div class="form-group" style="padding: 0px 20px; margin-bottom: 0px;margin-top: 16px;">
                         <label for="time"
@@ -61,7 +59,14 @@
                     </div>
                 </form>
             </div>
+            <div class="treeselect" id="tree" style="float: left">
+                <div id="tree_well" class="tree well" style="background: none; border: none; padding-bottom: 0px;">
+                    <ul style="padding-left: 15px;">
+                    </ul>
+                </div>
+            </div>
         </div>
+
         <div class="center" style="float:left;">
             <div class="alldata" style="float:left;">
                 <div id="sunburst"></div>
@@ -71,27 +76,33 @@
         </div>
 
         <div class="right" style="float:left;">
-            <div id="analyze" class="img1" style="float:left;"></div>
+            <!--div id="analyze" class="img1" style="float:left;"></!div-->
             <div style="float:left; position: relative; top: -40px;">
                 <label for="name" style="position: relative; left: 32px; top: 64px;">排序字段</label>
                 <div style="position: relative; left: 32px; top: 60px;">
                     <label class="radio-inline">
-                        <input type="radio" name="optionsRadiosinline" id="optionsRadios1" value="TotalAssets" onclick="onSelect()">资产总计
+                        <input type="radio" name="optionsRadiosinline" id="optionsRadios1" value="TotalAssets"
+                            onclick="onSelect()">资产总计
                     </label>
                     <label class="radio-inline">
-                        <input type="radio" name="optionsRadiosinline" id="optionsRadios2" value="TotalLiability" onclick="onSelect()">负债总计
+                        <input type="radio" name="optionsRadiosinline" id="optionsRadios2" value="TotalLiability"
+                            onclick="onSelect()">负债总计
                     </label>
                     <label class="radio-inline">
-                        <input type="radio" name="optionsRadiosinline" id="optionsRadios3" value="TotalEquity" onclick="onSelect()">所有者权益总计
+                        <input type="radio" name="optionsRadiosinline" id="optionsRadios3" value="TotalEquity"
+                            onclick="onSelect()">所有者权益总计
                     </label>
                     <label class="radio-inline">
-                        <input type="radio" name="optionsRadiosinline" id="optionsRadios4" value="TotalLiability_Equity" onclick="onSelect()">负债和所有者权益总计
+                        <input type="radio" name="optionsRadiosinline" id="optionsRadios4" value="TotalLiability_Equity"
+                            onclick="onSelect()">负债和所有者权益总计
                     </label>
                 </div>
                 <div id="analyze_2" class="img2"></div>
             </div>
             <div id="chart" class="img3" style="float:left; position: relative; top: -46px;">
-                <div id="chart2" style="height: 340px; margin-top: 10px;"></div>
+                <h1 style="margin-left: 220px;font-size: 20px;overflow: hidden;margin-top:0px;color:#00f6ff; margin-top: 10px;">特征聚类
+                </h1>
+                <div id="mds" style="height: 340px; margin-top: 10px;"></div>
             </div>
         </div>
     </div>
