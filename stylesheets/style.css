@@ -1,9 +1,14 @@
+* {
+	padding: 0;
+	margin: 0;
+}
+
 body,
 html {
 	overflow: hidden;
 	margin: 0;
 	padding: 0;
-	background: rgb(17, 29, 59);
+	background: rgb(12, 17, 36);
 	color: white;
 	font-family: "微软雅黑";
 }
@@ -24,8 +29,8 @@ header {
 	height: 810px;
 	/* border: solid;
 	border-radius: 13px 13px 13px 13px;
-	border-width: 2px; 
-	margin-left: 7px; */
+	border-width: 2px;*/
+	margin-left: 5px;
 	margin-top: 3px;
 }
 
@@ -50,7 +55,7 @@ header {
 
 }
 
-.dataview{
+.dataview {
 	width: 330px;
 	height: 205px;
 	float: left;
@@ -60,26 +65,27 @@ header {
 
 .select {
 	width: 330px;
-	height: 205px;
+	height: 200px;
 	border: none;
 	border-width: 2px;
 	margin-top: 5px;
 	margin-left: 10px;
-	background: url(../images/zuo2.png) center no-repeat;
+	margin-bottom: 15px;
+	background: url(../images/select.png) center no-repeat;
 }
 
 .treeselect {
 	width: 330px;
-	height: 370px;
+	height: 355px;
 	border: none;
 	border-width: 2px;
 	margin-left: 10px;
 	margin-top: 5px;
 	margin-bottom: 10px;
 	overflow-y: scroll;
-	background-color: #5accd4;
+	background-color: #6cdae2;
 	background: url(../images/center01.png) 0px 0px;
-	padding: 0px 5px 5px 0px;
+	/* padding: 0px 5px 5px 0px; */
 
 }
 
@@ -172,7 +178,7 @@ input[type="number"] {
 
 .tree {
 	min-height: 20px;
-	padding: 19px;
+	padding: 10px;
 	margin-bottom: 20px;
 	background-color: #fbfbfb;
 	/* border: 1px solid #999; */
@@ -186,32 +192,32 @@ input[type="number"] {
 
 .tree li {
 	list-style-type: none;
-	margin: 0;
-	padding: 10px 5px 0;
+	margin: 1px;
+	padding: 0px 0px 2px 0px;
 	position: relative
 }
 
 .tree li::before,
 .tree li::after {
 	content: '';
-	left: -20px;
+	left: -14px;
 	position: absolute;
-	right: auto
+	right: 0px;
 }
 
 .tree li::before {
 	border-left: 1px solid #999;
 	bottom: 50px;
 	height: 100%;
-	top: 0;
+	top: -12px;
 	width: 1px
 }
 
 .tree li::after {
 	border-top: 1px solid #999;
 	height: 20px;
-	top: 25px;
-	width: 25px
+	top: 10px;
+	width: 17px
 }
 
 .tree li span {
@@ -220,7 +226,7 @@ input[type="number"] {
 	border: 1px solid #999;
 	border-radius: 5px; */
 	display: inline-block;
-	padding: 3px 8px;
+	padding: 0px 2px;
 	text-decoration: none
 }
 

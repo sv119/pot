@@ -1,8 +1,8 @@
 /*
  * @Author: Antoine YANG 
  * @Date: 2019-07-12 13:50:39 
- * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-12 22:00:38
+ * @Last Modified by: mikey.zhaopeng
+ * @Last Modified time: 2019-07-13 22:02:58
  */
 
 console.log("Thanks for using portrait.js, writen by ZhenDong Yang, 2019-7-12");
@@ -25,9 +25,10 @@ Portrait.Chart = function Chart(parent) {
         background: "none",
         color: ['#FF7853', '#EA5151', '#CC3F57', '#9A2555', '#FFAE57'],
         fontColor: '#FFFFFF',
-        animation: 400,
+        stroke: "white",
+        animation: 1000,
         data: [],
-        size: 20
+        max: 5
     };
 };
 
@@ -89,129 +90,106 @@ Portrait.Chart.prototype.setOption = function (change) {
         width = option.width - option.margin[1] - option.margin[3] - option.padding[1] - option.padding[3];
         height = option.height - option.margin[0] - option.margin[2] - option.padding[0] - option.padding[2];
     }
+
+    let max = option.max;
+
     let g = this.SVG.select("g");
     g.selectAll("circle").remove();
     g.selectAll("text").remove();
     g.selectAll("line").remove();
 
-    // draw circles
-    drawBranch("__", option.data, 1);
+    // collect circles
+    let maxLevel = 0;
+    let set = [];
+    collect("__", option.data);
+    let queue = [];
+    for (let i = 0; i < maxLevel; i++) {
+        queue.push(0);
+    }
 
-    function drawBranch(path, data, _lastcount) {
+    // draw circles
+    let avrgsize = maxLevel == 1 ? width > height ? height / 16 : width / 16 :
+        width > height ? height / 4 / maxLevel : width / 4 / maxLevel;
+    drawBranch("__", option.data);
+
+    // adjust circles
+    adjustBranch("__", option.data, width / 2, height / 2);
+
+    function collect(path, data) {
         let level = -1;
         for (let i = 0; i < path.length; i++) {
             if (path.substring(i, i + 1) == "_")
                 level++;
+        }
+        if (level > maxLevel) {
+            maxLevel = level;
+            set.push(0);
+        }
+        if (data.length > max)
+            set[level - 1] += max;
+        else
+            set[level - 1] += data.length;
+        for (let i = 0; i < data.length && i < max; i++) {
+            if (data[i].children != void 0 && data[i].children.length != 0)
+                collect(path + i + '_', data[i].children);
+        }
+    }
+
+    function drawBranch(path, data) {
+        let level = -1;
+        for (let i = 0; i < path.length; i++) {
+            if (path.substring(i, i + 1) == "_")
+                level++;
+        }
+        let se = [];
+        for (let i = 0; i < max && i < data.length; i++) {
+            se.push(data[i]);
         }
         let root = path == "__" ? g : d3.select('#' + path);
         let _x = path == "__" ? width / 2 : parseFloat(root.attr('cx'));
         let _y = path == "__" ? height / 2 : parseFloat(root.attr('cy'));
         let color = option.color;
         let Fcolor = option.fontColor;
-        let animation = option.animation;
-        let updateLine = g.selectAll(".line" + path).data(data);
-        let updateCircle = g.selectAll(".circle" + path).data(data);
-        let updateLabel = g.selectAll(".text" + path).data(data);
+        let animation = option.animation / maxLevel;
+        let updateLine = g.selectAll(".line" + path).data(se);
+        let updateCircle = g.selectAll(".circle" + path).data(se);
+        let updateLabel = g.selectAll(".text" + path).data(se);
         let enterLine = updateLine.enter();
         let enterCircle = updateCircle.enter();
         let enterLabel = updateLabel.enter();
-        let exitLine = updateLine.exit();
-        let exitCircle = updateCircle.exit();
-        let exitLabel = updateLabel.exit();
-        let size = option.size / Math.log(level + 1);
-        let count = data.length;
-
-        updateLine.attr('x1', _x)
-            .attr('x2', _x)
-            .attr('y1', _y)
-            .attr('y2', _y)
-            .transition()
-            .duration(animation)
-            .attr('x2', function (d, i) {
-                if (path == "__")
-                    return _x;
-                return _x - Math.sin(i * 2 * Math.PI / count) * size * 4;
-            })
-            .attr('y2', function (d, i) {
-                if (path == "__")
-                    return _y;
-                return _y - Math.cos(i * 2 * Math.PI / count) * size * 4;
-            })
-            .style("stroke", color[(level - 1) % color.length])
-            .style("stroke-width", 1)
-            .attr("opacity", 1);
-        updateCircle.attr('cx', _x)
-            .attr('cy', _y)
-            .transition()
-            .duration(animation)
-            .attr('cx', function (d, i) {
-                if (path == "__")
-                    return _x;
-                return _x - Math.sin(i * 2 * Math.PI / count) * size * 4;
-            })
-            .attr('cy', function (d, i) {
-                if (path == "__")
-                    return _y;
-                return _y - Math.cos(i * 2 * Math.PI / count) * size * 4;
-            })
-            .attr('r', size)
-            .attr("fill", color[level % color.count])
-            .attr("opacity", 1)
-            .each("end", function (d, i) {
-                if (d.children == void 0 || d.children.length == 0)
-                    return;
-                drawBranch(path + i + '_', d.children, count);
-            });
-        updateLabel.attr('cx', _x)
-            .attr('cy', _y)
-            .html(function (d, i) {
-                if (path == "__")
-                    return "<tspan style='position: relative;'>" + d.label + "</tspan>" +
-                        "<tspan x='" + (_x) + "' y='" + (_y + size / 2) + "'>" + d.value + "</tspan>";
-                return "<tspan style='position: relative;'>" + d.label + "</tspan>" +
-                    "<tspan x='" + (_x - Math.sin(i * 2 * Math.PI / count) * size * 4) +
-                    "' y='" + (_y - Math.cos(i * 2 * Math.PI / count) * size * 4 + size / 2) + "'>" + d.value + "</tspan>";
-            })
-            .transition()
-            .duration(animation)
-            .attr("fill", Fcolor)
-            .attr("x", function (d, i) {
-                if (path == "__")
-                    return _x;
-                return _x - Math.sin(i * 2 * Math.PI / count) * size * 4;
-            })
-            .attr("y", function (d, i) {
-                if (path == "__")
-                    return _y;
-                return _y - Math.cos(i * 2 * Math.PI / count) * size * 4;
-            })
-            .attr("font-family", "sans-serif")
-            .attr("font-size", size / 3)
-            .attr("opacity", 1);
+        let size = avrgsize / Math.log(level + 2);
+        let count = se.length;
 
         enterLine.append('line')
             .classed('line' + path, true)
+            .classed('level-' + level, true)
+            .attr("id", function (d, i) {
+                return path + i + 'l';
+            })
             .attr('x1', _x)
             .attr('x2', _x)
             .attr('y1', _y)
             .attr('y2', _y)
             .transition()
-            .duration(animation)
+            .duration(function (d, i) {
+                return animation / level + i * animation / 4;
+            })
             .attr('x2', function (d, i) {
                 if (path == "__")
                     return _x;
-                return _x - Math.sin(i * 2 * Math.PI / count) * size * 4;
+                return _x + Math.sin(i * 2 * Math.PI / count) * size * 3.2;
             })
             .attr('y2', function (d, i) {
                 if (path == "__")
                     return _y;
-                return _y - Math.cos(i * 2 * Math.PI / count) * size * 4;
+                return _y - Math.cos(i * 2 * Math.PI / count) * size * 3.2;
             })
-            .style("stroke", color[(level - 1) % color.length])
+            .style("stroke", option.stroke)
             .style("stroke-width", 1)
             .attr("opacity", 1);
         enterCircle.append('circle')
             .classed('circle' + path, true)
+            .classed('level-' + level, true)
             .attr("id", function (d, i) {
                 return path + i + '_';
             })
@@ -221,75 +199,220 @@ Portrait.Chart.prototype.setOption = function (change) {
             .attr("fill", color[level % color.length])
             .attr("opacity", 0)
             .transition()
-            .duration(animation)
+            .delay(function (d, i) {
+                return i * animation / 4 / Math.pow(level, 2);
+            })
+            .duration(animation / level)
             .attr('r', size)
             .attr('cx', function (d, i) {
                 if (path == "__")
                     return _x;
-                return _x - Math.sin(i * 2 * Math.PI / count) * size * 4;
+                return _x + Math.sin(i * 2 * Math.PI / count) * size * 3.2;
             })
             .attr('cy', function (d, i) {
                 if (path == "__")
                     return _y;
-                return _y - Math.cos(i * 2 * Math.PI / count) * size * 4;
+                return _y - Math.cos(i * 2 * Math.PI / count) * size * 3.2;
             })
             .attr("opacity", 1)
             .each("end", function (d, i) {
                 if (d.children == void 0 || d.children.length == 0)
                     return;
-                drawBranch(path + i + '_', d.children, count);
+                drawBranch(path + i + '_', d.children);
             });
         enterLabel.append('text')
             .classed('text' + path, true)
+            .classed('level-' + level, true)
+            .attr("id", function (d, i) {
+                return path + i + 't';
+            })
             .attr("fill", Fcolor)
             .attr("opacity", 0)
             .attr('cx', _x)
             .attr('cy', _y)
-            .html(function (d, i) {
-                if (path == "__")
-                    return "<tspan style='position: relative;'>" + d.label + "</tspan>" +
-                        "<tspan x='" + (_x) + "' y='" + (_y + size / 2) + "'>" + d.value + "</tspan>";
-                return "<tspan style='position: relative;'>" + d.label + "</tspan>" +
-                    "<tspan x='" + (_x - Math.sin(i * 2 * Math.PI / count) * size * 4) +
-                    "' y='" + (_y - Math.cos(i * 2 * Math.PI / count) * size * 4 + size / 2) + "'>" + d.value + "</tspan>";
+            .text(function (d) {
+                return d.label;
             })
             .attr("x", function (d, i) {
                 if (path == "__")
                     return _x;
-                return _x - Math.sin(i * 2 * Math.PI / count) * size * 4;
+                return _x + Math.sin(i * 2 * Math.PI / count) * size * 3.2;
             })
             .attr("y", function (d, i) {
                 if (path == "__")
                     return _y;
-                return _y - Math.cos(i * 2 * Math.PI / count) * size * 4;
+                return _y - Math.cos(i * 2 * Math.PI / count) * size * 3.2;
             })
             .attr("font-family", "sans-serif")
-            .attr("font-size", size / 3)
+            .attr("font-size", 0)
             .transition()
-            .delay(animation * 0.4)
-            .duration(animation * 0.6)
+            .delay(function (d, i) {
+                return animation * 0.4 / level + i * animation / 4;
+            })
+            .duration(animation * 0.6 / level)
             .attr("opacity", 1);
+    }
 
-        exitLine.transition()
-            .duration(animation)
-            .attr("opacity", 0)
-            .each("end", function () {
-                d3.select(this).remove();
+    function adjustBranch(path, data, ox, oy) {
+        let level = -1;
+        for (let i = 0; i < path.length; i++) {
+            if (path.substring(i, i + 1) == "_")
+                level++;
+        }
+        let _x = width / 2;
+        let _y = height / 2;
+        let color = option.color;
+        let Fcolor = option.fontColor;
+        let animation = option.animation / maxLevel;
+        let updateLine = g.selectAll(".line" + path).data(data);
+        let updateCircle = g.selectAll(".circle" + path).data(data);
+        let updateLabel = g.selectAll(".text" + path).data(data);
+        let size = avrgsize / Math.log(level + 2);
+        let distance = maxLevel == 1 ? 0 :
+            width > height ? height / 2 / (maxLevel - 1) * (level - 1.2) : width / 2 / (maxLevel - 1) * (level - 1.2);
+
+        updateLine.transition()
+            .delay(function (d, i) {
+                return path == "__" ? animation / Math.pow(level, 2) * (maxLevel + 1) + i * animation / Math.pow(level, 2) / 4 : i * animation / Math.pow(level, 2) / 4;
+            })
+            .duration(animation / Math.pow(level, 2))
+            .attr('x1', function () {
+                if (level <= 1)
+                    return d3.select(this).attr("x1");
+                return ox;
+            })
+            .attr('y1', function () {
+                if (level <= 1)
+                    return d3.select(this).attr("y1");
+                return oy;
+            })
+            .attr('x2', function () {
+                if (level <= 2)
+                    return d3.select(this).attr("x2");
+                let all = $("line.level-" + level);
+                let pos = set[level - 1] <= 8 ? 0 : -1 * parseInt(max / 2);
+                for (let t = 0; t < all.length; t++) {
+                    if (all[t].id == this.id) {
+                        pos += t;
+                        break;
+                    }
+                }
+                return _x + Math.sin(pos * 2 * Math.PI / set[level - 1]) * distance;
+            })
+            .attr('y2', function (d, i) {
+                if (level <= 2)
+                    return d3.select(this).attr("y2");
+                let all = $("line.level-" + level);
+                let pos = set[level - 1] <= 8 ? 0 : -1 * parseInt(max / 2);
+                for (let t = 0; t < all.length; t++) {
+                    if (all[t].id == this.id) {
+                        pos += t;
+                        break;
+                    }
+                }
+                return _y - Math.cos(pos * 2 * Math.PI / set[level - 1]) * distance;
+            })
+            .style("stroke", option.stroke)
+            .style("stroke-width", 1)
+            .attr("opacity", 0.5);
+        updateCircle
+            .on("mouseover", function () {
+                d3.select(this)
+                    .transition()
+                    .duration(animation)
+                    .style("opacity", 1);
+            })
+            .on("mouseout", function () {
+                d3.select(this)
+                    .transition()
+                    .duration(animation)
+                    .style("opacity", 0.8);
+            })
+            .transition()
+            .delay(function (d, i) {
+                return path == "__" ? animation / Math.pow(level, 2) * (maxLevel + 1) + i * animation / Math.pow(level, 2) / 4 :
+                    i * animation / Math.pow(level, 2) / 4;
+            })
+            .duration(animation / Math.pow(level, 2))
+            .attr('cx', function () {
+                if (level <= 2)
+                    return d3.select(this).attr("cx");
+                let all = $("circle.level-" + level);
+                let pos = set[level - 1] <= 8 ? 0 : -1 * parseInt(max / 2);
+                for (let t = 0; t < all.length; t++) {
+                    if (all[t].id == this.id) {
+                        pos += t;
+                        break;
+                    }
+                }
+                return _x + Math.sin(pos * 2 * Math.PI / set[level - 1]) * distance;
+            })
+            .attr('cy', function () {
+                if (level <= 2)
+                    return d3.select(this).attr("cy");
+                let all = $("circle.level-" + level);
+                let pos = set[level - 1] <= 8 ? 0 : -1 * parseInt(max / 2);
+                for (let t = 0; t < all.length; t++) {
+                    if (all[t].id == this.id) {
+                        pos += t;
+                        break;
+                    }
+                }
+                return _y - Math.cos(pos * 2 * Math.PI / set[level - 1]) * distance;
+            })
+            .attr('r', size)
+            .attr("fill", color[level % color.length])
+            .attr("opacity", 0.8)
+            .each("end", function (d, i) {
+                if (d.children == void 0 || d.children.length == 0)
+                    return;
+                let all = $("circle.level-" + level);
+                let pos = set[level - 1] <= 8 ? 0 : -1 * parseInt(max / 2);
+                for (let t = 0; t < all.length; t++) {
+                    if (all[t].id == this.id) {
+                        pos += t;
+                        break;
+                    }
+                }
+                let tx = path == "__" ? _x : _x + Math.sin(pos * 2 * Math.PI / set[level - 1]) * distance;
+                let ty = path == "__" ? _y : _y - Math.cos(pos * 2 * Math.PI / set[level - 1]) * distance;
+                adjustBranch(path + i + '_', d.children, tx, ty);
             });
-        exitCircle.transition()
-            .duration(animation)
-            .attr("r", 0)
-            .attr("opacity", 0)
-            .each("end", function () {
-                if (d.children != void 0 && d.children.length != 0)
-                    drawBranch(path + i + '_', d.children, count);
-                d3.select(this).remove();
-            });
-        exitLabel.transition()
-            .duration(animation)
-            .attr("opacity", 0)
-            .each("end", function () {
-                d3.select(this).remove();
-            });
+        updateLabel.transition()
+            .delay(function (d, i) {
+                return path == "__" ? animation / Math.pow(level, 2) * (maxLevel + 1.4) + i * animation / Math.pow(level, 2) / 4 :
+                    animation / Math.pow(level, 2) * 0.4 + i * animation / Math.pow(level, 2) / 4;
+            })
+            .duration(animation / Math.pow(level, 2))
+            .attr("fill", Fcolor)
+            .attr("x", function () {
+                if (level <= 2)
+                    return d3.select(this).attr("x");
+                let all = $("text.level-" + level);
+                let pos = set[level - 1] <= 8 ? 0 : -1 * parseInt(max / 2);
+                for (let t = 0; t < all.length; t++) {
+                    if (all[t].id == this.id) {
+                        pos += t;
+                        break;
+                    }
+                }
+                return _x + Math.sin(pos * 2 * Math.PI / set[level - 1]) * distance;
+            })
+            .attr("y", function () {
+                if (level <= 2)
+                    return d3.select(this).attr("y");
+                let all = $("text.level-" + level);
+                let pos = set[level - 1] <= 8 ? 0 : -1 * parseInt(max / 2);
+                for (let t = 0; t < all.length; t++) {
+                    if (all[t].id == this.id) {
+                        pos += t;
+                        break;
+                    }
+                }
+                return _y - Math.cos(pos * 2 * Math.PI / set[level - 1]) * distance;
+            })
+            .attr("font-family", "sans-serif")
+            .attr("font-size", size / 2 * Math.log(level + Math.E))
+            .attr("opacity", 0.8);
     }
 }

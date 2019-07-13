@@ -1,8 +1,8 @@
 /*
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 10:56:05 
- * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-13 14:00:09
+ * @Last Modified by: mikey.zhaopeng
+ * @Last Modified time: 2019-07-13 22:02:59
  */
 
 var colorset = {
@@ -47,9 +47,10 @@ var incase = {
           try {
             let txt = d3.select("#item-" + data[i].SECURITY_CODE).text();
             d3.select("#item-" + data[i].SECURITY_CODE)
-              .html('<img src="../images/icon05.png" style="width:16px;height:16px;float:left">')
+              .html('<img src="../images/ico04.ico" style="width:16px;height:16px;float:left;margin-left:3px; ">')
               .append("a")
               .attr("href", "javascript: void(0);")
+              .style("color","#00BFFF")
               .text(txt)
               .on("click", function () {
                 $("input[name=Code]").val(
@@ -263,6 +264,7 @@ function draw() {
       break;
     }
   }
+  dataview(objset);
 }
 
 var portrait = new Portrait.Chart('sunburst');
@@ -279,7 +281,7 @@ function paint_portrait(d) {
     var option = {
       margin: 20,
       // border: "1px solid white",
-      // animation: 1000,
+      // stroke: "none",
       data: data
     };
 
@@ -332,7 +334,7 @@ function paint_portrait(d) {
     if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
       continue;
     var val = parseInt(d[para + spaner + "0M"]);
-    if (val >= all / 6) {
+    if (val >= all / 4) {
       var child = {
         label: enter(nameof[para + spaner + "0M"], 5),
         value: val
@@ -342,11 +344,6 @@ function paint_portrait(d) {
       others += val;
     }
   }
-  var child = {
-    label: "其他",
-    value: others
-  };
-  data[0]['children'][0]['children'].push(child);
 
   // 非流动资产
   all = parseInt(d["BAME01320M"]);
@@ -357,7 +354,7 @@ function paint_portrait(d) {
     if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
       continue;
     var val = parseInt(d[para + spaner + "0M"]);
-    if (val >= all / 6) {
+    if (val >= all / 4) {
       var child = {
         label: enter(nameof[para + spaner + "0M"], 5),
         value: val
@@ -367,11 +364,6 @@ function paint_portrait(d) {
       others += val;
     }
   }
-  child = {
-    label: "其他",
-    value: others
-  };
-  data[0]['children'][1]['children'].push(child);
 
   // 流动负债
   all = parseInt(d["BAME01980M"]);
@@ -380,7 +372,7 @@ function paint_portrait(d) {
   for (var num = 137; num <= 197; num++) {
     var spaner = num.toString();
     var val = parseInt(d[para + spaner + "0M"]);
-    if (val >= all / 6) {
+    if (val >= all / 4) {
       var child = {
         label: enter(nameof[para + spaner + "0M"], 5),
         value: val
@@ -390,11 +382,6 @@ function paint_portrait(d) {
       others += val;
     }
   }
-  child = {
-    label: "其他",
-    value: others
-  };
-  data[1]['children'][0]['children'].push(child);
 
   // 非流动负债
   all = parseInt(d["BAME02190M"]);
@@ -405,7 +392,7 @@ function paint_portrait(d) {
     if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
       continue;
     var val = parseInt(d[para + spaner + "0M"]);
-    if (val >= all / 6) {
+    if (val >= all / 4) {
       var child = {
         label: enter(nameof[para + spaner + "0M"], 5),
         value: val
@@ -415,11 +402,6 @@ function paint_portrait(d) {
       others += val;
     }
   }
-  child = {
-    label: "其他",
-    value: others
-  };
-  data[1]['children'][1]['children'].push(child);
 
   // 所有者权益总计
   all = parseInt(d["BAME02470M"]);
@@ -430,7 +412,7 @@ function paint_portrait(d) {
     if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
       continue;
     var val = parseInt(d[para + spaner + "0M"]);
-    if (val >= all / 6) {
+    if (val >= all / 4) {
       var child = {
         label: enter(nameof[para + spaner + "0M"], 5),
         value: val
@@ -440,11 +422,6 @@ function paint_portrait(d) {
       others += val;
     }
   }
-  child = {
-    label: "其他",
-    value: others
-  };
-  data[2]['children'][0]['children'].push(child);
 
   var option = {
     margin: 20,
@@ -453,13 +430,15 @@ function paint_portrait(d) {
     data: [{
       label: "企业画像",
       value: '',
-      children: data
-    }]
+      children: data,
+    }],
+    max: 3
   };
   if (option && typeof option === "object") {
     portrait.setOption(option);
   }
 }
+
 
 function buildTree() {
   var all = d3.select("#tree_well").select("ul");
@@ -468,19 +447,20 @@ function buildTree() {
     if (Class[i_1].name == "")
       continue;
     var c_1 = all.append("li")
-      .html('<img src="../images/icon03.png" style="width:16px;height:16px;float:left"></img><span><i class="icon-folder-open"></i>' + Class[i_1].name + '</span>')
+      .html('<img src="../images/ico04.ico" style="width:16px;height:16px;float:left;margin-left:0px;"></img><span><i class="icon-folder-open"></i>' + Class[i_1].name + '</span>')
       .append("ul")
-      .style("padding-left", "25px");
+      .style("padding-left", "25px")
+      .style("margin-top","2px");
     for (let i_2 = 0; i_2 < Class[i_1].children.length; i_2++) {
       var c_2 = c_1.append("li")
         .style("display", "none")
-        .html('<img src="../images/icon01.png" style="width:16px;height:16px;float:left"></img><span><i class="icon-minus-sign"></i>' + Class[i_1].children[i_2].name + '</span>')
+        .html('<img src="../images/ico04.ico" style="width:16px;height:16px;float:left;margin-left:3px;"></img><span><i class="icon-minus-sign"></i>' + Class[i_1].children[i_2].name + '</span>')
         .append("ul")
         .style("padding-left", "25px");
       for (let i_3 = 0; i_3 < Class[i_1].children[i_2].children.length; i_3++) {
         var c_3 = c_2.append("li")
           .style("display", "none")
-          .html('<img src="../images/icon02.png" style="width:16px;height:16px;float:left"></img><span><i class="icon-minus-sign"></i>' +
+          .html('<img src="../images/ico04.ico" style="width:16px;height:16px;float:left;margin-left:3px;"></img><span><i class="icon-minus-sign"></i>' +
             Class[i_1].children[i_2].children[i_3].name + '</span>')
           .append("ul")
           .style("padding-left", "25px");
@@ -493,7 +473,7 @@ function buildTree() {
               var str = Class[i_1].children[i_2].children[i_3].children[i_4].name;
               return "item-" + str.substring(str.indexOf('(') + 1, str.indexOf(')'));
             })
-            .html('<img src="../images/icon05.png" style="width:16px;height:16px;float:left"></img><i class="icon-leaf"></i>' +
+            .html('<img src="../images/ico04.ico" style="width:16px;height:16px;float:left;margin-left:1px;"></img><i class="icon-leaf"></i>' +
               Class[i_1].children[i_2].children[i_3].children[i_4].name);
         }
       }
@@ -514,287 +494,6 @@ function buildTree() {
       e.stopPropagation();
     });
   });
-}
-
-{
-  /*
-  function paint_analyze(d) {
-    if (d == void 0)
-      d = [];
-    if (d.length == 0) {
-      var myChart = echarts.init(document.getElementById('analyze'));
-      var app = {};
-      app.title = "没有数据";
-
-      let year = [" - "];
-
-      var option = {
-        textStyle: {
-          color: '#eee'
-        },
-        color: colorset.sunset,
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: { // 坐标轴指示器，坐标轴触发有效
-            type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
-          }
-        },
-        title: {
-          text: '运营能力分析 / 偿债能力分析',
-          left: 'center',
-          top: 10,
-          textStyle: {
-            color: '#00f6ff'
-          }
-        },
-        grid: [{
-          left: 50,
-          right: 20,
-          height: '35%'
-        }, {
-          left: 50,
-          right: 20,
-          top: '65%',
-          height: '30%'
-        }],
-        xAxis: [{
-          type: 'category',
-          data: year,
-          axisLabel: {
-            show: false
-          }
-        }, {
-          gridIndex: 1,
-          type: 'category',
-          data: year,
-          position: 'top',
-          axisLabel: {
-            show: false
-          }
-        }],
-        yAxis: [{
-          type: 'value'
-        }, {
-          gridIndex: 1,
-          type: 'value',
-          inverse: true
-        }],
-        series: [{
-          name: '流动比率',
-          xAxisIndex: 1,
-          yAxisIndex: 1,
-          type: 'bar',
-          data: []
-        }, {
-          name: '速动比率',
-          xAxisIndex: 1,
-          yAxisIndex: 1,
-          type: 'bar',
-          data: []
-        }, {
-          name: '现金比例',
-          xAxisIndex: 1,
-          yAxisIndex: 1,
-          type: 'bar',
-          data: []
-        }, {
-          name: '资产负债率',
-          xAxisIndex: 1,
-          yAxisIndex: 1,
-          type: 'bar',
-          data: []
-        }, {
-          name: '应收账款周转率',
-          type: 'bar',
-          data: []
-        }, {
-          name: '存货周转率',
-          type: 'bar',
-          data: []
-        }, {
-          name: '总资产周转率',
-          type: 'bar',
-          data: []
-        }]
-      };
-
-      if (option && typeof option === "object") {
-        myChart.setOption(option, true);
-      }
-
-      return;
-    }
-
-    var y = incase.year;
-    var type = incase.ctx;
-    for (var i = 0; i < dataset[y][type].Income.length; i++) {
-      if (dataset[y][type].Income[i].Code == d[0].Code) {
-        for (var m = 0; m < d.length; m++) {
-          d[m].Income = dataset[y][type].Income[i];
-        }
-        break;
-      }
-    }
-    for (var i = 0; i < dataset[y][type].CashFlow.length; i++) {
-      if (dataset[y][type].CashFlow[i].Code == d[0].Code) {
-        for (var m = 0; m < d.length; m++) {
-          d[m].CashFlow = dataset[y][type].CashFlow[i];
-        }
-        break;
-      }
-    }
-
-    var myChart = echarts.init(document.getElementById('analyze'));
-
-    let data = [];
-    for (let i = 0; i < 7; i++) {
-      data.push([]);
-    }
-
-    let year = [];
-
-    var option = null;
-
-    var averCheck = 0;
-    var averRepo = 0;
-    var averAssets = 0;
-    for (let i = 0; i < d.length; i++) {
-      averCheck += parseInt(d[i].ToCheckIn);
-      averRepo += parseInt(d[i].Repo);
-      averAssets += parseInt(d[i].TotalAssets);
-    }
-    averCheck /= d.length;
-    averRepo /= d.length;
-    averAssets /= d.length;
-
-    for (let i = 0; i < d.length; i++) {
-      year.push(d[i].year);
-      data[0].push(parseInt(d[i].CurrentAssets / d[i].CurrentLiability * 1000) / 1000);
-      data[1].push(parseInt(d[i].ValidAssets / d[i].CurrentLiability * 1000) / 1000);
-      data[2].push(parseInt(d[i].CheckAssets / d[i].CurrentLiability * 1000) / 1000);
-      data[3].push(parseInt(d[i].TotalLiability / d[i].TotalAssets * 1000) / 1000);
-      data[4].push(parseInt(d[i].CashFlow.FromOperation / averCheck * 1000) / 1000);
-      data[5].push(parseInt(d[i].Income.TotalCost / averRepo * 1000) / 1000);
-      data[6].push(parseInt(d[i].CashFlow.FromOperation / averAssets * 1000) / 1000);
-    }
-
-    for (var i = 0; i < year.length; i++) {
-      var max = parseInt(year[0]);
-      var index = 0;
-      for (var j = 0; j < year.length - i; j++) {
-        if (parseInt(year[j]) > max) {
-          max = parseInt(year[j]);
-          index = j;
-        }
-      }
-      if (index != year.length - i - 1) {
-        var obj = year[index];
-        year[index] = year[year.length - 1];
-        year[year.length - 1] = obj;
-        for (var j = 0; j < 7; j++) {
-          obj = data[j][index];
-          data[j][index] = data[j][data[j].length - 1];
-          data[j][data[j].length - 1] = obj;
-        }
-      }
-    }
-
-    option = {
-      textStyle: {
-        color: '#eee'
-      },
-      color: colorset.sunset,
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: { // 坐标轴指示器，坐标轴触发有效
-          type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
-        }
-      },
-      title: {
-        text: "运营能力分析 / 偿债能力分析",
-        left: 'center',
-        top: 10,
-        textStyle: {
-          color: '#00f6ff'
-        }
-      },
-      grid: [{
-        left: 50,
-        right: 20,
-        height: '35%'
-      }, {
-        left: 50,
-        right: 20,
-        top: '65%',
-        height: '30%'
-      }],
-      xAxis: [{
-        type: 'category',
-        data: year,
-        axisLabel: {
-          show: false
-        }
-      }, {
-        gridIndex: 1,
-        type: 'category',
-        data: year,
-        position: 'top',
-        axisLabel: {
-          show: false
-        }
-      }],
-      yAxis: [{
-        type: 'value'
-      }, {
-        gridIndex: 1,
-        type: 'value',
-        inverse: true
-      }],
-      series: [{
-        name: '流动比率',
-        type: 'bar',
-        xAxisIndex: 1,
-        yAxisIndex: 1,
-        data: data[0]
-      }, {
-        name: '速动比率',
-        type: 'bar',
-        xAxisIndex: 1,
-        yAxisIndex: 1,
-        data: data[1]
-      }, {
-        name: '现金比例',
-        type: 'bar',
-        xAxisIndex: 1,
-        yAxisIndex: 1,
-        data: data[2]
-      }, {
-        name: '资产负债率',
-        xAxisIndex: 1,
-        yAxisIndex: 1,
-        type: 'bar',
-        data: data[3]
-      }, {
-        name: '应收账款周转率',
-        type: 'bar',
-        data: data[4]
-      }, {
-        name: '存货周转率',
-        type: 'bar',
-        data: data[5]
-      }, {
-        name: '总资产周转率',
-        type: 'bar',
-        data: data[6]
-      }]
-    };
-
-    if (option && typeof option === "object") {
-      myChart.setOption(option, true);
-    }
-  }
-  paint_analyze([]);
-  */
 }
 
 // 散点图配置项
@@ -882,10 +581,13 @@ function drawMDS(y, ctx) {
         })
         .attr("r", 6)
         .attr("opacity", "0.6")
-        .attr("fill", "#3564e6")
+        .attr("fill", function (d) {
+          //console.log(d[3], $("input[name=Code]").val());
+          return d[3] == $("input[name=Code]").val() ? "#FFFAF0" : "#00BFFF";
+        })
         .on("mouseover", function (d) {
           // alert((parseInt(d3.event.pageX)+10)+'px, ' + (parseInt(d3.event.pageY)-10)+'px');
-          d3.select(this).attr("fill", "white").attr("r", 9).attr("opacity", "0.8");
+          d3.select(this).attr("fill", "#FFFAF0").attr("r", 10).attr("opacity", "1");
           mdstip.html(d[2] + d[3]);
           mdstip.style("visibility", "visible");
         })
@@ -894,12 +596,31 @@ function drawMDS(y, ctx) {
         })
         .on("mouseout", function () {
           d3.select(this)
-            .transition()
-            .duration(300)
-            .attr("fill", "#3564e6")
+            .attr("fill", "#00BFFF")
             .attr("r", 6)
             .attr("opacity", "0.6");
           mdstip.style("visibility", "hidden");
+        })
+        .on('click', function (d) {
+          $("input[name=Code]").val(d[3]);
+          draw();
+          d3.select(this)
+            .attr("fill", "#FFFAF0")
+            .attr("r", 10)
+            .attr("opacity", "1");
+        });
+
+      svg.selectAll("circle")
+        .data(data1)
+        .attr("fill", function (d) {
+          //console.log(d[3], $("input[name=Code]").val());
+          return d[3] == $("input[name=Code]").val() ? "#FFFAF0" : "#00BFFF";
+        })
+        .attr("r", function (d) {
+          return d[3] == $("input[name=Code]").val() ? "10" : "6";
+        })
+        .attr("opacity", function (d) {
+          return d[3] == $("input[name=Code]").val() ? "1" : "0.6";
         });
     });
     return;
@@ -1904,4 +1625,128 @@ function enter(str, limit) {
     }
   }
   return str;
+}
+var tipBox = d3.select("#dataviewsvg")
+  .append("table")
+  .attr("border", "0")
+  .style("margin-left","20px")
+  .style("margin-top","40px");
+
+var table1 = tipBox.append("tr");
+table1.append("th").style("width", "130px").style("color", "#00f6ff").text("公司名");
+table1.append("th").style("width", "112px").style("color", "#00f6ff").text("证券代码");
+table1.append("th").style("width", "120px").style("color", "#00f6ff").text("流动比率");
+
+var table2 = tipBox.append("tr");
+table2.append("td").attr("id", "t1").text("NULL");
+table2.append("td").attr("id", "t2").text("NULL");
+table2.append("td").attr("id", "t3").text("NULL");
+
+
+var table3 = tipBox.append("tr");
+table3.append("th").style("width", "130px").style("color", "#00f6ff").text("速动比率");
+table3.append("th").style("width", "112px").style("color", "#00f6ff").text("现金比率");
+table3.append("th").style("width", "120px").style("color", "#00f6ff").text("资产负债率");
+
+var table4 = tipBox.append("tr");
+table4.append("td").attr("id", "t4").text("NULL");
+table4.append("td").attr("id", "t5").text("NULL");
+table4.append("td").attr("id", "t6").text("NULL");
+
+var table5 = tipBox.append("tr");
+table5.append("th").style("width", "130px").style("color", "#00f6ff").text("资产管理效率");
+table5.append("th").style("width", "112px").style("color", "#00f6ff").text("存货周转率");
+table5.append("th").style("width", "120px").style("color", "#00f6ff").text("总资产周转率");
+
+var table6 = tipBox.append("tr");
+table6.append("td").attr("id", "t7").text("NULL");
+table6.append("td").attr("id", "t8").text("NULL");
+table6.append("td").attr("id", "t9").text("NULL");
+
+function dataview(d) {
+  var y = incase.year;
+  var type = incase.ctx;
+  for (var i = 0; i < dataset[y][type].Income.length; i++) {
+    if (dataset[y][type].Income[i].Code == d[0].Code) {
+      for (var m = 0; m < d.length; m++) {
+        d[m].Income = dataset[y][type].Income[i];
+      }
+      break;
+    }
+  }
+  for (var i = 0; i < dataset[y][type].CashFlow.length; i++) {
+    if (dataset[y][type].CashFlow[i].Code == d[0].Code) {
+      for (var m = 0; m < d.length; m++) {
+        d[m].CashFlow = dataset[y][type].CashFlow[i];
+      }
+      break;
+    }
+  }
+
+  let data = [];
+  for (let i = 0; i < 7; i++) {
+    data.push([]);
+  }
+
+  let year = [];
+
+  var option = null;
+
+  var averCheck = 0;
+  var averRepo = 0;
+  var averAssets = 0;
+  for (let i = 0; i < d.length; i++) {
+    averCheck += parseInt(d[i].ToCheckIn);
+    averRepo += parseInt(d[i].Repo);
+    averAssets += parseInt(d[i].TotalAssets);
+  }
+  averCheck /= d.length;
+  averRepo /= d.length;
+  averAssets /= d.length;
+
+  for (let i = 0; i < d.length; i++) {
+    year.push(d[i].year);
+    data[0].push(parseInt(d[i].CurrentAssets / d[i].CurrentLiability * 1000) / 1000);
+    data[1].push(parseInt(d[i].ValidAssets / d[i].CurrentLiability * 1000) / 1000);
+    data[2].push(parseInt(d[i].CheckAssets / d[i].CurrentLiability * 1000) / 1000);
+    data[3].push(parseInt(d[i].TotalLiability / d[i].TotalAssets * 1000) / 1000);
+    data[4].push(parseInt(d[i].CashFlow.FromOperation / averCheck * 1000) / 1000);
+    data[5].push(parseInt(d[i].Income.TotalCost / averRepo * 1000) / 1000);
+    data[6].push(parseInt(d[i].CashFlow.FromOperation / averAssets * 1000) / 1000);
+  }
+
+  for (var i = 0; i < year.length; i++) {
+    if (year[i] == y) {
+      d3.select("#t1").text(function () {
+        return d[0]["CashFlow"]["Name"];
+      });
+      d3.select("#t2").text(function () {
+        return d[0]["CashFlow"]["Code"];
+      });
+      d3.select("#t3").text(function () {
+        return data[0][i];
+      });
+      d3.select("#t4").text(function () {
+        return data[1][i];
+      });
+      d3.select("#t5").text(function () {
+        return data[2][i];
+      });
+      d3.select("#t6").text(function () {
+        return data[3][i];
+      });
+      d3.select("#t7").text(function () {
+        return data[4][i];
+      });
+      d3.select("#t8").text(function () {
+        return data[5][i];
+      });
+      d3.select("#t9").text(function () {
+        return data[6][i];
+      });
+
+    }
+  }
+
+
 }
