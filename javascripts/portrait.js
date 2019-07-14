@@ -2,7 +2,7 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-12 13:50:39 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-13 23:06:32
+ * @Last Modified time: 2019-07-14 21:55:26
  */
 
 console.log("Thanks for using portrait.js, writen by ZhenDong Yang, 2019-7-12");
@@ -23,7 +23,7 @@ Portrait.Chart = function Chart(parent) {
         padding: [0, 0, 0, 0],
         title: "undefined",
         background: "none",
-        color: ['#FF7853', '#EA5151', '#CC3F57', '#9A2555', '#FFAE57'],
+        color: "circle",
         fontColor: '#FFFFFF',
         stroke: "white",
         animation: 1000,
@@ -196,7 +196,10 @@ Portrait.Chart.prototype.setOption = function (change) {
             .attr('cx', _x)
             .attr('cy', _y)
             .attr('r', 0)
-            .attr("fill", color[level % color.length])
+            .attr("fill", function (d, i) {
+                if (option.color == "circle")
+                    return d3.hsl(i * 2 * Math.PI, 0.5, 0.5);
+            })
             .attr("opacity", 0)
             .transition()
             .delay(function (d, i) {
@@ -398,7 +401,19 @@ Portrait.Chart.prototype.setOption = function (change) {
                 return _y - Math.cos(pos * 2 * Math.PI / set[level - 1]) * distance;
             })
             .attr('r', size)
-            .attr("fill", color[level % color.length])
+            .attr("fill", function (d, i) {
+                if (option.color == "circle") {
+                    let all = $("circle.level-" + level);
+                    let pos = set[level - 1] <= 8 ? 0 : -1 * parseInt(max / 2);
+                    for (let t = 0; t < all.length; t++) {
+                        if (all[t].id == this.id) {
+                            pos += t;
+                            break;
+                        }
+                    }
+                    return d3.hsl(360 * pos / set[level - 1], 1, 0.6);
+                }
+            })
             .attr("opacity", 0.7)
             .each("end", function (d, i) {
                 if (d.children == void 0 || d.children.length == 0)

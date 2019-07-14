@@ -2,11 +2,14 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 10:56:05 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-14 18:42:55
+ * @Last Modified time: 2019-07-14 21:50:31
  */
 
 var colorset = {
-  sunset: ['#00BFFF', '#1E90FF', '#6495ED', '#4169E1', '#87CEFA']
+  echarts_default: ['#c23531','#2f4554', '#61a0a8', '#d48265', '#91c7ae','#749f83',  '#ca8622', '#bda29a','#6e7074', '#546570', '#c4ccd3'],
+  echarts_colorful: ['#2A8339', '#367DA6', '#A68B36', '#BD5692'],
+  long2: ['#F9ADA0', '#F26271', '#C65B7C', '#5B3758'],
+  long: ['#e9eb87', '#8f91a2', '#a9d2d5']
 };
 
 var dataset = {};
@@ -49,7 +52,7 @@ var incase = {
               .html('<img src="../images/ico04.ico" style="width:16px;height:16px;float:left;margin-left:3px; ">')
               .append("a")
               .attr("href", "javascript: void(0);")
-              .style("color","#00BFFF")
+              .style("color", "#00BFFF")
               .text(txt)
               .on("click", function () {
                 $("input[name=Code]").val(
@@ -197,6 +200,12 @@ function init() {
 }
 
 function draw() {
+  if ($("input[name=Code]").val().toString().length < 6)
+    return;
+  if ($("input[name=Code]").val().toString().length > 6) {
+    $("input[name=Code]").val($("input[name=Code]").val().toString().substring(0, 7));
+    return;
+  }
   layout(false);
   if (incase.ctx == "Merge") {
     drawMDS(incase.year, "m");
@@ -279,7 +288,7 @@ function paint_portrait(d) {
     }];
     var option = {
       margin: 20,
-      color: colorset.sunset,
+      // color: colorset.long2,
       // border: "1px solid white",
       // stroke: "none",
       data: data
@@ -334,7 +343,7 @@ function paint_portrait(d) {
     if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
       continue;
     var val = parseInt(d[para + spaner + "0M"]);
-    if (val >= all / 4) {
+    if (val >= all / 100) {
       var child = {
         label: enter(nameof[para + spaner + "0M"], 5),
         value: val
@@ -354,7 +363,7 @@ function paint_portrait(d) {
     if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
       continue;
     var val = parseInt(d[para + spaner + "0M"]);
-    if (val >= all / 4) {
+    if (val >= all / 100) {
       var child = {
         label: enter(nameof[para + spaner + "0M"], 5),
         value: val
@@ -372,7 +381,7 @@ function paint_portrait(d) {
   for (var num = 137; num <= 197; num++) {
     var spaner = num.toString();
     var val = parseInt(d[para + spaner + "0M"]);
-    if (val >= all / 4) {
+    if (val >= all / 100) {
       var child = {
         label: enter(nameof[para + spaner + "0M"], 5),
         value: val
@@ -392,7 +401,7 @@ function paint_portrait(d) {
     if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
       continue;
     var val = parseInt(d[para + spaner + "0M"]);
-    if (val >= all / 4) {
+    if (val >= all / 100) {
       var child = {
         label: enter(nameof[para + spaner + "0M"], 5),
         value: val
@@ -412,7 +421,7 @@ function paint_portrait(d) {
     if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
       continue;
     var val = parseInt(d[para + spaner + "0M"]);
-    if (val >= all / 4) {
+    if (val >= all / 100) {
       var child = {
         label: enter(nameof[para + spaner + "0M"], 5),
         value: val
@@ -425,7 +434,7 @@ function paint_portrait(d) {
 
   var option = {
     margin: 20,
-    color: colorset.sunset,
+    // color: colorset.long2,
     // border: "1px solid white",
     // animation: 1000,
     data: [{
@@ -433,7 +442,7 @@ function paint_portrait(d) {
       value: '',
       children: data,
     }],
-    max: 3
+    max: 20
   };
   if (option && typeof option === "object") {
     portrait.setOption(option);
@@ -450,7 +459,7 @@ function buildTree() {
       .html('<img src="../images/ico04.ico" style="width:16px;height:16px;float:left;margin-left:0px;"></img><span><i class="icon-folder-open"></i>' + Class[i_1].name + '</span>')
       .append("ul")
       .style("padding-left", "25px")
-      .style("margin-top","2px");
+      .style("margin-top", "2px");
     for (let i_2 = 0; i_2 < Class[i_1].children.length; i_2++) {
       var c_2 = c_1.append("li")
         .style("display", "none")
@@ -585,22 +594,22 @@ function drawMDS(y, ctx) {
         .data(data1)
         .enter()
         .append("circle")
-        .attr("class","circled")
+        .attr("class", "circled")
         .attr("cx", function (d) {
           return d[0] * 0.8 + 60;
         })
         .attr("cy", function (d) {
           return d[1] * 0.8 + 10;
         })
-        .attr("r", 6)
+        .attr("r", 3)
         .attr("opacity", "0.6")
         .attr("fill", function (d) {
           //console.log(d[3], $("input[name=Code]").val());
-          return d[3] == $("input[name=Code]").val() ? "#FFFAF0" : "#00BFFF";
+          return d[3] == $("input[name=Code]").val() ? "#FFFAF0" : colorset.long2[0];
         })
         .on("mouseover", function (d) {
           // alert((parseInt(d3.event.pageX)+10)+'px, ' + (parseInt(d3.event.pageY)-10)+'px');
-          d3.select(this).attr("fill", "#FFFAF0").attr("r", 10).attr("opacity", "1");
+          d3.select(this).attr("fill", "#FFFAF0").attr("r", 5).attr("opacity", "1");
           mdstip.html(d[2] + d[3]);
           mdstip.style("visibility", "visible");
         })
@@ -609,8 +618,8 @@ function drawMDS(y, ctx) {
         })
         .on("mouseout", function () {
           d3.select(this)
-            .attr("fill", "#00BFFF")
-            .attr("r", 6)
+            .attr("fill", colorset.long2[0])
+            .attr("r", 3)
             .attr("opacity", "0.6");
           mdstip.style("visibility", "hidden");
         })
@@ -630,12 +639,12 @@ function drawMDS(y, ctx) {
         .duration(600)
         .attr("opacity", "0")
         .attr("r", 0)
-        .each("end", function() {
+        .each("end", function () {
           d3.select(this).remove();
         });
     });
     return;
-  }  
+  }
 
   // label = mdsData[y][ctx].label;
   // data = mdsData[y][ctx].data;
@@ -644,10 +653,12 @@ function drawMDS(y, ctx) {
 
 // 柱状图配置项
 {
+  var changed = false;
+
   var width = parseInt(d3.select("#analyze_2").style("width")) - 4;
   var height = parseInt(d3.select("#analyze_2").style("height")) / 4 - 8;
   var padding = {
-    top: 24,
+    top: 26,
     right: 20,
     bottom: 4,
     left: 20
@@ -661,11 +672,16 @@ function drawMDS(y, ctx) {
   var animation = 400;
 
   var color = {
-    init: colorset.sunset[3],
-    in: colorset.sunset[0]
+    init: colorset.long2[3],
+    in: colorset.long2
   };
 
-  var _data = [];
+  var _data = [
+    [],
+    [],
+    [],
+    []
+  ];
 
   var max = [0, 0, 0, 0];
   var min = [0, 0, 0, 0];
@@ -684,144 +700,55 @@ function drawMDS(y, ctx) {
 }
 
 function layout(ensure) {
-  for (let li = 0; li < 2; li++) {
-    d3.select("#ranking" + li).selectAll("rect").attr("fill", color.in);
-    d3.select("#column" + li + "-" + $("input[name=Code]").val()).attr("fill", "white");
-
-    let highlighted = d3.select("#column" + li + "-" + $("input[name=Code]").val());
-
-    try {
-      let center = parseInt(width) / 2 - (padding.left + padding.right) / 2;
-      let start = parseFloat(highlighted.attr("x")) + parseFloat(highlighted.attr("transform").substring(10, highlighted.attr("transform").indexOf(',')));
-      let dx = center - start - rectWidth;
-      trans[li] += dx;
-      trans[li] = trans[li] > 0 ? 0 : trans[li];
-
-      for (let i = 0; i < _data.length; i++) {
-        if (_data[i].Code == $("input[name=Code]").val()) {
-          columnAt[li] = i;
-          break;
-        }
-      }
-      let begin = columnAt[li] < 10 ? 0 : columnAt[li] - 10;
-      let _max = parseInt(_data[begin][param[li]]);
-      for (let i = begin + 1; i < _data.length && i < begin + 21; i++) {
-        _data[i].index = i;
-        if (parseInt(_data[i][param[li]]) > _max) {
-          _max = parseInt(_data[i][param[li]]);
-        }
-      }
-      _max = _max > 0 ? _max * 1.1 : _max * 0.9;
-      yScale[li] = d3.scale.linear()
-        .domain([min[li], _max])
-        .range([0, parseInt(height) - padding.top - padding.bottom]);
-
-      if (_max < max[li]) {
-        d3.select("#ranking" + li)
-          .selectAll("rect")
-          .data(_data)
-          .transition()
-          .delay(animation)
-          .duration(animation)
-          .attr("transform", "translate(" + trans[li] + ",0)")
-          .attr("fill", function (d) {
-            return (d.Code == $("input[name=Code]").val()) ? "white" : color.in;
-          })
-          .style("opacity", 0.7)
-          .attr("width", rectWidth);
-
-        d3.select("#ranking" + li)
-          .selectAll("rect")
-          .data(_data)
-          .transition()
-          .delay(2.1 * animation)
-          .duration(animation)
-          .attr("y", function (d) {
-            return parseInt(height) - padding.bottom - yScale[li](parseInt(d[param[li]]));
-          })
-          .attr("height", function (d) {
-            return yScale[li](parseInt(d[param[li]]));
-          })
-          .attr("x", function (d, i) {
-            return i * rectStep;
-          });
-      } else {
-        d3.select("#ranking" + li)
-          .selectAll("rect")
-          .data(_data)
-          .transition()
-          .delay(animation)
-          .duration(animation)
-          .attr("y", function (d) {
-            return parseInt(height) - padding.bottom - yScale[li](parseInt(d[param[li]]));
-          })
-          .attr("height", function (d) {
-            return yScale[li](parseInt(d[param[li]]));
-          })
-          .attr("x", function (d, i) {
-            return i * rectStep;
-          });
-
-        d3.select("#ranking" + li)
-          .selectAll("rect")
-          .data(_data)
-          .transition()
-          .delay(2.1 * animation)
-          .duration(animation)
-          .attr("transform", "translate(" + trans[li] + ",0)")
-          .attr("fill", function (d) {
-            return (d.Code == $("input[name=Code]").val()) ? "white" : color.in;
-          })
-          .style("opacity", 0.7)
-          .attr("width", rectWidth);
-      }
-
-      max[li] = _max;
-    } catch (error) {}
-
-    if (_data == dataset[incase.year][incase.ctx].Balance && !ensure) {
-      return;
+  for (let li = 0; li < 4; li++) {
+    if (_data[li] == dataset[incase.year][incase.ctx].Balance && !ensure) {
+      continue;
+    } else if (li == 0) {
+      ensure = true;
     }
 
-    _data = dataset[incase.year][incase.ctx].Balance;
+    _data[li] = [];
+    for (let i = 0; i < dataset[incase.year][incase.ctx].Balance.length; i++) {
+      _data[li].push(dataset[incase.year][incase.ctx].Balance[i]);
+    }
 
-    rectStep = 10 * parseInt(width) / _data.length;
+    rectStep = 10 * parseInt(width) / _data[li].length;
     rectWidth = rectStep * 0.6;
 
-    max[li] = parseInt(_data[0][param[li]]);
-    min[li] = parseInt(_data[0][param[li]]);
-    average[li] = parseInt(_data[0][param[li]]);
+    max[li] = parseInt(_data[li][0][param[li]]);
+    min[li] = parseInt(_data[li][0][param[li]]);
+    average[li] = parseInt(_data[li][0][param[li]]);
 
-    for (let i = 1; i < _data.length; i++) {
-      _data[i].index = i;
-      if (parseInt(_data[i][param[li]]) > max[li]) {
-        max[li] = parseInt(_data[i][param[li]]);
+    for (let i = 1; i < _data[li].length; i++) {
+      _data[li][i].index = i;
+      if (parseInt(_data[li][i][param[li]]) > max[li]) {
+        max[li] = parseInt(_data[li][i][param[li]]);
       }
-      if (parseInt(_data[i][param[li]]) < min[li]) {
-        min[li] = parseInt(_data[i][param[li]]);
+      if (parseInt(_data[li][i][param[li]]) < min[li]) {
+        min[li] = parseInt(_data[li][i][param[li]]);
       }
-      average[li] += parseInt(_data[i][param[li]]);
+      average[li] += parseInt(_data[li][i][param[li]]);
     }
     min[li] = min[li] > 0 ? 0 : min[li] * 1.1;
     max[li] = max[li] > 0 ? max[li] * 1.1 : max[li] * 0.9;
-    average[li] /= _data.length;
+    average[li] /= _data[li].length;
 
     yScale[li] = d3.scale.linear()
       .domain([min[li], max[li]])
       .range([0, parseInt(height) - padding.top - padding.bottom]);
 
-    for (let i = 0; i < _data.length; i++) {
-      let min = _data[0][param[li]];
+    for (let i = 0; i < _data[li].length; i++) {
+      let min = _data[li][0][param[li]];
       let index = 0;
-      for (let j = 0; j < _data.length - i; j++) {
-        if (parseFloat(_data[j][param[li]]) < min) {
-          min = parseFloat(_data[j][param[li]]);
+      for (let j = 0; j < _data[li].length - i; j++) {
+        if (parseFloat(_data[li][j][param[li]]) < min) {
+          min = parseFloat(_data[li][j][param[li]]);
           index = j;
         }
       }
-      let temp = _data[_data.length - 1 - i];
-      _data[_data.length - 1 - i] = _data[index];
-      _data[index] = temp;
+      let temp = _data[li][_data[li].length - 1 - i];
+      _data[li][_data[li].length - 1 - i] = _data[li][index];
+      _data[li][index] = temp;
     }
 
     if (d3.select("#analyze_2").html() == "") {
@@ -839,14 +766,19 @@ function layout(ensure) {
       svg[li] = d3.select("#ranking" + li);
     }
 
-    let rectUpdate = svg[li].selectAll("rect").data(_data);
+    let rectUpdate = svg[li].selectAll("rect").data(_data[li]);
     let rectEnter = rectUpdate.enter();
     let rectExit = rectUpdate.exit();
 
-    rectUpdate.transition()
+    rectUpdate
+      .attr("id", function (d) {
+        return "column" + li + "-" + d.Code;
+      })
+      .transition()
+      .delay(animation * 0.2 * li)
       .duration(animation)
       .attr("fill", function (d) {
-        return (d.Code == $("input[name=Code]").val()) ? "white" : color.in;
+        return (d.Code == $("input[name=Code]").val()) ? "white" : color.in[li];
       })
       .style("opacity", 0.7)
       .attr("x", function (d, i) {
@@ -860,7 +792,7 @@ function layout(ensure) {
         return yScale[li](parseInt(d[param[li]]));
       })
       .transition()
-      .delay(2000 + 2000 * Math.random())
+      .delay(animation + 2000 * Math.random())
       .duration(animation + animation * Math.random())
       .attr("x", function (d, i) {
         return i * rectStep;
@@ -902,9 +834,10 @@ function layout(ensure) {
         draw();
       })
       .transition()
+      .delay(animation * 0.2 * li)
       .duration(animation)
       .attr("fill", function (d) {
-        return (d.Code == $("input[name=Code]").val()) ? "white" : color.in;
+        return (d.Code == $("input[name=Code]").val()) ? "white" : color.in[li];
       })
       .attr("y", function (d) {
         return parseInt(height) - padding.bottom - yScale[li](parseInt(d[param[li]]));
@@ -921,13 +854,116 @@ function layout(ensure) {
       });
 
     rectExit.transition()
+      .delay(animation * 0.2 * li)
       .duration(animation)
       .style("opacity", 0)
       .attr("width", 0);
   }
+  adjust();
+}
 
-  if (ensure) {
-    layout(false);
+function adjust() {
+  for (let li = 0; li < 4; li++) {
+    d3.select("#ranking" + li).selectAll("rect").attr("fill", color.in);
+    d3.select("#column" + li + "-" + $("input[name=Code]").val()).attr("fill", "white");
+
+    let highlighted = d3.select("#column" + li + "-" + $("input[name=Code]").val());
+
+    try {
+      let center = parseInt(width) / 2 - (padding.left + padding.right) / 2;
+      let start = parseFloat(highlighted.attr("x")) + parseFloat(highlighted.attr("transform").substring(10, highlighted.attr("transform").indexOf(',')));
+      let dx = center - start - rectWidth;
+      trans[li] += dx;
+      trans[li] = trans[li] > 0 ? 0 : trans[li];
+
+      for (let i = 0; i < _data[li].length; i++) {
+        if (_data[li][i].Code == $("input[name=Code]").val()) {
+          columnAt[li] = i;
+          break;
+        }
+      }
+      let begin = columnAt[li] < 10 ? 0 : columnAt[li] - 10;
+      let _max = parseInt(_data[li][begin][param[li]]);
+      for (let i = begin + 1; i < _data[li].length && i < begin + 21; i++) {
+        _data[li][i].index = i;
+        if (parseInt(_data[li][i][param[li]]) > _max) {
+          _max = parseInt(_data[li][i][param[li]]);
+        }
+      }
+      _max = _max > 0 ? _max * 1.1 : _max * 0.9;
+      yScale[li] = d3.scale.linear()
+        .domain([min[li], _max])
+        .range([0, parseInt(height) - padding.top - padding.bottom]);
+
+      if (_max < max[li]) {
+        d3.select("#ranking" + li)
+          .selectAll("rect")
+          .data(_data[li])
+          .transition()
+          .delay(function () {
+            return animation * 2 + animation * 1.1 * li;
+          })
+          .duration(animation)
+          .attr("transform", "translate(" + trans[li] + ",0)")
+          .attr("fill", function (d) {
+            return (d.Code == $("input[name=Code]").val()) ? "white" : color.in[li];
+          })
+          .style("opacity", 0.7)
+          .attr("width", rectWidth);
+
+        d3.select("#ranking" + li)
+          .selectAll("rect")
+          .data(_data[li])
+          .transition()
+          .delay(function () {
+            return 3.1 * animation + animation * 1.1 * li;
+          })
+          .duration(animation)
+          .attr("y", function (d) {
+            return parseInt(height) - padding.bottom - yScale[li](parseInt(d[param[li]]));
+          })
+          .attr("height", function (d) {
+            return yScale[li](parseInt(d[param[li]]));
+          })
+          .attr("x", function (d, i) {
+            return i * rectStep;
+          });
+      } else {
+        d3.select("#ranking" + li)
+          .selectAll("rect")
+          .data(_data[li])
+          .transition()
+          .delay(function () {
+            return animation * 2 + animation * 1.1 * li;
+          })
+          .duration(animation)
+          .attr("y", function (d) {
+            return parseInt(height) - padding.bottom - yScale[li](parseInt(d[param[li]]));
+          })
+          .attr("height", function (d) {
+            return yScale[li](parseInt(d[param[li]]));
+          })
+          .attr("x", function (d, i) {
+            return i * rectStep;
+          });
+
+        d3.select("#ranking" + li)
+          .selectAll("rect")
+          .data(_data[li])
+          .transition()
+          .delay(function () {
+            return 3.1 * animation + animation * 1.1 * li;
+          })
+          .duration(animation)
+          .attr("transform", "translate(" + trans[li] + ",0)")
+          .attr("fill", function (d) {
+            return (d.Code == $("input[name=Code]").val()) ? "white" : color.in[li];
+          })
+          .style("opacity", 0.7)
+          .attr("width", rectWidth);
+      }
+      max[li] = _max;
+    } catch (error) {}
   }
 }
 
@@ -1558,9 +1594,9 @@ function layout(ensure) {
         },
         itemStyle: {
           normal: {
-            color: 'yellow',
+            color: colorset.long[0],
             shadowBlur: 10,
-            shadowColor: 'yellow'
+            shadowColor: colorset.long[0]
           }
         },
         zlevel: 1
