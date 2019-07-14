@@ -8,7 +8,7 @@ html {
 	overflow: hidden;
 	margin: 0;
 	padding: 0;
-	background: rgb(12, 17, 36);
+	background: rgb(7, 9, 20);
 	color: white;
 	font-family: "微软雅黑";
 }
@@ -129,8 +129,8 @@ header {
 }
 
 .img3 {
-	width: 530px;
-	height: 360px;
+	width: 540px;
+	height: 370px;
 	border: none;
 	border-width: 2px;
 	margin-top: 20px;

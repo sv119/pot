@@ -16,7 +16,39 @@
     <div id="all" style="width:1536px;height:815px;float: left;">
         <div class="left" style="float:left;">
             <div class="dataview" id="dataviewsvg">
-                
+                <h1 style="font-size:20px;padding-left: 35px;color: #00f6ff;">新三板财务数据(公司总量:203)</h1>
+                <table style="margin:10px 0px 0px 15px ;">
+                    <tr>
+                        <th style="color: #00f6ff;padding-left: 60px;font-size: 15px;">公司名称</th>
+                        <th style="color: #00f6ff;padding-left: 45px;font-size: 15px;">证券代码</th>
+                    </tr>
+                    <tr>
+                        <th id="t1" style="padding-left: 62px;">Null</td>
+                        <th id="t2" style="padding-left: 50px;">Null</td>
+
+                    </tr>
+                    <tr>
+                        <td style="color: #00f6ff;padding-top: 8px;">流动比率</td>
+                        <td style="color: #00f6ff;padding-top: 8px;">速动比率</td>
+                        <td style="color: #00f6ff;padding-top: 8px;">现金比率</td>
+                    </tr>
+                    <tr>
+                        <td id="t3" style="padding-left: 8px;">Null</td>
+                        <td id="t4" style="padding-left: 8px;">Null</td>
+                        <td id="t5" style="padding-left: 8px;">Null</td>
+                    </tr>
+                    <tr>
+                        <td style="color: #00f6ff">资产负债率</td>
+                        <td style="color: #00f6ff">资产管理效率</td>
+                        <td style="color: #00f6ff">总资产周转率</td>
+                    </tr>
+                    <tr>
+                        <td id="t7" style="padding-left: 8px;">Null</td>
+                        <td id="t8" style="padding-left: 8px;">Null</td>
+                        <td id="t6" style="padding-left: 8px;">Null</td>
+                    </tr>
+                </table>
+
             </div>
             <div class="select" style="padding: 10px;float: left">
                 <form role="form">
@@ -76,10 +108,10 @@
         <div class="right" style="float:left;">
             <!--div id="analyze" class="img1" style="float:left;"></!div-->
             <div style="float:left; position: relative; top: -40px;">
-                <label for="name" style="position: relative; left: 32px; top: 64px;">排序字段</label>
+                <label for="name" style="position: relative; left: 32px; top: 64px;color: #00f6ff">排序字段</label>
                 <div style="position: relative; left: 32px; top: 60px;">
                     <label class="radio-inline">
-                        <input type="radio" name="optionsRadiosinline" id="optionsRadios1" value="TotalAssets"
+                        <input type="radio" name="optionsRadiosinline" id="optionsRadios1" value="TotalAssets" 
                             onclick="onSelect()">资产总计
                     </label>
                     <label class="radio-inline">
@@ -98,7 +130,8 @@
                 <div id="analyze_2" class="img2"></div>
             </div>
             <div id="chart" class="img3" style="float:left; position: relative; top: -46px;">
-                <h1 style="margin-left: 220px;font-size: 20px;overflow: hidden;margin-top:0px;color:#00f6ff; margin-top: 10px;">特征聚类
+                <h1  style="margin-left: 220px;font-size: 20px;overflow: hidden;margin-top:0px;color:#00f6ff; margin-top: 10px;">
+                    特征聚类
                 </h1>
                 <div id="mds" style="height: 340px; margin-top: 10px;"></div>
             </div>

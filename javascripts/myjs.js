@@ -2,12 +2,11 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 10:56:05 
  * @Last Modified by: mikey.zhaopeng
- * @Last Modified time: 2019-07-13 22:02:59
+ * @Last Modified time: 2019-07-14 14:46:40
  */
 
 var colorset = {
-  sunset: ['#FF7853', '#EA5151', '#CC3F57', '#9A2555', '#FFAE57'],
-  background: '#2E2733'
+  sunset: ['#00BFFF', '#1E90FF', '#6495ED', '#4169E1', '#87CEFA']
 };
 
 var dataset = {};
@@ -264,7 +263,7 @@ function draw() {
       break;
     }
   }
-  dataview(objset);
+  dataview(objset);z
 }
 
 var portrait = new Portrait.Chart('sunburst');
@@ -425,6 +424,7 @@ function paint_portrait(d) {
 
   var option = {
     margin: 20,
+    color: colorset.sunset,
     // border: "1px solid white",
     // animation: 1000,
     data: [{
@@ -498,14 +498,7 @@ function buildTree() {
 
 // 散点图配置项
 {
-  var mdstip = d3.select("body")
-    .append("div")
-    .attr("id", "point-view")
-    .style("position", "absolute")
-    .style("z-index", "10")
-    .style("visibility", "hidden")
-    .style("opacity", "0.7")
-    .style("border", "solid");
+  
 
   var mdsData = {};
 
@@ -514,9 +507,19 @@ function buildTree() {
     .attr("id", "mdssvg")
     .attr("width", "530px")
     .attr("height", "360px");
-}
+}        
 
 function drawMDS(y, ctx) {
+  d3.selectAll("#circled").remove();
+  d3.selectAll("#point-view").remove();
+  var mdstip = d3.select("body")
+      .append("div")
+      .attr("id", "point-view")
+      .style("position", "absolute")
+      .style("z-index", "10")
+      .style("visibility", "hidden")
+      .style("opacity", "0.7")
+      .style("border", "solid");
   let data = [];
   if (mdsData[y] == void 0) {
     mdsData[y] = {};
@@ -573,6 +576,7 @@ function drawMDS(y, ctx) {
         .data(data1)
         .enter()
         .append("circle")
+        .attr("id","circled")
         .attr("cx", function (d) {
           return d[0] * 0.8 + 60;
         })
@@ -601,6 +605,13 @@ function drawMDS(y, ctx) {
             .attr("opacity", "0.6");
           mdstip.style("visibility", "hidden");
         })
+        .on("mouseout", function () {
+          d3.select(this)
+            .attr("fill", "#00BFFF")
+            .attr("r", 6)
+            .attr("opacity", "0.6");
+          mdstip.style("visibility", "hidden");
+        })
         .on('click', function (d) {
           $("input[name=Code]").val(d[3]);
           draw();
@@ -608,7 +619,8 @@ function drawMDS(y, ctx) {
             .attr("fill", "#FFFAF0")
             .attr("r", 10)
             .attr("opacity", "1");
-        });
+        })
+        ;
 
       svg.selectAll("circle")
         .data(data1)
@@ -622,11 +634,14 @@ function drawMDS(y, ctx) {
         .attr("opacity", function (d) {
           return d[3] == $("input[name=Code]").val() ? "1" : "0.6";
         });
+
     });
     return;
-  }
-  label = mdsData[y][ctx].label;
-  data = mdsData[y][ctx].data;
+  }  
+
+  // label = mdsData[y][ctx].label;
+  // data = mdsData[y][ctx].data;
+  // console.log(label)
 }
 
 // 柱状图配置项
@@ -1626,43 +1641,8 @@ function enter(str, limit) {
   }
   return str;
 }
-var tipBox = d3.select("#dataviewsvg")
-  .append("table")
-  .attr("border", "0")
-  .style("margin-left","20px")
-  .style("margin-top","40px");
 
-var table1 = tipBox.append("tr");
-table1.append("th").style("width", "130px").style("color", "#00f6ff").text("公司名");
-table1.append("th").style("width", "112px").style("color", "#00f6ff").text("证券代码");
-table1.append("th").style("width", "120px").style("color", "#00f6ff").text("流动比率");
-
-var table2 = tipBox.append("tr");
-table2.append("td").attr("id", "t1").text("NULL");
-table2.append("td").attr("id", "t2").text("NULL");
-table2.append("td").attr("id", "t3").text("NULL");
-
-
-var table3 = tipBox.append("tr");
-table3.append("th").style("width", "130px").style("color", "#00f6ff").text("速动比率");
-table3.append("th").style("width", "112px").style("color", "#00f6ff").text("现金比率");
-table3.append("th").style("width", "120px").style("color", "#00f6ff").text("资产负债率");
-
-var table4 = tipBox.append("tr");
-table4.append("td").attr("id", "t4").text("NULL");
-table4.append("td").attr("id", "t5").text("NULL");
-table4.append("td").attr("id", "t6").text("NULL");
-
-var table5 = tipBox.append("tr");
-table5.append("th").style("width", "130px").style("color", "#00f6ff").text("资产管理效率");
-table5.append("th").style("width", "112px").style("color", "#00f6ff").text("存货周转率");
-table5.append("th").style("width", "120px").style("color", "#00f6ff").text("总资产周转率");
-
-var table6 = tipBox.append("tr");
-table6.append("td").attr("id", "t7").text("NULL");
-table6.append("td").attr("id", "t8").text("NULL");
-table6.append("td").attr("id", "t9").text("NULL");
-
+//dataview
 function dataview(d) {
   var y = incase.year;
   var type = incase.ctx;
@@ -1739,9 +1719,6 @@ function dataview(d) {
         return data[4][i];
       });
       d3.select("#t8").text(function () {
-        return data[5][i];
-      });
-      d3.select("#t9").text(function () {
         return data[6][i];
       });
 
