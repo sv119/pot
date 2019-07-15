@@ -2,11 +2,11 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 10:56:05 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-14 21:50:31
+ * @Last Modified time: 2019-07-15 20:09:10
  */
 
 var colorset = {
-  echarts_default: ['#c23531','#2f4554', '#61a0a8', '#d48265', '#91c7ae','#749f83',  '#ca8622', '#bda29a','#6e7074', '#546570', '#c4ccd3'],
+  echarts_default: ['#c23531', '#2f4554', '#61a0a8', '#d48265', '#91c7ae', '#749f83', '#ca8622', '#bda29a', '#6e7074', '#546570', '#c4ccd3'],
   echarts_colorful: ['#2A8339', '#367DA6', '#A68B36', '#BD5692'],
   long2: ['#F9ADA0', '#F26271', '#C65B7C', '#5B3758'],
   long: ['#e9eb87', '#8f91a2', '#a9d2d5']
@@ -32,7 +32,8 @@ var yearset = [];
 
 var incase = {
   year: null,
-  ctx: "Merge"
+  ctx: "Merge",
+  code: null
 };
 
 (function load() {
@@ -57,7 +58,7 @@ var incase = {
               .on("click", function () {
                 $("input[name=Code]").val(
                   d3.select(this).text().substring(d3.select(this).text().indexOf('(') + 1, d3.select(this).text().indexOf(')')));
-                draw();
+                draw(true);
               });
           } catch (error) {
             if (NOTFOUND[data[i].SECURITY_CODE] == void 0) {
@@ -79,7 +80,7 @@ var incase = {
                     return;
                   incase.year = d3.select(this).text();
                   d3.select("#nowYear").html(incase.year + '<span class="caret"></span>');
-                  draw();
+                  draw(true);
                 });
               if (y == 0) {
                 d3.select("#nowYear").html(year + '<span class="caret"></span>');
@@ -180,18 +181,17 @@ var incase = {
 
 function init() {
   // console.log(dataset);
+  $("input[name=Code]").val(dataset[incase.year][incase.ctx]["Balance"][0].Code);
   layout();
   d3.selectAll(".ctxselector").on("click", function () {
     if (d3.select(this).text() == incase.ctx)
       return;
     incase.ctx = d3.select(this).text() == "合并年数据" ? "Merge" : "Parent";
     d3.select("#nowCtx").html(d3.select(this).text() + '<span class="caret"></span>');
-    draw();
+    draw(true);
   });
-  $("input[name='optionsRadiosinline'][value='TotalAssets']").prop("checked", true);
-  $("input[name=Code]").val("");
   document.getElementById("inputCode").focus();
-  paint_portrait([]);
+  paint_portrait(dataset[incase.year][incase.ctx]["Balance"][0]);
   if (incase.ctx == "Merge") {
     drawMDS(incase.year, "m");
   } else {
@@ -199,12 +199,16 @@ function init() {
   }
 }
 
-function draw() {
-  if ($("input[name=Code]").val().toString().length < 6)
-    return;
-  if ($("input[name=Code]").val().toString().length > 6) {
-    $("input[name=Code]").val($("input[name=Code]").val().toString().substring(0, 7));
-    return;
+function draw(ensure) {
+  if (!ensure) {
+    if ($("input[name=Code]").val().toString().length < 6)
+      return;
+    if ($("input[name=Code]").val().toString().length > 6) {
+      $("input[name=Code]").val($("input[name=Code]").val().toString().substring(0, 7));
+      return;
+    }
+    if ($("input[name=Code]").val() == incase.code)
+      return;
   }
   layout(false);
   if (incase.ctx == "Merge") {
@@ -213,6 +217,7 @@ function draw() {
     drawMDS(incase.year, "p");
   }
   let code = $("input[name=Code]").val();
+  incase.code = code;
   d3.select("#notexist")
     .text("证券信息不存在")
     .style("visibility", "hidden");
@@ -273,6 +278,7 @@ function draw() {
     }
   }
   dataview(objset);
+  adjust();
 }
 
 var portrait = new Portrait.Chart('sunburst');
@@ -288,9 +294,12 @@ function paint_portrait(d) {
     }];
     var option = {
       margin: 20,
+      padding: 10,
+      linelength: 5,
       // color: colorset.long2,
       // border: "1px solid white",
       // stroke: "none",
+      animation: 400,
       data: data
     };
 
@@ -302,34 +311,34 @@ function paint_portrait(d) {
 
   var data = [{
     label: '资产总计',
-    value: '?',
+    value: parseInt(d["BAME01340M"]),
     children: [{
       label: '流动资产',
-      value: '?',
+      value: parseInt(d["BAME00030M"]),
       children: []
     }, {
       label: '非流动资产',
-      value: '?',
+      value: parseInt(d["BAME01320M"]),
       children: []
     }]
   }, {
     label: '负债总计',
-    value: '?',
+    value: parseInt(d["BAME02210M"]),
     children: [{
       label: '流动负债',
-      value: '?',
+      value: parseInt(d["BAME01980M"]),
       children: []
     }, {
       label: '非流动负债',
-      value: '?',
+      value: parseInt(d["BAME02190M"]),
       children: []
     }]
   }, {
     label: '所有者权益',
-    value: '?',
+    value: parseInt(d["BAME02470M"]),
     children: [{
       label: '所有者权益总计',
-      value: '?',
+      value: parseInt(d["BAME02470M"]),
       children: []
     }]
   }];
@@ -380,6 +389,8 @@ function paint_portrait(d) {
   para = "BAME0";
   for (var num = 137; num <= 197; num++) {
     var spaner = num.toString();
+    if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
+      continue;
     var val = parseInt(d[para + spaner + "0M"]);
     if (val >= all / 100) {
       var child = {
@@ -432,17 +443,24 @@ function paint_portrait(d) {
     }
   }
 
+  var event = () => {
+    portrait.setOption(this.option);
+  };
+
   var option = {
     margin: 20,
+    padding: 10,
+    linelength: 5,
     // color: colorset.long2,
     // border: "1px solid white",
-    // animation: 1000,
+    animation: 2400,
     data: [{
       label: "企业画像",
       value: '',
+      onclick: event,
       children: data,
     }],
-    max: 20
+    max: 10
   };
   if (option && typeof option === "object") {
     portrait.setOption(option);
@@ -601,15 +619,19 @@ function drawMDS(y, ctx) {
         .attr("cy", function (d) {
           return d[1] * 0.8 + 10;
         })
-        .attr("r", 3)
+        .attr("r", 2)
         .attr("opacity", "0.6")
-        .attr("fill", function (d) {
+        .attr("fill", function (d, i) {
           //console.log(d[3], $("input[name=Code]").val());
-          return d[3] == $("input[name=Code]").val() ? "#FFFAF0" : colorset.long2[0];
+          return d[3] == $("input[name=Code]").val() ? "#FFFAF0" : d3.hsl(i * 2 * Math.PI, 1, 0.65);//colorset.long2[0];
         })
+        .attr("stroke", function (d, i) {
+          return d[3] == $("input[name=Code]").val() ? "#FFFAF0" : d3.hsl(i * 2 * Math.PI, 1, 0.4);
+        })
+        .attr("stroke-width", 1)
         .on("mouseover", function (d) {
           // alert((parseInt(d3.event.pageX)+10)+'px, ' + (parseInt(d3.event.pageY)-10)+'px');
-          d3.select(this).attr("fill", "#FFFAF0").attr("r", 5).attr("opacity", "1");
+          d3.select(this).attr("fill", "#FFFAF0").attr("r", 3).attr("opacity", "1");
           mdstip.html(d[2] + d[3]);
           mdstip.style("visibility", "visible");
         })
@@ -618,18 +640,22 @@ function drawMDS(y, ctx) {
         })
         .on("mouseout", function () {
           d3.select(this)
-            .attr("fill", colorset.long2[0])
-            .attr("r", 3)
+            .attr("fill", d3.hsl(i * 2 * Math.PI, 1, 0.65))
+            .attr("r", 2)
             .attr("opacity", "0.6");
           mdstip.style("visibility", "hidden");
         })
         .on('click', function (d) {
           $("input[name=Code]").val(d[3]);
-          draw();
           d3.select(this)
             .attr("fill", "#FFFAF0")
             .attr("r", 10)
-            .attr("opacity", "1");
+            .attr("opacity", "1")
+            .transition()
+            .duration(1000)
+            .each("end", function () {
+              draw(false);
+            });
         });
 
       svg.selectAll("circle")
@@ -653,17 +679,17 @@ function drawMDS(y, ctx) {
 
 // 柱状图配置项
 {
-  var changed = false;
-
   var width = parseInt(d3.select("#analyze_2").style("width")) - 4;
-  var height = parseInt(d3.select("#analyze_2").style("height")) / 4 - 8;
+  var height = parseInt(d3.select("#analyze_2").style("height")) / 4 - 16;
   var padding = {
-    top: 26,
-    right: 20,
+    top: 22,
+    right: 40,
     bottom: 4,
-    left: 20
+    left: 66
   };
   var svg = [null, null, null, null];
+  var xAxis = [null, null, null, null];
+  var yAxis = [null, null, null, null];
 
   var yScale = [null, null, null, null];
   var trans = [0, 0, 0, 0];
@@ -733,9 +759,106 @@ function layout(ensure) {
     max[li] = max[li] > 0 ? max[li] * 1.1 : max[li] * 0.9;
     average[li] /= _data[li].length;
 
+    if (d3.select("#analyze_2").html() == "") {
+      for (let j = 0; j < 4; j++) {
+        svg[j] = d3.select("#analyze_2")
+          .append("svg")
+          .attr("id", "ranking" + j)
+          .attr("width", width - padding.left - padding.right)
+          .style("margin-left", padding.left + "px")
+          .attr("height", height)
+          .style("position", "relative")
+          .style("top", function () {
+            return -height * j + "px";
+          })
+          .attr("version", "1.1")
+          .attr("xmlns", "http://www.w3.org/2000/svg");
+
+        xAxis[j] = svg[j].append("g")
+          .attr("id", "xAxis" + j)
+          .attr("transform", "translate(-6,0)")
+          .classed("axis", true);
+
+        yAxis[j] = d3.select("#analyze_2")
+          .append("svg")
+          .attr("width", padding.left - 10)
+          .style("margin-left", "10px")
+          .attr("height", height)
+          .style("position", "relative")
+          .style("top", -height * (j + 1) + 2 + "px")
+          .attr("version", "1.1")
+          .attr("xmlns", "http://www.w3.org/2000/svg")
+          .append("g")
+          .attr("id", "yAxis" + j)
+          .attr("transform", "translate(50,17)")
+          .classed("axis", true);
+      }
+    } else {
+      svg[li] = d3.select("#ranking" + li);
+      xAxis[li] = d3.select("#xAxis" + li);
+      yAxis[li] = d3.select("#yAxis" + li);
+    }
+
     yScale[li] = d3.scale.linear()
       .domain([min[li], max[li]])
       .range([0, parseInt(height) - padding.top - padding.bottom]);
+
+    var y_scale = d3.scale.linear()
+      .domain([min[li], max[li]])
+      .range([parseInt(height) - padding.top - padding.bottom, 0]);
+
+    var y_axis = d3.svg.axis()
+      .scale(y_scale)
+      .orient("left")
+      .ticks(3);
+
+    yAxis[li].call(y_axis);
+
+    yAxis[li].selectAll("text")
+      .text(function () {
+        let old = d3.select(this).text();
+        while (old.indexOf(',') != -1)
+          old = old.replace(',', '');
+        if (parseInt(old) >= 100000000)
+          return parseInt(parseInt(old) / 100000000) + "亿";
+        if (parseInt(old) >= 10000)
+          return parseInt(parseInt(old) / 10000) + "万";
+        if (parseInt(old) >= 1000)
+          return parseInt(parseInt(old) / 1000) + "千";
+        return old;
+      });
+
+    xAxis[li].selectAll("line")
+      .data([_data[li]])
+      .transition()
+      .delay(function () {
+        return animation * 2 + animation * 1.1 * (li + 1);
+      })
+      .duration(animation)
+      .attr("transform", "translate(" + trans[li] + ",2)");
+
+    xAxis[li].selectAll("line")
+      .data([_data[li]])
+      .enter()
+      .append("line")
+      .attr('x1', -rectStep)
+      .attr('x2', 0)
+      .attr('y1', parseInt(height) - padding.bottom)
+      .attr('y2', parseInt(height) - padding.bottom)
+      .attr("transform", "translate(" + trans[li] + ",2)")
+      .transition()
+      .delay(function () {
+        return animation * 2 + animation * 1.1 * (li + 1);
+      })
+      .duration(animation)
+      .attr('x2', function () {
+          return 10 * parseInt(width);
+      });
+
+    xAxis[li].selectAll("line")
+      .data([_data[li]])
+      .exit()
+      .remove();
 
     for (let i = 0; i < _data[li].length; i++) {
       let min = _data[li][0][param[li]];
@@ -749,21 +872,6 @@ function layout(ensure) {
       let temp = _data[li][_data[li].length - 1 - i];
       _data[li][_data[li].length - 1 - i] = _data[li][index];
       _data[li][index] = temp;
-    }
-
-    if (d3.select("#analyze_2").html() == "") {
-      for (let j = 0; j < 4; j++) {
-        svg[j] = d3.select("#analyze_2")
-          .append("svg")
-          .attr("id", "ranking" + j)
-          .attr("width", width - padding.left - padding.right)
-          .style("margin-left", padding.left + "px")
-          .attr("height", height)
-          .attr("version", "1.1")
-          .attr("xmlns", "http://www.w3.org/2000/svg");
-      }
-    } else {
-      svg[li] = d3.select("#ranking" + li);
     }
 
     let rectUpdate = svg[li].selectAll("rect").data(_data[li]);
@@ -831,7 +939,7 @@ function layout(ensure) {
       .on("click", function () {
         $("input[name=Code]").val(
           this.id.substring(this.id.indexOf('-') + 1, this.id.length));
-        draw();
+        draw(false);
       })
       .transition()
       .delay(animation * 0.2 * li)
@@ -859,7 +967,6 @@ function layout(ensure) {
       .style("opacity", 0)
       .attr("width", 0);
   }
-  adjust();
 }
 
 function adjust() {
@@ -870,7 +977,7 @@ function adjust() {
     let highlighted = d3.select("#column" + li + "-" + $("input[name=Code]").val());
 
     try {
-      let center = parseInt(width) / 2 - (padding.left + padding.right) / 2;
+      let center = parseInt(width) / 2 - padding.left;
       let start = parseFloat(highlighted.attr("x")) + parseFloat(highlighted.attr("transform").substring(10, highlighted.attr("transform").indexOf(',')));
       let dx = center - start - rectWidth;
       trans[li] += dx;
@@ -882,6 +989,7 @@ function adjust() {
           break;
         }
       }
+      d3.select("#rank_" + li).text(columnAt[li] + 1);
       let begin = columnAt[li] < 10 ? 0 : columnAt[li] - 10;
       let _max = parseInt(_data[li][begin][param[li]]);
       for (let i = begin + 1; i < _data[li].length && i < begin + 21; i++) {
@@ -895,13 +1003,52 @@ function adjust() {
         .domain([min[li], _max])
         .range([0, parseInt(height) - padding.top - padding.bottom]);
 
+      var y_scale = d3.scale.linear()
+        .domain([min[li], _max])
+        .range([parseInt(height) - padding.top - padding.bottom, 0]);
+
+      var y_axis = d3.svg.axis()
+        .scale(y_scale)
+        .orient("left")
+        .ticks(3);
+
+      yAxis[li].transition()
+        .delay(function () {
+          return animation * 4.1 + animation * 1.1 * (li + 1);
+        })
+        .duration(animation * 1.1)
+        .call(y_axis);
+
+      yAxis[li].selectAll("text")
+        .text(function () {
+          let old = d3.select(this).text();
+          while (old.indexOf(',') != -1)
+            old = old.replace(',', '');
+          if (parseInt(old) >= 100000000)
+            return parseInt(parseInt(old) / 100000000) + "亿";
+          if (parseInt(old) >= 1000000)
+            return parseInt(parseInt(old) / 10000) + "万";
+          if (parseInt(old) >= 1000)
+            return parseInt(parseInt(old) / 1000) + "千";
+          return old;
+        });
+
+      xAxis[li].selectAll("line")
+        .data([_data[li]])
+        .transition()
+        .delay(function () {
+          return animation * 2 + animation * 1.1 * (li + 1);
+        })
+        .duration(animation)
+        .attr("transform", "translate(" + trans[li] + ",2)");
+
       if (_max < max[li]) {
         d3.select("#ranking" + li)
           .selectAll("rect")
           .data(_data[li])
           .transition()
           .delay(function () {
-            return animation * 2 + animation * 1.1 * li;
+            return animation * 2 + animation * 1.1 * (li + 1);
           })
           .duration(animation)
           .attr("transform", "translate(" + trans[li] + ",0)")
@@ -916,7 +1063,7 @@ function adjust() {
           .data(_data[li])
           .transition()
           .delay(function () {
-            return 3.1 * animation + animation * 1.1 * li;
+            return 3.1 * animation + animation * 1.1 * (li + 1);
           })
           .duration(animation)
           .attr("y", function (d) {
@@ -934,7 +1081,7 @@ function adjust() {
           .data(_data[li])
           .transition()
           .delay(function () {
-            return animation * 2 + animation * 1.1 * li;
+            return animation * 2 + animation * 1.1 * (li + 1);
           })
           .duration(animation)
           .attr("y", function (d) {
@@ -952,7 +1099,7 @@ function adjust() {
           .data(_data[li])
           .transition()
           .delay(function () {
-            return 3.1 * animation + animation * 1.1 * li;
+            return 3.1 * animation + animation * 1.1 * (li + 1);
           })
           .duration(animation)
           .attr("transform", "translate(" + trans[li] + ",0)")
@@ -1655,6 +1802,7 @@ function format(num) {
     number.push(part);
   }
   for (var i = number.length - 1; i >= 0; i--) {
+    number[i] = number[i] >= 100 || i == number.length - 1 ? number[i] : number[i] >= 10 ? "0" + number[i] : "00" + number[i];
     str += number[i];
     if (i != 0) {
       str += ',';
@@ -1705,8 +1853,6 @@ function dataview(d) {
   }
 
   let year = [];
-
-  var option = null;
 
   var averCheck = 0;
   var averRepo = 0;

@@ -21,7 +21,7 @@
                         <label for="time"
                             style="margin-top: 5px; float: left;margin-right: 5px;color:#3eaae9;">数据年选择</label>
                     </div>
-                    <div class="btn-group">
+                    <div class="btn-group" style="float: right; margin-right: 20px;">
                         <button type="button" id="nowYear" class="btn btn-default dropdown-toggle"
                             data-toggle="dropdown">1970
                             <span class="caret"></span>
@@ -29,11 +29,11 @@
                         <ul class="dropdown-menu" id="year" role="menu">
                         </ul>
                     </div>
-                    <div class="form-group" style="padding: 10px 20px; margin-bottom: 0px;">
+                    <div class="form-group" style="padding: 10px 20px 4px; margin-bottom: 0px;">
                         <label for="time"
-                            style="margin-top: 14px; float: left;margin-right: 5px;color:#3eaae9;">数据源选择</label>
+                            style="margin-top: 14px; margin-right: 5px;color:#3eaae9;position: relative;left: -75px;top: 34px;">数据源选择</label>
                     </div>
-                    <div class="btn-group">
+                    <div class="btn-group" style="float: right; margin-right: 20px;">
                         <button type="button" id="nowCtx" class="btn btn-default dropdown-toggle"
                             data-toggle="dropdown">合并年数据
                             <span class="caret"></span>
@@ -43,10 +43,10 @@
                             <li><a class="ctxselector" href="javascript: void(0);">母公司年数据</a></li>
                         </ul>
                     </div>
-                    <div class="form-group" style="padding: 10px 20px 0px 20px; margin-bottom: 0px;">
-                        <label for="name" style="margin-top: 2px;color:#3eaae9;">输入证券代码查询</label>
+                    <div class="form-group" style="float: right;">
+                        <label for="name" style="margin-top: 14px; margin-right: 5px;color:#3eaae9;position: relative;left: 20px;top: 10px;">输入证券代码查询</label>
                         <input type="number" name="Code" id="inputCode" class="form-control" value=""
-                            required="required" placeholder="证券代码" style="margin-left: 50px; height: 2em;"
+                            required="required" placeholder="证券代码" style="margin-left: 50px; margin-top: 20px; margin-right: 20px; height: 2.2em; font-size: 18px; float: right;"
                             onkeypress="return (/[\d]/.test(String.fromCharCode(event.keyCode)))" onkeyup="draw();">
                         <span id="notexist"
                             style="position: relative; left: 180px; top: -25px; letter-spacing: 0.1em; visibility: hidden;">
@@ -61,21 +61,20 @@
                 </div>
             </div>
             <div class="dataview" id="dataviewsvg">
-                <h1 style="font-size:20px;padding-left: 35px;color: #00f6ff;">新三板财务数据(公司总量:203)</h1>
-                <table style="margin:10px 0px 0px 15px ;">
+                <h1 style="font-size:20px; margin: 12px 10px 7px 24px;color: #00f6ff;">新三板财务数据 (公司总量: 203)</h1>
+                <table style="margin: 8px auto;" border="1">
                     <tr>
-                        <th style="color: #00f6ff;padding-left: 60px;font-size: 15px;">公司名称</th>
-                        <th style="color: #00f6ff;padding-left: 45px;font-size: 15px;">证券代码</th>
+                        <th colspan="2" style="color: #00f6ff; font-size: 15px;">公司名称</th>
+                        <th style="color: #00f6ff; font-size: 15px;">证券代码</th>
                     </tr>
                     <tr>
-                        <th id="t1" style="padding-left: 62px;">Null</td>
-                        <th id="t2" style="padding-left: 50px;">Null</td>
-
+                        <th colspan="2" id="t1">Null</td>
+                        <th id="t2">Null</td>
                     </tr>
                     <tr>
-                        <td style="color: #00f6ff;padding-top: 8px;">流动比率</td>
-                        <td style="color: #00f6ff;padding-top: 8px;">速动比率</td>
-                        <td style="color: #00f6ff;padding-top: 8px;">现金比率</td>
+                        <td style="color: #00f6ff;">流动比率</td>
+                        <td style="color: #00f6ff;">速动比率</td>
+                        <td style="color: #00f6ff;">现金比率</td>
                     </tr>
                     <tr>
                         <td id="t3" style="padding-left: 8px;">Null</td>
@@ -107,28 +106,13 @@
         <div class="right" style="float:left;">
             <!--div id="analyze" class="img1" style="float:left;"></!div-->
             <div style="float:left; position: relative; top: 8px;">
-                <!-- <!--label for="name" style="position: relative; left: 32px; top: 64px;color: #00f6ff">排序字段</!--label>
-                <div style="position: relative; left: 32px; top: 60px;">
-                    <label class="radio-inline">
-                        <input type="radio" name="optionsRadiosinline" id="optionsRadios1" value="TotalAssets" 
-                            onclick="onSelect()">资产总计
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="optionsRadiosinline" id="optionsRadios2" value="TotalLiability"
-                            onclick="onSelect()">负债总计
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="optionsRadiosinline" id="optionsRadios3" value="TotalEquity"
-                            onclick="onSelect()">所有者权益总计
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="optionsRadiosinline" id="optionsRadios4" value="TotalLiability_Equity"
-                            onclick="onSelect()">负债和所有者权益总计
-                    </label>
-                </div> -->
                 <div id="analyze_2" class="img2" style="padding: 8px 2px;"></div>
+                <div style="position: relative; left: 223.3px; top: -398px; font-size: 15px;">资产量排名：<span id="rank_0">-</span></div>
+                <div style="position: relative; left: 223.3px; top: -324px; font-size: 15px;">负债量排名：<span id="rank_1">-</span></div>
+                <div style="position: relative; left: 223.3px; top: -250px; font-size: 15px;">所有者权益排名：<span id="rank_2">-</span></div>
+                <div style="position: relative; left: 223.3px; top: -176px; font-size: 15px;">负债及所有者权益总额排名：<span id="rank_3">-</span></div>
             </div>
-            <div id="chart" class="img3" style="float:left; position: relative; top: 2px;">
+            <div id="chart" class="img3" style="float:left; position: relative; top: -78px;">
                 <h1  style="margin-left: 220px;font-size: 20px;overflow: hidden;margin-top:0px;color:#00f6ff; margin-top: 10px;">
                     特征聚类
                 </h1>

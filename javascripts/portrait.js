@@ -2,10 +2,10 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-12 13:50:39 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-14 21:55:26
+ * @Last Modified time: 2019-07-15 19:33:53
  */
 
-console.log("Thanks for using portrait.js, writen by ZhenDong Yang, 2019-7-12");
+console.log("Thanks for using portrait.js, writen by ZhenDong Yang, 2019-7-15");
 
 var Portrait = window.NameSpace || {};
 
@@ -23,11 +23,15 @@ Portrait.Chart = function Chart(parent) {
         padding: [0, 0, 0, 0],
         title: "undefined",
         background: "none",
-        color: "circle",
+        fill: "circle",
+        color: [],
         fontColor: '#FFFFFF',
+        linelength: 6,
         stroke: "white",
         animation: 1000,
         data: [],
+        minsize: 0.6,
+        maxsize: 1,
         max: 5
     };
 };
@@ -78,9 +82,6 @@ Portrait.Chart.prototype.setOption = function (change) {
             .style("margin", function () {
                 return option.margin[0] + "px " + option.margin[1] + "px " + option.margin[2] + "px " + option.margin[3] + "px";
             })
-            .style("padding", function () {
-                return option.padding[0] + "px " + option.padding[1] + "px " + option.padding[2] + "px " + option.padding[3] + "px";
-            })
             .style("background", option.background);
         this.SVG.append("g");
     }
@@ -92,6 +93,8 @@ Portrait.Chart.prototype.setOption = function (change) {
     }
 
     let max = option.max;
+    let maxsize = option.maxsize;
+    let minsize = option.minsize;
 
     let g = this.SVG.select("g");
     g.selectAll("circle").remove();
@@ -101,11 +104,9 @@ Portrait.Chart.prototype.setOption = function (change) {
     // collect circles
     let maxLevel = 0;
     let set = [];
+    let dmax = [];
+    let dmin = [];
     collect("__", option.data);
-    let queue = [];
-    for (let i = 0; i < maxLevel; i++) {
-        queue.push(0);
-    }
 
     // draw circles
     let avrgsize = maxLevel == 1 ? width > height ? height / 16 : width / 16 :
@@ -121,15 +122,37 @@ Portrait.Chart.prototype.setOption = function (change) {
             if (path.substring(i, i + 1) == "_")
                 level++;
         }
+        var din = data[0].value == void 0 || !(parseInt(data[0].value) >= 0 || parseInt(data[0].value) < 0) ? 1 : parseFloat(data[0].value);
         if (level > maxLevel) {
             maxLevel = level;
             set.push(0);
+            dmax.push(din);
+            dmin.push(din);
         }
-        if (data.length > max)
+        if (data.length > max) {
             set[level - 1] += max;
-        else
+            let mis = data.length;
+            while (mis > max) {
+                let __min = data[0].value == void 0 ? 1 : data[0].value;
+                let index = 0;
+                for (let p = 1; p < mis; p++) {
+                    if (data[p].value == void 0 || data[p].value < __min) {
+                        __min = data[p].value == void 0 ? 1 : data[p].value;
+                        index = p;
+                    }
+                }
+                let temp = data[index];
+                data[index] = data[--mis];
+                data[mis] = temp;
+            }
+        } else
             set[level - 1] += data.length;
         for (let i = 0; i < data.length && i < max; i++) {
+            din = data[i].value == void 0 || !(parseInt(data[i].value) >= 0 || parseInt(data[i].value) < 0) ? 1 : parseFloat(data[i].value);
+            if (din > dmax[level - 1])
+                dmax[level - 1] = din;
+            if (din < dmin[level - 1])
+                dmin[level - 1] = din;
             if (data[i].children != void 0 && data[i].children.length != 0)
                 collect(path + i + '_', data[i].children);
         }
@@ -145,9 +168,16 @@ Portrait.Chart.prototype.setOption = function (change) {
         for (let i = 0; i < max && i < data.length; i++) {
             se.push(data[i]);
         }
-        let root = path == "__" ? g : d3.select('#' + path);
-        let _x = path == "__" ? width / 2 : parseFloat(root.attr('cx'));
-        let _y = path == "__" ? height / 2 : parseFloat(root.attr('cy'));
+        let root = null;
+        let _x = 0;
+        let _y = 0;
+        try {
+            root = path == "__" ? g : d3.select('#' + path);
+            _x = path == "__" ? width / 2 + option.padding[3] : parseFloat(root.attr('cx'));
+            _y = path == "__" ? height / 2 + option.padding[0] : parseFloat(root.attr('cy'));
+        } catch (error) {
+            return;
+        }
         let color = option.color;
         let Fcolor = option.fontColor;
         let animation = option.animation / maxLevel;
@@ -172,17 +202,17 @@ Portrait.Chart.prototype.setOption = function (change) {
             .attr('y2', _y)
             .transition()
             .duration(function (d, i) {
-                return animation / level + i * animation / 4;
+                return animation / level / 2 + i * animation / 8;
             })
             .attr('x2', function (d, i) {
                 if (path == "__")
                     return _x;
-                return _x + Math.sin(i * 2 * Math.PI / count) * size * 3.2;
+                return _x + Math.sin(i * 2 * Math.PI / count) * size * 3;
             })
             .attr('y2', function (d, i) {
                 if (path == "__")
                     return _y;
-                return _y - Math.cos(i * 2 * Math.PI / count) * size * 3.2;
+                return _y - Math.cos(i * 2 * Math.PI / count) * size * 3;
             })
             .style("stroke", option.stroke)
             .style("stroke-width", 1)
@@ -197,25 +227,27 @@ Portrait.Chart.prototype.setOption = function (change) {
             .attr('cy', _y)
             .attr('r', 0)
             .attr("fill", function (d, i) {
-                if (option.color == "circle")
+                if (option.fill == "circle")
                     return d3.hsl(i * 2 * Math.PI, 0.5, 0.5);
+                else
+                    return color;
             })
             .attr("opacity", 0)
             .transition()
             .delay(function (d, i) {
-                return i * animation / 4 / Math.pow(level, 2);
+                return i * animation / 8 / Math.pow(level, 2);
             })
-            .duration(animation / level)
+            .duration(animation / level / 2)
             .attr('r', size)
             .attr('cx', function (d, i) {
                 if (path == "__")
                     return _x;
-                return _x + Math.sin(i * 2 * Math.PI / count) * size * 3.2;
+                return _x + Math.sin(i * 2 * Math.PI / count) * size * 3;
             })
             .attr('cy', function (d, i) {
                 if (path == "__")
                     return _y;
-                return _y - Math.cos(i * 2 * Math.PI / count) * size * 3.2;
+                return _y - Math.cos(i * 2 * Math.PI / count) * size * 3;
             })
             .attr("opacity", 1)
             .each("end", function (d, i) {
@@ -239,20 +271,20 @@ Portrait.Chart.prototype.setOption = function (change) {
             .attr("x", function (d, i) {
                 if (path == "__")
                     return _x;
-                return _x + Math.sin(i * 2 * Math.PI / count) * size * 3.2;
+                return _x + Math.sin(i * 2 * Math.PI / count) * size * 3;
             })
             .attr("y", function (d, i) {
                 if (path == "__")
                     return _y;
-                return _y - Math.cos(i * 2 * Math.PI / count) * size * 3.2;
+                return _y - Math.cos(i * 2 * Math.PI / count) * size * 3;
             })
             .attr("font-family", "sans-serif")
             .attr("font-size", 0)
             .transition()
             .delay(function (d, i) {
-                return animation * 0.4 / level + i * animation / 4;
+                return animation * 0.4 / level / 2 + i * animation / 8;
             })
-            .duration(animation * 0.6 / level)
+            .duration(animation * 0.6 / level / 2)
             .attr("opacity", 1);
     }
 
@@ -262,22 +294,22 @@ Portrait.Chart.prototype.setOption = function (change) {
             if (path.substring(i, i + 1) == "_")
                 level++;
         }
-        let _x = width / 2;
-        let _y = height / 2;
+        let _x = width / 2 + option.padding[3];
+        let _y = height / 2 + option.padding[0];
         let color = option.color;
         let Fcolor = option.fontColor;
         let animation = option.animation / maxLevel;
         let updateLine = g.selectAll(".line" + path).data(data);
         let updateCircle = g.selectAll(".circle" + path).data(data);
         let updateLabel = g.selectAll(".text" + path).data(data);
-        let size = avrgsize / Math.log(level + 2);
+        let size = avrgsize / Math.log(level + 2) / maxsize;
         let distance = maxLevel == 1 ? 0 :
             width > height ? height / 2 / (maxLevel - 1) * (level - 1.2) : width / 2 / (maxLevel - 1) * (level - 1.2);
 
         updateLine.transition()
             .delay(function (d, i) {
-                return level < 2 ? animation / Math.pow(level, 2) * (maxLevel + 1.4) + i * animation / Math.pow(level, 2) / 4 :
-                    animation / Math.pow(level, 2) * 0.4 + i * animation / Math.pow(level, 2) / 4;
+                return level < 2 ? animation / Math.pow(level, 2) * (maxLevel + 1.4) / 2 + i * animation / Math.pow(level, 2) / 8 :
+                    animation / Math.pow(level, 2) * 0.4 + i * animation / Math.pow(level, 2) / 3;
             })
             .duration(animation / level)
             .attr('x1', function () {
@@ -303,7 +335,7 @@ Portrait.Chart.prototype.setOption = function (change) {
                 }
                 return _x + Math.sin(pos * 2 * Math.PI / set[level - 1]) * distance;
             })
-            .attr('y2', function (d, i) {
+            .attr('y2', function () {
                 if (level <= 2)
                     return d3.select(this).attr("y2");
                 let all = $("line.level-" + level);
@@ -318,60 +350,48 @@ Portrait.Chart.prototype.setOption = function (change) {
             })
             .style("stroke", option.stroke)
             .style("stroke-width", 1)
-            .attr("opacity", 0.02);
+            .attr("opacity", 0);
         updateCircle
             .on("mouseover", function () {
                 let id = d3.select(this).attr("id");
-                d3.select(this)
-                    .transition()
-                    .duration(animation)
-                    .style("opacity", 1);
+                d3.select(this).style("opacity", 1);
                 let p = id.split("_");
                 let s = "#__";
                 for (let i = 2; i < p.length; i++) {
                     s += p[i] + "_";
-                    d3.select(s)
-                        .transition()
-                        .duration(animation)
-                        .style("opacity", 1);
-                    d3.select(s + "t")
-                        .transition()
-                        .duration(animation)
-                        .style("opacity", 1);
-                    d3.select(s + "l")
-                        .transition()
-                        .duration(animation)
-                        .style("opacity", 1);
+                    d3.select(s).style("opacity", 1);
+                    d3.select(s + "t").style("opacity", 1);
+                    d3.select(s + "l").style("opacity", 1);
                 }
             })
             .on("mouseout", function () {
                 let id = d3.select(this).attr("id");
-                d3.select(this)
-                    .transition()
-                    .duration(animation)
-                    .style("opacity", 0.7);
-                    let p = id.split("_");
-                    let s = "#__";
+                d3.select(this).style("opacity", 0.7);
+                let p = id.split("_");
+                let s = "#__";
                 for (let i = 2; i < p.length; i++) {
                     s += p[i] + "_";
-                    d3.select(s)
-                        .transition()
-                        .duration(animation)
-                        .style("opacity", 0.7);
-                    d3.select(s + "t")
-                        .transition()
-                        .duration(animation)
-                        .style("opacity", 0.7);
-                    d3.select(s + "l")
-                        .transition()
-                        .duration(animation)
-                        .style("opacity", 0.02);
+                    d3.select(s).style("opacity", 0.7);
+                    d3.select(s + "t").style("opacity", 0.7);
+                    d3.select(s + "l").style("opacity", 0);
                 }
             })
+            .each(function (d) {
+                let act = d.onclick == void 0 ? () => {} : d.onclick;
+                d3.select(this).on("click", act);
+            })
+            .attr("stroke", function (d, i) {
+                if (option.fill == "circle")
+                    return d3.hsl(i * 2 * Math.PI, 0.5, 0.5);
+                else
+                    return color;
+            })
+            .attr("stroke-width", 0)
             .transition()
+            .ease("linear-out-in")
             .delay(function (d, i) {
-                return level < 2 ? animation / Math.pow(level, 2) * (maxLevel + 1.4) + i * animation / Math.pow(level, 2) / 4 :
-                    animation / Math.pow(level, 2) * 0.4 + i * animation / Math.pow(level, 2) / 4;
+                return level < 2 ? animation / Math.pow(level, 2) * (maxLevel + 1.4) / 2 + i * animation / Math.pow(level, 2) / 8 :
+                    animation / Math.pow(level, 2) * 0.4 / 2 + i * animation / Math.pow(level, 2) / 3;
             })
             .duration(animation / level)
             .attr('cx', function () {
@@ -400,9 +420,13 @@ Portrait.Chart.prototype.setOption = function (change) {
                 }
                 return _y - Math.cos(pos * 2 * Math.PI / set[level - 1]) * distance;
             })
-            .attr('r', size)
-            .attr("fill", function (d, i) {
-                if (option.color == "circle") {
+            .attr('r', function (d) {
+                if (d.value == void 0 || !(parseFloat(d.value) > 0 || parseFloat(d.value) <= 0) || dmin[level - 1] == dmax[level - 1])
+                    return size;
+                return size * minsize + size * maxsize * (parseFloat(d.value) - dmin[level - 1]) / dmax[level - 1];
+            })
+            .attr("fill", function () {
+                if (option.fill == "circle") {
                     let all = $("circle.level-" + level);
                     let pos = set[level - 1] <= 8 ? 0 : -1 * parseInt(max / 2);
                     for (let t = 0; t < all.length; t++) {
@@ -411,8 +435,9 @@ Portrait.Chart.prototype.setOption = function (change) {
                             break;
                         }
                     }
-                    return d3.hsl(360 * pos / set[level - 1], 1, 0.6);
-                }
+                    return d3.hsl(360 * pos / set[level - 1], level / maxLevel * 0.6 + 0.4, 0.6 - level / maxLevel * 0.2);
+                } else
+                    return color;
             })
             .attr("opacity", 0.7)
             .each("end", function (d, i) {
@@ -432,8 +457,8 @@ Portrait.Chart.prototype.setOption = function (change) {
             });
         updateLabel.transition()
             .delay(function (d, i) {
-                return level < 2 ? animation / Math.pow(level, 2) * (maxLevel + 1.4) + i * animation / Math.pow(level, 2) / 4 :
-                    animation / Math.pow(level, 2) * 0.4 + i * animation / Math.pow(level, 2) / 4;
+                return level < 2 ? animation / Math.pow(level, 2) * (maxLevel + 1.4) / 2 + i * animation / Math.pow(level, 2) / 8 :
+                    animation / Math.pow(level, 2) * 0.4 / 2 + i * animation / Math.pow(level, 2) / 3;
             })
             .duration(animation / level)
             .attr("fill", Fcolor)
@@ -465,6 +490,28 @@ Portrait.Chart.prototype.setOption = function (change) {
             })
             .attr("font-family", "sans-serif")
             .attr("font-size", size / 2 * Math.log(level + Math.E))
-            .attr("opacity", 0.7);
+            .attr("opacity", 0.7)
+            .each("end", function () {
+                var text = d3.select(this),
+                    words = text.text().split('').reverse(),
+                    word, line = [],
+                    lineNumber = 0,
+                    lineHeight = text.node().getBoundingClientRect().height,
+                    x = +text.attr('x'),
+                    y = +text.attr('y'),
+                    tspan = text.text(null).append('tspan').attr('x', x).attr('y', y);
+                while (word = words.pop()) {
+                    line.push(word);
+                    // const dash = lineNumber > 0 ? '-' : '';
+                    // tspan.text(dash + line.join(''));
+                    tspan.text(line.join(''));
+                    if (tspan.text().length > option.linelength) {
+                        line.pop();
+                        tspan.text(line.join(''));
+                        line = [word];
+                        tspan = text.append('tspan').attr('x', x).attr('y', ++lineNumber * lineHeight + y).text(word);
+                    }
+                }
+            });
     }
 }

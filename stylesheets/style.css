@@ -62,6 +62,9 @@ header {
 	background: url(../images/zuo2.png) center no-repeat;
 	margin-left: 10px;
 }
+.dataview th, td {
+	padding: 2px 10px;
+}
 
 .select {
 	width: 330px;
@@ -247,4 +250,16 @@ input[type="number"] {
 .tree li.parent_li>span:hover+ul li span {
 	background: rgba(255, 255, 255, 0.192);
 	/* border: 1px solid #94a0b4; */
+}
+
+
+.axis path,
+.axis line {
+	fill: none;
+	stroke: #cccccc;
+	shape-rendering: crispEdges;
+}
+.axis {
+	fill: #cccccc;
+	font-size: 12px;
 }
