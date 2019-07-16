@@ -102,7 +102,8 @@ header {
 	margin-bottom: 10px;
 }
 
-.map {
+.center02 {
+	
 	width: 610px;
 	height: 360px;
 	border: none;
@@ -110,6 +111,16 @@ header {
 	margin-top: 10px;
 	margin-left: 20px;
 	background: url(../images/hangye.png) 0px 0px;
+}
+
+.map {
+	width: 610px;
+	height: 350px;
+	/* border: none;
+	border-width: 2px;
+	margin-top: 10px;
+	margin-left: 20px;
+	background: url(../images/hangye.png) 0px 0px; */
 }
 
 .img1 {

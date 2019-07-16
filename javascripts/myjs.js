@@ -2,7 +2,7 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 10:56:05 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-15 20:09:10
+ * @Last Modified time: 2019-07-16 19:09:24
  */
 
 var colorset = {
@@ -281,11 +281,208 @@ function draw(ensure) {
   adjust();
 }
 
-var portrait = new Portrait.Chart('sunburst');
+//var portrait = new Portrait.Chart('sunburst');
+d3.select("#sunburst").append("svg")
+  .attr("width", 610)
+  .attr("height", 400)
+  .attr("id", "sb");
 
 function paint_portrait(d) {
+  d3.select("#sb").html("");
   if (d == void 0)
     d = [];
+  var width = 610,
+    height = 400;
+
+  //定义数据转换函数
+  var pack = d3.layout.pack().size([width, height]);
+
+  var svg = d3.select("#sb");
+
+  var data = [{
+    name: '资产总计',
+    value: parseInt(d["BAME01340M"]),
+    color: "rgb(231,82,99)",
+    children: [{
+      name: '流动资产',
+      value: parseInt(d["BAME00030M"]),
+      color: "rgb(231,82,99)",
+      children: []
+    }, {
+      name: '非流动资产',
+      value: parseInt(d["BAME01320M"]),
+      color: "rgb(231,82,99)",
+      children: []
+    }]
+  }, {
+    name: '负债总计',
+    value: parseInt(d["BAME02210M"]),
+    color: "rgb(252,137,97)",
+    children: [{
+      name: '流动负债',
+      value: parseInt(d["BAME01980M"]),
+      color: "rgb(252,137,97)",
+      children: []
+    }, {
+      name: '非流动负债',
+      value: parseInt(d["BAME02190M"]),
+      color: "rgb(252,137,97)",
+      children: []
+    }]
+  }, {
+    name: '所有者权益',
+    value: parseInt(d["BAME02470M"]),
+    color: "rgb(254,196,136)",
+    children: [{
+      name: '所有者权益总计',
+      value: parseInt(d["BAME02470M"]),
+      color: "rgb(254,196,136)",
+      children: []
+    }]
+  }];
+
+  // 流动资产
+  var para = "BAME00";
+  for (var num = 3; num <= 83; num++) {
+    var spaner = num < 10 ? "0" + num : num;
+    if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
+      continue;
+    var val = parseInt(d[para + spaner + "0M"]);
+    if (val > 0) {
+      var child = {
+        name: enter(nameof[para + spaner + "0M"], 5),
+        value: val,
+        children: []
+      };
+      data[0]['children'][0]['children'].push(child);
+    }
+  }
+
+  // 非流动资产
+  para = "BAME0";
+  for (var num = 86; num <= 131; num++) {
+    var spaner = num < 100 ? "0" + num : num;
+    if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
+      continue;
+    var val = parseInt(d[para + spaner + "0M"]);
+    if (val > 0) {
+      var child = {
+        name: enter(nameof[para + spaner + "0M"], 5),
+        value: val,
+        children: []
+      };
+      data[0]['children'][1]['children'].push(child);
+    }
+  }
+
+  // 流动负债
+  para = "BAME0";
+  for (var num = 137; num <= 197; num++) {
+    var spaner = num.toString();
+    if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
+      continue;
+    var val = parseInt(d[para + spaner + "0M"]);
+    if (val > 0) {
+      var child = {
+        name: enter(nameof[para + spaner + "0M"], 5),
+        value: val,
+        children: []
+      };
+      data[1]['children'][0]['children'].push(child);
+    }
+  }
+
+  // 非流动负债
+  para = "BAME0";
+  for (var num = 200; num <= 218; num++) {
+    var spaner = num.toString();
+    if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
+      continue;
+    var val = parseInt(d[para + spaner + "0M"]);
+    if (val > 0) {
+      var child = {
+        name: enter(nameof[para + spaner + "0M"], 5),
+        value: val,
+        children: []
+      };
+      data[1]['children'][1]['children'].push(child);
+    }
+  }
+
+  // 所有者权益总计
+  para = "BAME0";
+  for (var num = 223; num <= 246; num++) {
+    var spaner = num.toString();
+    if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
+      continue;
+    var val = parseInt(d[para + spaner + "0M"]);
+    if (val > 0) {
+      var child = {
+        name: enter(nameof[para + spaner + "0M"], 5),
+        value: val,
+        children: []
+      };
+      data[2]['children'][0]['children'].push(child);
+    }
+  }
+
+  //取数据，绘图
+  var nodes = pack.nodes({
+    name: '',
+    value: parseInt(d["BAME01340M"]) + parseInt(d["BAME02210M"]) + parseInt(d["BAME02470M"]),
+    color: "rgb(188,55,211)",
+    children: data
+  });
+  // var links = pack.links(nodes);
+
+  var color = ["rgb(188,55,211)", "rgb(231,82,99)", "rgb(252,137,97)", "rgb(254,196,136)"];
+
+  //画圈圈
+  svg.selectAll("circle")
+    .data(nodes)
+    .enter()
+    .append("circle")
+    .attr("fill", function(d) {
+      return d.color == void 0 ? d.parent.color : d.color;
+    })
+    .attr("fill-opacity", 0.3)
+    .attr("cx", function (d) {
+      return d.x;
+    })
+    .attr("cy", function (d) {
+      return d.y;
+    })
+    .attr("r", function (d) {
+      return d.r;
+    })
+    .on("mouseover", function () {
+      d3.select(this)
+        .attr("fill", colorset.long2[3]);
+    })
+    .on("mouseout", function (d) {
+      d3.select(this)
+        .attr("fill", function() {
+          return d.color == void 0 ? d.parent.color : d.color;
+        });
+    });
+
+  //添加文字
+  svg.selectAll("text")
+    .data(nodes)
+    .enter()
+    .append("text")
+    .attr("x", function (d) {
+      return d.x;
+    })
+    .attr("y", function (d) {
+      return d.y;
+    })
+    .attr("font-size", "10px")
+    .attr("fill", "black")
+    .html(function (d) {
+      return d.depth == 2 ? d.name : "";
+    });
+  /*
   if (d.length == 0) {
     var data = [{
       label: '没有数据',
@@ -352,7 +549,7 @@ function paint_portrait(d) {
     if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
       continue;
     var val = parseInt(d[para + spaner + "0M"]);
-    if (val >= all / 100) {
+    if (val > 0) {
       var child = {
         label: enter(nameof[para + spaner + "0M"], 5),
         value: val
@@ -372,7 +569,7 @@ function paint_portrait(d) {
     if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
       continue;
     var val = parseInt(d[para + spaner + "0M"]);
-    if (val >= all / 100) {
+    if (val > 0) {
       var child = {
         label: enter(nameof[para + spaner + "0M"], 5),
         value: val
@@ -392,7 +589,7 @@ function paint_portrait(d) {
     if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
       continue;
     var val = parseInt(d[para + spaner + "0M"]);
-    if (val >= all / 100) {
+    if (val > 0) {
       var child = {
         label: enter(nameof[para + spaner + "0M"], 5),
         value: val
@@ -412,7 +609,7 @@ function paint_portrait(d) {
     if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
       continue;
     var val = parseInt(d[para + spaner + "0M"]);
-    if (val >= all / 100) {
+    if (val > 0) {
       var child = {
         label: enter(nameof[para + spaner + "0M"], 5),
         value: val
@@ -432,7 +629,7 @@ function paint_portrait(d) {
     if (nameof[para + spaner + "0M"].indexOf("其中：") != -1)
       continue;
     var val = parseInt(d[para + spaner + "0M"]);
-    if (val >= all / 100) {
+    if (val > 0) {
       var child = {
         label: enter(nameof[para + spaner + "0M"], 5),
         value: val
@@ -460,11 +657,12 @@ function paint_portrait(d) {
       onclick: event,
       children: data,
     }],
-    max: 10
+    max: 100
   };
   if (option && typeof option === "object") {
     portrait.setOption(option);
   }
+  */
 }
 
 function buildTree() {
@@ -623,7 +821,7 @@ function drawMDS(y, ctx) {
         .attr("opacity", "0.6")
         .attr("fill", function (d, i) {
           //console.log(d[3], $("input[name=Code]").val());
-          return d[3] == $("input[name=Code]").val() ? "#FFFAF0" : d3.hsl(i * 2 * Math.PI, 1, 0.65);//colorset.long2[0];
+          return d[3] == $("input[name=Code]").val() ? "#FFFAF0" : d3.hsl(i * 2 * Math.PI, 1, 0.65); //colorset.long2[0];
         })
         .attr("stroke", function (d, i) {
           return d[3] == $("input[name=Code]").val() ? "#FFFAF0" : d3.hsl(i * 2 * Math.PI, 1, 0.4);
@@ -653,6 +851,8 @@ function drawMDS(y, ctx) {
             .attr("opacity", "1")
             .transition()
             .duration(1000)
+            .attr("r", 2)
+            .attr("opacity", "0.6")
             .each("end", function () {
               draw(false);
             });
@@ -852,7 +1052,7 @@ function layout(ensure) {
       })
       .duration(animation)
       .attr('x2', function () {
-          return 10 * parseInt(width);
+        return 10 * parseInt(width);
       });
 
     xAxis[li].selectAll("line")
