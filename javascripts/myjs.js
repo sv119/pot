@@ -2,14 +2,15 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 10:56:05 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-16 19:09:24
+ * @Last Modified time: 2019-07-17 00:26:02
  */
 
 var colorset = {
-  echarts_default: ['#c23531', '#2f4554', '#61a0a8', '#d48265', '#91c7ae', '#749f83', '#ca8622', '#bda29a', '#6e7074', '#546570', '#c4ccd3'],
+  echarts_default: ['#91c7ae', '#ca8622', '#bda29a', '#6e7074', '#546570', '#61a0a8', '#749f83', '#c4ccd3', '#d48265', '#c23531', '#2f4554'],
   echarts_colorful: ['#2A8339', '#367DA6', '#A68B36', '#BD5692'],
   long2: ['#F9ADA0', '#F26271', '#C65B7C', '#5B3758'],
-  long: ['#e9eb87', '#8f91a2', '#a9d2d5']
+  long: ['#e9eb87', '#8f91a2', '#a9d2d5'],
+  brew: ["#6C7a70", d3.rgb("rgb(255,81,82)").darker(0.2), d3.rgb("rgb(141,255,105)").darker(0.2), d3.rgb("rgb(114,88,255)").darker(0.2)]
 };
 
 var dataset = {};
@@ -288,7 +289,6 @@ d3.select("#sunburst").append("svg")
   .attr("id", "sb");
 
 function paint_portrait(d) {
-  d3.select("#sb").html("");
   if (d == void 0)
     d = [];
   var width = 610,
@@ -302,41 +302,41 @@ function paint_portrait(d) {
   var data = [{
     name: '资产总计',
     value: parseInt(d["BAME01340M"]),
-    color: "rgb(231,82,99)",
+    color: colorset.brew[3],
     children: [{
       name: '流动资产',
       value: parseInt(d["BAME00030M"]),
-      color: "rgb(231,82,99)",
+      color: colorset.brew[3],
       children: []
     }, {
       name: '非流动资产',
       value: parseInt(d["BAME01320M"]),
-      color: "rgb(231,82,99)",
+      color: colorset.brew[3],
       children: []
     }]
   }, {
     name: '负债总计',
     value: parseInt(d["BAME02210M"]),
-    color: "rgb(252,137,97)",
+    color: colorset.brew[1],
     children: [{
       name: '流动负债',
       value: parseInt(d["BAME01980M"]),
-      color: "rgb(252,137,97)",
+      color: colorset.brew[1],
       children: []
     }, {
       name: '非流动负债',
       value: parseInt(d["BAME02190M"]),
-      color: "rgb(252,137,97)",
+      color: colorset.brew[1],
       children: []
     }]
   }, {
     name: '所有者权益',
     value: parseInt(d["BAME02470M"]),
-    color: "rgb(254,196,136)",
+    color: colorset.brew[2],
     children: [{
       name: '所有者权益总计',
       value: parseInt(d["BAME02470M"]),
-      color: "rgb(254,196,136)",
+      color: colorset.brew[2],
       children: []
     }]
   }];
@@ -430,22 +430,21 @@ function paint_portrait(d) {
   var nodes = pack.nodes({
     name: '',
     value: parseInt(d["BAME01340M"]) + parseInt(d["BAME02210M"]) + parseInt(d["BAME02470M"]),
-    color: "rgb(188,55,211)",
+    color: colorset.brew[0],
     children: data
   });
   // var links = pack.links(nodes);
 
-  var color = ["rgb(188,55,211)", "rgb(231,82,99)", "rgb(252,137,97)", "rgb(254,196,136)"];
-
-  //画圈圈
+  
   svg.selectAll("circle")
     .data(nodes)
-    .enter()
-    .append("circle")
+    .transition()
+    .duration(800)
     .attr("fill", function(d) {
-      return d.color == void 0 ? d.parent.color : d.color;
+      return d.color == void 0 ? d3.hsl(d.parent.color).brighter(0.8)
+        : d3.hsl(d.color).brighter(d.depth * 0.32);
     })
-    .attr("fill-opacity", 0.3)
+    .attr("fill-opacity", 0.7)
     .attr("cx", function (d) {
       return d.x;
     })
@@ -455,6 +454,13 @@ function paint_portrait(d) {
     .attr("r", function (d) {
       return d.r;
     })
+    .attr("stroke-width", 1)
+    .attr("stroke", "black");
+
+  svg.selectAll("circle")
+    .data(nodes)
+    .enter()
+    .append("circle")
     .on("mouseover", function () {
       d3.select(this)
         .attr("fill", colorset.long2[3]);
@@ -462,11 +468,50 @@ function paint_portrait(d) {
     .on("mouseout", function (d) {
       d3.select(this)
         .attr("fill", function() {
-          return d.color == void 0 ? d.parent.color : d.color;
+          return d.color == void 0 ? d3.hsl(d.parent.color).brighter(0.8)
+           : d3.hsl(d.color).brighter(d.depth * 0.32);
         });
-    });
+    })
+    .transition()
+    .duration(800)
+    .attr("fill", function(d) {
+      return d.color == void 0 ? d3.hsl(d.parent.color).brighter(0.8)
+        : d3.hsl(d.color).brighter(d.depth * 0.32);
+    })
+    .attr("fill-opacity", 0.7)
+    .attr("cx", function (d) {
+      return d.x;
+    })
+    .attr("cy", function (d) {
+      return d.y;
+    })
+    .attr("r", function (d) {
+      return d.r;
+    })
+    .attr("stroke-width", 1)
+    .attr("stroke", "black");
+
+    
+  svg.selectAll("circle")
+    .data(nodes)
+    .exit()
+    .remove();
 
   //添加文字
+  svg.selectAll("text")
+    .data(nodes)
+    .attr("x", function (d) {
+      return d.x;
+    })
+    .attr("y", function (d) {
+      return d.y;
+    })
+    .attr("font-size", "12px")
+    .attr("fill", "black")
+    .html(function (d) {
+      return d.depth == 2 ? d.name : "";
+    });
+
   svg.selectAll("text")
     .data(nodes)
     .enter()
@@ -477,11 +522,16 @@ function paint_portrait(d) {
     .attr("y", function (d) {
       return d.y;
     })
-    .attr("font-size", "10px")
+    .attr("font-size", "12px")
     .attr("fill", "black")
     .html(function (d) {
       return d.depth == 2 ? d.name : "";
     });
+
+  svg.selectAll("text")
+    .data(nodes)
+    .exit()
+    .remove();
   /*
   if (d.length == 0) {
     var data = [{
