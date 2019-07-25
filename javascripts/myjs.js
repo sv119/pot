@@ -2,7 +2,7 @@
  * @Author: Antoine YANG 
  * @Date: 2019-07-04 10:56:05 
  * @Last Modified by: Antoine YANG
- * @Last Modified time: 2019-07-17 00:26:02
+ * @Last Modified time: 2019-07-25 17:56:49
  */
 
 var colorset = {
@@ -286,7 +286,17 @@ function draw(ensure) {
 d3.select("#sunburst").append("svg")
   .attr("width", 610)
   .attr("height", 400)
-  .attr("id", "sb");
+  .attr("id", "sb")
+  .attr("class", "cloneable still")
+  .style('-webkit-user-select', 'none')
+  .style('-moz-user-select', 'none')
+  .style('-o-user-select', 'none')
+  .style('user-select', 'none')
+  .on("mousedown", function () {
+    Box.ready = true;
+    d3.select(this).classed("still", false)
+      .classed("cloning", true);
+  });
 
 function paint_portrait(d) {
   if (d == void 0)
@@ -435,14 +445,14 @@ function paint_portrait(d) {
   });
   // var links = pack.links(nodes);
 
-  
+
   svg.selectAll("circle")
     .data(nodes)
     .transition()
     .duration(800)
-    .attr("fill", function(d) {
-      return d.color == void 0 ? d3.hsl(d.parent.color).brighter(0.8)
-        : d3.hsl(d.color).brighter(d.depth * 0.32);
+    .attr("fill", function (d) {
+      return d.color == void 0 ? d3.hsl(d.parent.color).brighter(0.8) :
+        d3.hsl(d.color).brighter(d.depth * 0.32);
     })
     .attr("fill-opacity", 0.7)
     .attr("cx", function (d) {
@@ -467,16 +477,16 @@ function paint_portrait(d) {
     })
     .on("mouseout", function (d) {
       d3.select(this)
-        .attr("fill", function() {
-          return d.color == void 0 ? d3.hsl(d.parent.color).brighter(0.8)
-           : d3.hsl(d.color).brighter(d.depth * 0.32);
+        .attr("fill", function () {
+          return d.color == void 0 ? d3.hsl(d.parent.color).brighter(0.8) :
+            d3.hsl(d.color).brighter(d.depth * 0.32);
         });
     })
     .transition()
     .duration(800)
-    .attr("fill", function(d) {
-      return d.color == void 0 ? d3.hsl(d.parent.color).brighter(0.8)
-        : d3.hsl(d.color).brighter(d.depth * 0.32);
+    .attr("fill", function (d) {
+      return d.color == void 0 ? d3.hsl(d.parent.color).brighter(0.8) :
+        d3.hsl(d.color).brighter(d.depth * 0.32);
     })
     .attr("fill-opacity", 0.7)
     .attr("cx", function (d) {
@@ -491,7 +501,7 @@ function paint_portrait(d) {
     .attr("stroke-width", 1)
     .attr("stroke", "black");
 
-    
+
   svg.selectAll("circle")
     .data(nodes)
     .exit()
